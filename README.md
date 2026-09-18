@@ -25,23 +25,41 @@ Fimake ships as a **dev plugin** (sideload from manifest). There is no Figma Com
 
 > Compatibility: use the plugin zip and the npm package from the **same release** (e.g. both `v1.0.0`). Default port is `10101` on both sides.
 
-### 2. Connect your AI client (recommended: `stdio` + `npx`)
+### 2. Run the MCP server (pick one)
 
-No clone, no `pnpm`, no `.env` needed:
+**A. Standalone binary (recommended, no Node needed).** Download `fimake-<your-os>` from [GitHub Releases](../../releases) (`fimake-macos-arm64`, `fimake-linux-x64`, `fimake-windows-x64.exe`), make it executable (`chmod +x fimake-*` on macOS/Linux), then point your client at it:
 
 ```json
 {
   "mcpServers": {
     "fimake": {
-      "command": "npx",
-      "args": ["-y", "@chavisnguyen/fimake@latest"],
+      "command": "/absolute/path/to/fimake-macos-arm64",
       "env": { "TRANSPORT": "stdio", "PORT": "10101" }
     }
   }
 }
 ```
 
-Where to put it:
+**B. From source (contributors, Intel Macs).** Clone, build once, point at the local file (needs `Node.js >= 22`):
+
+```bash
+git clone https://github.com/chavisnguyen/FiMake.git
+cd FiMake && make install && make build
+```
+
+```json
+{
+  "mcpServers": {
+    "fimake": {
+      "command": "node",
+      "args": ["/absolute/path/to/FiMake/mcp/dist/index.js"],
+      "env": { "TRANSPORT": "stdio", "PORT": "10101" }
+    }
+  }
+}
+```
+
+Where to put the config:
 
 - **Claude Code / generic client / Inspector:** paste into your MCP config.
 - **Cursor:** `~/.cursor/mcp.json` or project `.cursor/mcp.json`.
@@ -54,8 +72,8 @@ Then restart the client if it requires it and ask something like *"list the page
 Use this only if your client requires an HTTP endpoint (or you want the Inspector over HTTP). You run the server yourself and point the client at a URL:
 
 ```bash
-npx -y @chavisnguyen/fimake@latest
-# with TRANSPORT=streamable-http, serves http://localhost:10101/mcp
+TRANSPORT=streamable-http ./fimake-macos-arm64
+# serves http://localhost:10101/mcp
 ```
 
 ```json

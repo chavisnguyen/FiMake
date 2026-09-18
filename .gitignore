@@ -8,3 +8,8 @@ test-results/
 .env
 mcp/.env
 exports/
+fimake-plugin*.zip
+fimake-macos-*
+fimake-linux-*
+fimake-windows-*
+stage/

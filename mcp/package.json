@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Fimake MCP Server for Figma",
   "main": "./dist/index.js",
+  "files": ["dist"],
   "bin": {
     "@chavisnguyen/fimake": "./dist/index.js"
   },

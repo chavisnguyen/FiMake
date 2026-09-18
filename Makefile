@@ -1,6 +1,6 @@
 # Unified entrypoint for the mcp server and the Figma plugin.
 # Usage: `make <target>` — every target runs in both packages.
-.PHONY: help install test typecheck lint build check dev-mcp dev-plugin clean
+.PHONY: help install test typecheck lint build check dev-mcp dev-plugin package-plugin clean
 
 help:
 	@echo "install    Install dependencies (mcp + plugin)"
@@ -11,6 +11,7 @@ help:
 	@echo "check      typecheck + lint + test (pre-push gate)"
 	@echo "dev-mcp    Watch + restart the MCP server"
 	@echo "dev-plugin Watch + rebuild the plugin (re-run it in Figma to reload)"
+	@echo "package-plugin Zip the sideload plugin (manifest.json + dist/) for GitHub Releases"
 	@echo "clean      Remove build outputs and coverage"
 
 install:
@@ -39,6 +40,11 @@ dev-mcp:
 
 dev-plugin:
 	cd plugin && pnpm dev
+
+# Sideload bundle for GitHub Releases: import the zip's manifest.json in Figma.
+package-plugin: build
+	rm -f fimake-plugin.zip
+	cd plugin && zip -r ../fimake-plugin.zip manifest.json dist -x 'dist/*.map'
 
 clean:
 	rm -rf mcp/dist mcp/coverage plugin/dist plugin/coverage

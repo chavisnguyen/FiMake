@@ -1,0 +1,101 @@
+name: Release assets
+# User flow: create a GitHub Release (tag, e.g. v1.0.0) -> this workflow
+# gates, builds standalone MCP binaries (no Node/npm needed by users) +
+# the sideload plugin zip, and attaches everything to the Release.
+on:
+  release:
+    types: [published]
+permissions:
+  contents: write # attach assets to the Release
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Gate (typecheck + lint + test + build)
+        run: make check
+
+  plugin-zip:
+    needs: gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Package sideload plugin (manifest.json + dist/)
+        run: make package-plugin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugin-zip
+          path: fimake-plugin.zip
+
+  binary:
+    needs: gate
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            asset: fimake-macos-arm64
+          - os: ubuntu-latest
+            asset: fimake-linux-x64
+          - os: windows-latest
+            asset: fimake-windows-x64.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build MCP server
+        working-directory: ./mcp
+        run: pnpm build
+      - name: Stage production files (dist + prod deps only)
+        shell: bash
+        run: |
+          rm -rf stage
+          mkdir stage
+          cp mcp/package.json stage/
+          cp -r mcp/dist stage/
+          cd stage && pnpm install --prod
+      - name: Build standalone binary (caxa bundles Node 22)
+        run: pnpm dlx @cdxgen/caxa --input stage --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: ${{ matrix.asset }}
+
+  attach:
+    needs: [gate, plugin-zip, binary]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+      - run: ls -la assets
+      - name: Attach assets to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} assets/* --clobber
