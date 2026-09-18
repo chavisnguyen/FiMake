@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fimake</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.45;
+        background: var(--figma-color-bg, #ffffff);
+        color: var(--figma-color-text, #000000);
+      }
+      body[data-status="online"] { --status: #16a34a; --status-bg: #dcfce7; --status-border: #86efac; }
+      body[data-status="offline"] { --status: #dc2626; --status-bg: #fee2e2; --status-border: #fca5a5; }
+      button { font-family: inherit; }
+
+      /* ============ PILL VIEW (300x78) ============ */
+      #dot-view {
+        width: 100vw;
+        height: 100vh;
+        box-sizing: border-box;
+        padding: 10px 12px;
+      }
+      #dot-view[hidden] { display: none; }
+      #dot {
+        width: 100%;
+        height: 100%;
+        padding: 0 12px;
+        border: 1.5px solid var(--status-border, #fca5a5);
+        border-radius: 14px;
+        background: var(--status-bg, #fee2e2);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-align: left;
+        color: inherit;
+      }
+      body[data-status="offline"] #dot { animation: pill-pulse 2s ease-in-out infinite; }
+      @keyframes pill-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35); }
+        50% { box-shadow: 0 0 0 5px rgba(220, 38, 38, 0); }
+      }
+      #dot-logo {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #8B5CF6, #2563EB);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      #dot-logo svg { width: 20px; height: 20px; display: block; }
+      #dot-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+      #dot-title {
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #dot-status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--status, #dc2626);
+      }
+      #dot-status-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--status, #dc2626);
+        flex-shrink: 0;
+      }
+      body[data-status="online"] #dot-status-dot { box-shadow: 0 0 6px var(--status); }
+      #dot-chevron {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--figma-color-text-secondary, #6b7280);
+        flex-shrink: 0;
+      }
+
+      /* ============ CONSOLE VIEW (600x640) ============ */
+      #console-view {
+        height: 100vh;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        padding: 14px 16px;
+        gap: 10px;
+      }
+      #console-view[hidden] { display: none; }
+
+      /* Banner */
+      #banner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1.5px solid var(--status-border);
+        background: var(--status-bg);
+      }
+      #brand-mark {
+        width: 42px;
+        height: 42px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #8B5CF6, #2563EB);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      #brand-mark svg { width: 24px; height: 24px; display: block; }
+      #brand-text { flex: 1; min-width: 0; }
+      #brand-title { font-size: 16px; font-weight: 700; }
+      #status-text { font-size: 13px; font-weight: 500; color: var(--status); }
+      #collapse {
+        border: 1px solid var(--figma-color-border, #d1d5db);
+        background: var(--figma-color-bg, #ffffff);
+        color: inherit;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      /* Toolbar */
+      #toolbar { display: flex; align-items: center; gap: 8px; }
+      #filter { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+      .filter-btn {
+        border: 1px solid var(--figma-color-border, #d1d5db);
+        background: transparent;
+        color: var(--figma-color-text-secondary, #6b7280);
+        border-radius: 999px;
+        cursor: pointer;
+        padding: 3px 11px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .filter-btn.active {
+        background: var(--figma-color-text, #111111);
+        border-color: var(--figma-color-text, #111111);
+        color: var(--figma-color-bg, #ffffff);
+      }
+      #task-count {
+        font-size: 12px;
+        color: var(--figma-color-text-secondary, #6b7280);
+        white-space: nowrap;
+      }
+      #clear {
+        border: 1px solid var(--figma-color-border, #d1d5db);
+        background: var(--figma-color-bg-secondary, #f3f4f6);
+        color: inherit;
+        border-radius: 8px;
+        cursor: pointer;
+        padding: 4px 12px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      /* Feed */
+      #feed {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      #empty {
+        margin: auto;
+        text-align: center;
+        color: var(--figma-color-text-secondary, #6b7280);
+        font-size: 13px;
+        line-height: 1.7;
+        padding: 24px 16px;
+      }
+      #empty strong { display: block; font-size: 15px; color: inherit; margin-bottom: 4px; }
+      .task {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        border-radius: 10px;
+        background: var(--figma-color-bg-secondary, #f3f4f6);
+        border-left: 4px solid #9ca3af;
+      }
+      .task[data-status="pending"] { border-left-color: #3b82f6; }
+      .task[data-status="done"] { border-left-color: #16a34a; }
+      .task[data-status="failed"] { border-left-color: #dc2626; }
+      .task-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .task[data-status="pending"] .task-icon::after {
+        content: "";
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        border: 2.5px solid var(--figma-color-border, #d1d5db);
+        border-top-color: #3b82f6;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .task[data-status="done"] .task-icon { color: #16a34a; }
+      .task[data-status="done"] .task-icon::after { content: "✓"; }
+      .task[data-status="failed"] .task-icon { color: #dc2626; }
+      .task[data-status="failed"] .task-icon::after { content: "✕"; }
+      .task-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+      .task-cmd {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .task-sub {
+        font-size: 11px;
+        color: var(--figma-color-text-secondary, #6b7280);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .task-meta {
+        font-size: 11px;
+        color: var(--figma-color-text-secondary, #6b7280);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      #feed[data-filter="done"] .task:not([data-status="done"]),
+      #feed[data-filter="pending"] .task:not([data-status="pending"]),
+      #feed[data-filter="failed"] .task:not([data-status="failed"]) {
+        display: none;
+      }
+
+      /* Help + footer */
+      #help { font-size: 12px; }
+      #help summary {
+        cursor: pointer;
+        color: var(--figma-color-text-secondary, #6b7280);
+      }
+      #help pre {
+        font-size: 11px;
+        white-space: pre-wrap;
+        background: var(--figma-color-bg-secondary, #f3f4f6);
+        padding: 10px;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+      #console-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 11px;
+        color: var(--figma-color-text-secondary, #6b7280);
+      }
+      #server-url {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #console-footer a { color: inherit; }
+    </style>
+  </head>
+  <body data-status="offline">
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
+</html>

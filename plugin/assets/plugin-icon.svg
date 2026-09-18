@@ -1,0 +1,10 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="fimake-bg" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+<stop stop-color="#8B5CF6"/>
+<stop offset="1" stop-color="#2563EB"/>
+</linearGradient>
+</defs>
+<rect width="128" height="128" rx="28" fill="url(#fimake-bg)"/>
+<path d="M48 34v60M48 44h42M48 70h30" stroke="white" stroke-width="17" stroke-linecap="round"/>
+</svg>

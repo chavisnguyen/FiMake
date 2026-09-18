@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["es2020", "DOM", "DOM.Iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "typeRoots": ["../node_modules/@figma", "../node_modules/@types"],
+    "baseUrl": "../main",
+    "paths": {
+      "@shared/*": ["../../mcp/src/shared/*"]
+    }
+  },
+  "include": ["./**/*.ts", "./**/*.tsx", "../main/**/*.ts"]
+}

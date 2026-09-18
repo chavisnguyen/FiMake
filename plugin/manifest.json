@@ -1,0 +1,32 @@
+{
+  "name": "Fimake",
+  "id": "1572223324912824909",
+  "api": "1.0.0",
+  "editorType": [
+    "figma",
+    "dev"
+  ],
+  "permissions": [],
+  "main": "dist/main.js",
+  "ui": "dist/index.html",
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": [
+      "http://localhost:10101",
+      "ws://localhost:10101",
+      "https://localhost:10101",
+      "wss://localhost:10101",
+      "https://fonts.googleapis.com",
+      "https://fonts.gstatic.com"
+    ],
+    "devAllowedDomains": [
+      "http://localhost:10101",
+      "ws://localhost:10101",
+      "https://localhost:10101",
+      "wss://localhost:10101",
+      "https://fonts.googleapis.com",
+      "https://fonts.gstatic.com"
+    ],
+    "reasoning": "This plugin needs to access the MCP server to get commands from the server."
+  }
+}

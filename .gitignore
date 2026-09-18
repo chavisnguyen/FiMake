@@ -1,0 +1,10 @@
+.idea/
+node_modules/
+dist/
+coverage/
+test-output.txt
+test-results/
+.playwright/
+.env
+mcp/.env
+exports/

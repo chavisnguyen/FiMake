@@ -1,0 +1,77 @@
+name: Tests
+on:
+  push:
+  pull_request:
+jobs:
+  mcp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      # Single workspace install at root (mcp + plugin share one lockfile).
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+        working-directory: ./mcp
+      - run: pnpm test:typecheck
+        working-directory: ./mcp
+      - run: pnpm lint
+        working-directory: ./mcp
+      - name: Run tests
+        working-directory: ./mcp
+        shell: bash
+        env:
+          # Strip ANSI colors so the Summary report renders clean markdown.
+          NO_COLOR: 1
+        run: |
+          set -o pipefail
+          pnpm test -- --reporter=default --reporter=github-actions 2>&1 | tee test-output.txt
+      - name: Test report
+        if: always()
+        working-directory: ./mcp
+        shell: bash
+        run: |
+          echo "## MCP test report" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          grep -E "Test Files|Tests |FAIL " test-output.txt | tail -n 10 >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+  plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      # Same single root install — no per-package installs.
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tsc
+        working-directory: ./plugin
+      - run: pnpm build
+        working-directory: ./plugin
+      - run: pnpm lint
+        working-directory: ./plugin
+      - name: Run tests
+        working-directory: ./plugin
+        shell: bash
+        env:
+          # Strip ANSI colors so the Summary report renders clean markdown.
+          NO_COLOR: 1
+        run: |
+          set -o pipefail
+          pnpm test -- --reporter=default --reporter=github-actions 2>&1 | tee test-output.txt
+      - name: Test report
+        if: always()
+        working-directory: ./plugin
+        shell: bash
+        run: |
+          echo "## Plugin test report" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          grep -E "Test Files|Tests |FAIL " test-output.txt | tail -n 10 >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

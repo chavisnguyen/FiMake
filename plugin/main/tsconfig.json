@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["es2020"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "typeRoots": ["../node_modules/@figma", "../node_modules/@types"],
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../../mcp/src/shared/*"]
+    }
+  }
+}
