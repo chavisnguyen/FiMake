@@ -72,16 +72,16 @@ jobs:
       - name: Build MCP server
         working-directory: ./mcp
         run: pnpm build
-      - name: Install prod deps and stage (symlinks resolved by Node 22 CI)
+      - name: Install prod deps (hoisted) and stage
         shell: bash
         run: |
           rm -rf stage
           mkdir stage
           cp mcp/package.json stage/
           cp -rL mcp/dist stage/
-          # pnpm filter install creates node_modules symlinks resolved correctly
-          # by Node 22's ESM resolver inside the caxa-extracted binary.
-          pnpm --filter @chavisnguyen/fimake install --prod --ignore-scripts
+          # --node-linker=hoisted writes real files into mcp/node_modules,
+          # so Node 22 inside the caxa binary can resolve them.
+          (cd mcp && pnpm install --prod --node-linker=hoisted --ignore-scripts)
           cp -rL mcp/node_modules stage/
           echo "STAGE=$(pwd)/stage" >> $GITHUB_ENV
       - name: Build standalone binary (caxa bundles Node 22)
