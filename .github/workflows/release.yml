@@ -81,7 +81,8 @@ jobs:
           # like socket.io and dotenv.
           # esbuild bundles @modelcontextprotocol/sdk (incl. zod-to-json-schema)
           # so no nested resolution is needed.
-          npm install --prod --ignore-scripts
+          npm install --ignore-scripts
+          test -f node_modules/esbuild/package.json
           test -f node_modules/socket.io/package.json
           test -f node_modules/dotenv/package.json
           pnpm build:binary
