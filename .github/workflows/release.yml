@@ -78,7 +78,7 @@ jobs:
         run: |
           STAGE=/tmp/fimake-deploy-$$
           export HOME=/tmp
-          export npm_config_prefix=/tmp
+          export NPM_CONFIG_PREFIX=/tmp
           pnpm --filter @chavisnguyen/fimake deploy --legacy \
             --config.inject-workspace-packages=true \
             --config.node-linker=hoisted \
