@@ -76,6 +76,7 @@ jobs:
       - name: Stage production files (dist + all prod deps, hoisted)
         shell: bash
         run: |
+          export HOME=/tmp
           STAGE=$(mktemp -d)
           pnpm --filter @chavisnguyen/fimake deploy --legacy \
             --config.inject-workspace-packages=true \
