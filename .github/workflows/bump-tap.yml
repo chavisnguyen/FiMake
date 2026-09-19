@@ -39,7 +39,7 @@ jobs:
           SHA_ARM=$(sha256sum fimake-macos-arm64 | cut -d' ' -f1)
           SHA_INTEL=$(sha256sum fimake-macos-x64 | cut -d' ' -f1)
           SHA_LINUX=$(sha256sum fimake-linux-x64 | cut -d' ' -f1)
-          gh repo clone chavisnguyen/homebrew-fimake tap -- --depth 1
+          git clone "https://${GH_TOKEN}@github.com/chavisnguyen/homebrew-fimake" tap --depth 1
           cd tap
           git checkout master
           python3 - "$TAG" "$SHA_ARM" "$SHA_INTEL" "$SHA_LINUX" <<'EOF'
