@@ -72,14 +72,16 @@ jobs:
       - name: Build MCP server
         working-directory: ./mcp
         run: pnpm build
-      - name: Deploy prod deps (isolated linker) and stage
+      - name: Install prod deps (isolated linker) and build binary
         shell: bash
         run: |
-          pnpm --filter @chavisnguyen/fimake deploy stage --prod --node-linker=isolated --ignore-scripts --legacy
-          test -f stage/node_modules/zod-to-json-schema/package.json
-          echo "STAGE=$(pwd)/stage" >> $GITHUB_ENV
-      - name: Build standalone binary (caxa bundles Node 22)
-        run: pnpm dlx @cdxgen/caxa --input "${{ env.STAGE }}" --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
+          # --node-linker=isolated writes each package's deps into
+          # its own node_modules as real files (no pnpm symlinks),
+          # so the caxa-extracted binary can resolve nested imports
+          # like @modelcontextprotocol/sdk -> zod-to-json-schema.
+          pnpm --filter @chavisnguyen/fimake install --prod --node-linker=isolated --ignore-scripts
+          test -f mcp/node_modules/@modelcontextprotocol/sdk/node_modules/zod-to-json-schema/package.json
+          pnpm dlx @cdxgen/caxa --input mcp --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset }}
