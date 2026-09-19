@@ -1,6 +1,6 @@
 # Fimake
 
-[![npm version](https://img.shields.io/npm/v/@chavisnguyen/fimake)](https://www.npmjs.com/package/@chavisnguyen/fimake)
+[![release](https://img.shields.io/github/v/release/chavisnguyen/FiMake)](https://github.com/chavisnguyen/FiMake/releases)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue)](./LICENSE)
 
 ## Problem
@@ -23,11 +23,11 @@ Fimake ships as a **dev plugin** (sideload from manifest). There is no Figma Com
 3. Run it via *Plugins > Development > Fimake*. Expected: **Not connected to MCP server**.
 4. **Keep the plugin window open.** It flips to **Connected** once the MCP server (step 2) is running.
 
-> Compatibility: use the plugin zip and the npm package from the **same release** (e.g. both `v1.0.0`). Default port is `10101` on both sides.
+> Compatibility: use the plugin zip and the binary from the **same release** (e.g. both `v1.0.x`). Default port is `10101` on both sides.
 
 ### 2. Run the MCP server (pick one)
 
-**A. Standalone binary (recommended, no Node needed).** Download `fimake-<your-os>` from [GitHub Releases](../../releases) (`fimake-macos-arm64`, `fimake-linux-x64`, `fimake-windows-x64.exe`), make it executable (`chmod +x fimake-*` on macOS/Linux), then point your client at it:
+**A. Standalone binary (recommended, no Node needed).** Download `fimake-<your-os>` from [GitHub Releases](../../releases) (`fimake-macos-arm64`, `fimake-macos-x64`, `fimake-linux-x64`), make it executable (`chmod +x fimake-*` on macOS/Linux), then point your client at it:
 
 ```json
 {
@@ -40,7 +40,7 @@ Fimake ships as a **dev plugin** (sideload from manifest). There is no Figma Com
 }
 ```
 
-**B. From source (contributors, Intel Macs).** Clone, build once, point at the local file (needs `Node.js >= 22`):
+**B. From source (contributors).** Clone, build once, point at the local file (needs `Node.js >= 22`):
 
 ```bash
 git clone https://github.com/chavisnguyen/FiMake.git

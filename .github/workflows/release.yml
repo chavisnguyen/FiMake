@@ -75,11 +75,9 @@ jobs:
           node-version: '22.x'
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build MCP server
-        working-directory: ./mcp
-        run: pnpm build
+      # NOTE: no pnpm install / pnpm build here on purpose — the next step
+      # wipes node_modules and rebuilds dist via npm (real files, no pnpm
+      # symlinks), so installing first would only waste CI minutes.
       - name: Install prod deps (npm, real files) and build standalone binary (caxa bundles Node 22)
         working-directory: ./mcp
         shell: bash
