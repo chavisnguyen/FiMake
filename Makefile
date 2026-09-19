@@ -48,8 +48,8 @@ package-plugin: build
 	cd plugin && zip -r ../fimake-plugin.zip manifest.json dist -x 'dist/*.map'
 
 # Publish a release: `make release V=1.0.33`
-# Version bumps are manual (mcp/package.json, plugin/package.json,
-# mcp/server.json must all equal V — the release.yml gate asserts the same).
+# Version bumps are manual (mcp/package.json and plugin/package.json
+# must both equal V — the release.yml gate asserts the same).
 # This target re-verifies that invariant, runs the full gate, pushes,
 # then creates the GitHub Release (which triggers binary builds + tap bump).
 # Never delete/recreate a published release: the Homebrew tap points at it.
@@ -60,7 +60,6 @@ release:
 	@git fetch --tags --quiet origin
 	@test "$$(python3 -c "import json; print(json.load(open('mcp/package.json'))['version'])")" = "$(V)" || (echo "error: mcp/package.json version != $(V)" && exit 1)
 	@test "$$(python3 -c "import json; print(json.load(open('plugin/package.json'))['version'])")" = "$(V)" || (echo "error: plugin/package.json version != $(V)" && exit 1)
-	@test "$$(grep -o '"version": "[^"]*"' mcp/server.json | sort -u)" = '"version": "$(V)"' || (echo "error: mcp/server.json versions != $(V)" && exit 1)
 	@if git rev-parse "v$(V)" >/dev/null 2>&1; then echo "error: tag v$(V) already exists"; exit 1; fi
 	@$(MAKE) check
 	@git push origin master

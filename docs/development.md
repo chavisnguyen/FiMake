@@ -63,4 +63,4 @@ Tool parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_ONLY
 
 ## Release
 
-Releases ship **standalone binaries + the sideload plugin zip, no npm**. Creating a GitHub Release (tag, e.g. `v1.0.0`) triggers `.github/workflows/release.yml`: gate (`make check`), then `make package-plugin` → `fimake-plugin.zip`, then one `caxa` binary per OS (`fimake-macos-arm64`, `fimake-macos-x64`, `fimake-linux-x64`) — all attached to the Release automatically. `mcp/server.json` is the MCP registry entry (`io.github.chavisnguyen/fimake`).
+Releases ship **standalone binaries + the sideload plugin zip, no npm**. Creating a GitHub Release (tag, e.g. `v1.0.0`) triggers `.github/workflows/release.yml`: gate (`make check`), then `make package-plugin` → `fimake-plugin.zip`, then one `caxa` binary per OS (`fimake-macos-arm64`, `fimake-macos-x64`, `fimake-linux-x64`) — all attached to the Release automatically. Homebrew users get the update via the tap bump workflow.

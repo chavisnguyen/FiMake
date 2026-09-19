@@ -160,26 +160,7 @@ describe("socket-server helper", () => {
   });
 });
 
-describe("server.json drift guard", () => {
-  it("matches mcp/package.json name + version", () => {
-    const pkg = JSON.parse(
-      fs.readFileSync(new URL("../../package.json", import.meta.url), "utf-8"),
-    ) as { name: string; version: string; mcpName: string };
-    const registry = JSON.parse(
-      fs.readFileSync(new URL("../../server.json", import.meta.url), "utf-8"),
-    ) as {
-      name: string;
-      version: string;
-      packages: Array<{ identifier: string; version: string }>;
-    };
-    expect(registry.name).toBe(pkg.mcpName);
-    expect(registry.version).toBe(pkg.version);
-    for (const p of registry.packages) {
-      expect(p.identifier).toBe(pkg.name);
-      expect(p.version).toBe(pkg.version);
-    }
-  });
-
+describe("version parity guard", () => {
   it("version single-source: plugin + SERVER_VERSION match mcp/package.json", async () => {
     const pkg = JSON.parse(
       fs.readFileSync(new URL("../../package.json", import.meta.url), "utf-8"),
