@@ -100,4 +100,6 @@ jobs:
       - name: Attach assets to Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.ref_name }} assets/* --clobber
+        # NOTE: --repo is required — this job has no checkout, so gh
+        # cannot resolve the repo from git remotes.
+        run: gh release upload ${{ github.ref_name }} assets/* --clobber --repo chavisnguyen/FiMake
