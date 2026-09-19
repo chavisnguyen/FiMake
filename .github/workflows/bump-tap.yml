@@ -24,17 +24,18 @@ jobs:
           cd "$WORK"
           # release.yml attaches the binaries asynchronously — wait for them.
           for i in $(seq 1 30); do
-            rm -f fimake-macos-* fimake-linux-*
+            rm -f fimake-*
             if gh release download "$TAG" --repo chavisnguyen/FiMake \
-              --pattern 'fimake-macos-arm64' \
-              --pattern 'fimake-macos-x64' \
-              --pattern 'fimake-linux-x64'; then
+              --pattern 'fimake-*'; then
               break
             fi
             echo "assets not ready yet, retry $i/30..."
             sleep 60
           done
           test -f fimake-macos-arm64 && test -f fimake-macos-x64 && test -f fimake-linux-x64
+          SHA_ARM=$(sha256sum fimake-macos-arm64 | cut -d' ' -f1)
+          SHA_INTEL=$(sha256sum fimake-macos-x64 | cut -d' ' -f1)
+          SHA_LINUX=$(sha256sum fimake-linux-x64 | cut -d' ' -f1)
           SHA_ARM=$(sha256sum fimake-macos-arm64 | cut -d' ' -f1)
           SHA_INTEL=$(sha256sum fimake-macos-x64 | cut -d' ' -f1)
           SHA_LINUX=$(sha256sum fimake-linux-x64 | cut -d' ' -f1)
@@ -59,5 +60,5 @@ jobs:
           EOF
           git diff --stat
           git add Formula/fimake.rb
-          git -c user.name "fimake-bot" -c user.email "fimake-bot@users.noreply.github.com" \
+          git -c "user.name=fimake-bot" -c "user.email=fimake-bot@users.noreply.github.com" \
             commit -m "fimake ${TAG}" && git push || echo "nothing to bump"
