@@ -57,12 +57,12 @@ release:
 	@test -n "$(V)" || (echo "usage: make release V=1.0.33" && exit 1)
 	@git diff --quiet || (echo "error: working tree dirty" && exit 1)
 	@git diff --cached --quiet || (echo "error: staged changes present" && exit 1)
+	@git fetch --tags --quiet origin
 	@test "$$(python3 -c "import json; print(json.load(open('mcp/package.json'))['version'])")" = "$(V)" || (echo "error: mcp/package.json version != $(V)" && exit 1)
 	@test "$$(python3 -c "import json; print(json.load(open('plugin/package.json'))['version'])")" = "$(V)" || (echo "error: plugin/package.json version != $(V)" && exit 1)
 	@test "$$(grep -o '"version": "[^"]*"' mcp/server.json | sort -u)" = '"version": "$(V)"' || (echo "error: mcp/server.json versions != $(V)" && exit 1)
 	@if git rev-parse "v$(V)" >/dev/null 2>&1; then echo "error: tag v$(V) already exists"; exit 1; fi
 	@$(MAKE) check
-	@git fetch --tags --quiet origin
 	@git push origin master
 	@PREV_TAG=$$(git describe --tags --abbrev=0 2>/dev/null || echo ""); \
 	if [ -n "$$PREV_TAG" ]; then NOTES=$$(git log "$$PREV_TAG..HEAD" --pretty=format:'- %s'); else NOTES="Release v$(V)."; fi; \
