@@ -76,19 +76,14 @@ jobs:
       - name: Stage production files (dist + all prod deps, hoisted)
         shell: bash
         run: |
-          rm -rf stage
-          mkdir stage
-          cp mcp/package.json stage/
-          cp -r mcp/dist stage/
+          STAGE=$(mktemp -d)
           pnpm --filter @chavisnguyen/fimake deploy --legacy \
             --config.inject-workspace-packages=true \
             --config.node-linker=hoisted \
-            --config.force-legacy-deploy=true stage
+            --config.force-legacy-deploy=true "$STAGE"
+          echo "STAGE=$STAGE" >> $GITHUB_ENV
       - name: Build standalone binary (caxa bundles Node 22)
-        # NOTE: `caxa --input mcp` includes mcp/node_modules automatically
-        # (pnpm hoists deps into mcp/node_modules). No separate staging step.
-        run: |
-          pnpm dlx @cdxgen/caxa --input mcp --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
+        run: pnpm dlx @cdxgen/caxa --input "$STAGE/mcp" --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset }}
