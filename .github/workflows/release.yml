@@ -72,17 +72,15 @@ jobs:
       - name: Build MCP server
         working-directory: ./mcp
         run: pnpm build
-      - name: Install prod deps (root workspace) and stage
+      - name: Stage production files (copy node_modules)
         shell: bash
         run: |
           rm -rf stage
           mkdir stage
           cp mcp/package.json stage/
           cp -rL mcp/dist stage/
-          # Install all prod deps into the workspace root node_modules,
-          # then copy them real-files into stage so the caxa-extracted
-          # binary can resolve nested imports regardless of linker.
-          pnpm install --prod --ignore-scripts
+          # node_modules is already populated by the gate step's
+          # `pnpm install --frozen-lockfile`, so copy it as-is.
           test -f node_modules/zod-to-json-schema/package.json
           cp -rL node_modules stage/
           echo "STAGE=$(pwd)/stage" >> $GITHUB_ENV
