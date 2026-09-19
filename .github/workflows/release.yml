@@ -72,19 +72,16 @@ jobs:
       - name: Build MCP server
         working-directory: ./mcp
         run: pnpm build
-      - name: Stage production files (dist + all prod deps, hoisted)
+      - name: Stage production files (dist + prod deps)
         shell: bash
         run: |
-          STAGE=/tmp/fimake-deploy-$$
-          export HOME=/tmp
-          export NPM_CONFIG_PREFIX=/tmp
-          pnpm --filter @chavisnguyen/fimake deploy --legacy \
-            --config.inject-workspace-packages=true \
-            --config.node-linker=hoisted \
-            --config.force-legacy-deploy=true \
-            --config.virtual-store-dir=/tmp/vstore \
-            "$STAGE"
-          echo "STAGE=$STAGE" >> $GITHUB_ENV
+          rm -rf stage
+          mkdir stage
+          cp mcp/package.json stage/
+          cp -rL mcp/dist stage/
+          cd mcp && pnpm install --prod --ignore-scripts
+          cp -rL mcp/node_modules stage/
+          echo "STAGE=$(pwd)/stage" >> $GITHUB_ENV
       - name: Build standalone binary (caxa bundles Node 22)
         run: pnpm dlx @cdxgen/caxa --input "${{ env.STAGE }}" --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
       - uses: actions/upload-artifact@v4
