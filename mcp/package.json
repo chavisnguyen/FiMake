@@ -1,7 +1,7 @@
 {
   "name": "@chavisnguyen/fimake",
   "mcpName": "io.github.chavisnguyen/fimake",
-  "version": "1.0.0",
+  "version": "1.0.31",
   "description": "Fimake MCP Server for Figma",
   "main": "./dist/index.js",
   "files": [

@@ -86,10 +86,21 @@ jobs:
           test -f node_modules/zod-to-json-schema/package.json
           pnpm build
           pnpm dlx @cdxgen/caxa --input . --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
+      - name: Smoke-test standalone binary
+        working-directory: ./mcp
+        shell: bash
+        # The binary must boot and report its version on stdout.
+        # Catches broken staging (e.g. missing node_modules) here in CI
+        # instead of after users install via Homebrew.
+        run: |
+          test -x ${{ matrix.asset }}
+          ./${{ matrix.asset }} --version
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset }}
-          path: ${{ matrix.asset }}
+          # caxa ran with working-directory ./mcp, so the binary lives there.
+          path: mcp/${{ matrix.asset }}
+          if-no-files-found: error
 
   attach:
     needs: [gate, plugin-zip, binary]
@@ -100,6 +111,14 @@ jobs:
           path: assets
           merge-multiple: true
       - run: ls -la assets
+      - name: Guard - all 4 assets present
+        # Never attach an incomplete release: 3 binaries + plugin zip.
+        # (A warn-only upload would otherwise ship a broken tap update.)
+        run: |
+          test -f assets/fimake-macos-arm64
+          test -f assets/fimake-macos-x64
+          test -f assets/fimake-linux-x64
+          test -f assets/fimake-plugin.zip
       - name: Attach assets to Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
