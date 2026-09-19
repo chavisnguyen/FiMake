@@ -81,8 +81,9 @@ jobs:
           cp mcp/package.json stage/
           cp -rL mcp/dist stage/
           cp -rL mcp/node_modules stage/
+          echo "STAGE=$(pwd)/stage" >> $GITHUB_ENV
       - name: Build standalone binary (caxa bundles Node 22)
-        run: pnpm dlx @cdxgen/caxa --input "$STAGE/mcp" --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
+        run: pnpm dlx @cdxgen/caxa --input "${{ env.STAGE }}" --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset }}
