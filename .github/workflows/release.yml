@@ -72,17 +72,11 @@ jobs:
       - name: Build MCP server
         working-directory: ./mcp
         run: pnpm build
-      - name: Stage production files (copy node_modules)
+      - name: Deploy prod deps (isolated linker) and stage
         shell: bash
         run: |
-          rm -rf stage
-          mkdir stage
-          cp mcp/package.json stage/
-          cp -rL mcp/dist stage/
-          # node_modules is already populated by the gate step's
-          # `pnpm install --frozen-lockfile`, so copy it as-is.
-          test -f node_modules/zod-to-json-schema/package.json
-          cp -rL node_modules stage/
+          pnpm --filter @chavisnguyen/fimake deploy stage --prod --node-linker=isolated --ignore-scripts --legacy
+          test -f stage/node_modules/zod-to-json-schema/package.json
           echo "STAGE=$(pwd)/stage" >> $GITHUB_ENV
       - name: Build standalone binary (caxa bundles Node 22)
         run: pnpm dlx @cdxgen/caxa --input "${{ env.STAGE }}" --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
