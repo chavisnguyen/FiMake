@@ -1,6 +1,6 @@
 {
   "name": "fimake-plugin",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "type": "module",
   "description": "Fimake plugin bridge for working with Figma documents via MCP",
   "scripts": {
@@ -23,7 +23,7 @@
     "dev": "concurrently -n tsc,build 'pnpm:tsc:watch' 'pnpm:build:watch'"
   },
   "author": "chavisnguyen",
-  "license": "MIT License",
+  "license": "Apache-2.0",
   "dependencies": {
     "@create-figma-plugin/utilities": "^4.0.3",
     "react": "^19.3.0",

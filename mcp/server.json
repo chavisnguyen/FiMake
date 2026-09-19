@@ -7,13 +7,13 @@
         "url": "https://github.com/chavisnguyen/fimake.git",
         "source": "github"
     },
-    "version": "1.0.31",
+    "version": "1.0.32",
     "packages": [
         {
             "registryType": "npm",
             "registryBaseUrl": "https://registry.npmjs.org",
             "identifier": "@chavisnguyen/fimake",
-            "version": "1.0.31",
+            "version": "1.0.32",
             "transport": {
                 "type": "stdio"
             },
@@ -30,7 +30,7 @@
             "registryType": "npm",
             "registryBaseUrl": "https://registry.npmjs.org",
             "identifier": "@chavisnguyen/fimake",
-            "version": "1.0.31",
+            "version": "1.0.32",
             "transport": {
                 "type": "streamable-http",
                 "url": "http://localhost:10101/mcp"

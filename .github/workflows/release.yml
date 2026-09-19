@@ -12,6 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Guard - package versions match release tag
+        # brew test asserts `fimake --version` == tag version, and --version
+        # is baked from mcp/package.json at build time. Fail fast here
+        # instead of shipping a release whose binary fails `brew test`.
+        run: |
+          TAG="${{ github.ref_name }}"
+          test "$(python3 -c "import json; print(json.load(open('mcp/package.json'))['version'])")" = "${TAG#v}"
+          test "$(python3 -c "import json; print(json.load(open('plugin/package.json'))['version'])")" = "${TAG#v}"
       - uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4

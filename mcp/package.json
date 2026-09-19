@@ -1,7 +1,7 @@
 {
   "name": "@chavisnguyen/fimake",
   "mcpName": "io.github.chavisnguyen/fimake",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "description": "Fimake MCP Server for Figma",
   "main": "./dist/index.js",
   "files": [
@@ -23,7 +23,7 @@
     "inspector": "npx @modelcontextprotocol/inspector@latest"
   },
   "author": "chavisnguyen",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "@hono/node-server": "^2.1.1",
     "@modelcontextprotocol/sdk": "1.22.0",

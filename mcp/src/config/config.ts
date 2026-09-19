@@ -41,10 +41,6 @@ export type EnvStartConfig = z.infer<typeof envStartSchema>;
 
 export const config = envStartSchema.parse(process.env);
 
-if (config.CORS_ORIGIN === "*") {
-    console.warn('[fimake] CORS_ORIGIN="*" allows any origin; set it explicitly for networked use.');
-}
-
 /** Backwards-compat const; prefer `config.PORT` for new code. */
 export const PORT = config.PORT;
 

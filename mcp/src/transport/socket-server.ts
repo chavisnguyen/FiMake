@@ -4,7 +4,14 @@ import { config } from "../config/config";
 import { debugLog } from "../shared/log";
 
 /** Shared Socket.IO options so stdio + streamable-http can't drift apart. */
+let corsWarningLogged = false;
 export function createSocketServer(httpServer: HttpServer): Server {
+    // Warn here (not in config.ts module scope) so `--version` stays silent
+    // while both real server paths still warn exactly once.
+    if (config.CORS_ORIGIN === "*" && !corsWarningLogged) {
+        corsWarningLogged = true;
+        console.warn('[fimake] CORS_ORIGIN="*" allows any origin; set it explicitly for networked use.');
+    }
     const io = new Server(httpServer, {
         cors: {
             origin: config.CORS_ORIGIN,
