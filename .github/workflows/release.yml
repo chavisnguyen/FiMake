@@ -48,6 +48,7 @@ jobs:
   binary:
     needs: gate
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
@@ -56,8 +57,6 @@ jobs:
             asset: fimake-macos-x64
           - os: ubuntu-latest
             asset: fimake-linux-x64
-          - os: windows-latest
-            asset: fimake-windows-x64.exe
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
