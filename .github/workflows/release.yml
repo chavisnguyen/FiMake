@@ -81,7 +81,7 @@ jobs:
           # zod-to-json-schema is a transitive dep of @modelcontextprotocol/sdk
           # that npm doesn't hoist, so install it explicitly.
           npm install --ignore-scripts
-          npm install zod-to-json-schema --ignore-scripts
+          npm install zod-to-json-schema --ignore-scripts --no-save
           pnpm build
           pnpm dlx @cdxgen/caxa --input . --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
       - uses: actions/upload-artifact@v4
