@@ -76,8 +76,8 @@ jobs:
       - name: Stage production files (dist + all prod deps, hoisted)
         shell: bash
         run: |
-          export HOME=/tmp
           STAGE=$(mktemp -d)
+          export HOME="$STAGE"
           pnpm --filter @chavisnguyen/fimake deploy --legacy \
             --config.inject-workspace-packages=true \
             --config.node-linker=hoisted \
