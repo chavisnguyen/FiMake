@@ -79,9 +79,9 @@ jobs:
           mkdir stage
           cp mcp/package.json stage/
           cp -rL mcp/dist stage/
-          # --node-linker=hoisted writes real files into mcp/node_modules,
-          # so Node 22 inside the caxa binary can resolve them.
-          (cd mcp && pnpm install --prod --node-linker=hoisted --ignore-scripts)
+          # --filter + --node-linker=hoisted writes real files into
+          # mcp/node_modules, so Node 22 inside the caxa binary can resolve.
+          pnpm --filter @chavisnguyen/fimake install --prod --node-linker=hoisted --ignore-scripts
           cp -rL mcp/node_modules stage/
           echo "STAGE=$(pwd)/stage" >> $GITHUB_ENV
       - name: Build standalone binary (caxa bundles Node 22)
