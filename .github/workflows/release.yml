@@ -52,6 +52,8 @@ jobs:
         include:
           - os: macos-latest
             asset: fimake-macos-arm64
+          - os: macos-15-intel
+            asset: fimake-macos-x64
           - os: ubuntu-latest
             asset: fimake-linux-x64
           - os: windows-latest

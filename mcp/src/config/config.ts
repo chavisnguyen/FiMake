@@ -4,7 +4,9 @@ import dotenv from "dotenv";
 // Load .env BEFORE parsing process.env so TRANSPORT/PORT/TIMEOUTS from
 // mcp/.env actually take effect (previously index.ts called dotenv.config()
 // after importing this module, so the file was silently ignored).
-dotenv.config();
+// quiet: dotenv v17 logs "injected env ..." to STDOUT by default, which
+// would corrupt the JSON-RPC stream in `stdio` transport mode.
+dotenv.config({ quiet: true });
 
 export const envStartSchema = z.object({
     //* The transport to use for the server. Can be one of 'stdio' or 'streamable-http'.

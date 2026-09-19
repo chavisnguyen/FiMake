@@ -1,0 +1,63 @@
+name: Bump Homebrew tap
+# After a Release is published (and release.yml has attached the binaries),
+# rewrite url/sha256 in chavisnguyen/homebrew-fimake Formula/fimake.rb.
+# Requires repo secret TAP_TOKEN: a PAT (classic, `repo` scope — or
+# fine-grained with contents:write on homebrew-fimake), because the default
+# GITHUB_TOKEN cannot push to another repository.
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release binaries + bump tap formula
+        env:
+          GH_TOKEN: ${{ secrets.TAP_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ github.ref_name }}"   # e.g. v1.0.0
+          ASSETS="fimake-macos-arm64 fimake-macos-x64 fimake-linux-x64"
+          WORK=$(mktemp -d)
+          cd "$WORK"
+          # release.yml attaches the binaries asynchronously — wait for them.
+          for i in $(seq 1 30); do
+            rm -f fimake-macos-* fimake-linux-*
+            if gh release download "$TAG" --repo chavisnguyen/FiMake \
+              --pattern 'fimake-macos-arm64' \
+              --pattern 'fimake-macos-x64' \
+              --pattern 'fimake-linux-x64'; then
+              break
+            fi
+            echo "assets not ready yet, retry $i/30..."
+            sleep 60
+          done
+          test -f fimake-macos-arm64 && test -f fimake-macos-x64 && test -f fimake-linux-x64
+          SHA_ARM=$(sha256sum fimake-macos-arm64 | cut -d' ' -f1)
+          SHA_INTEL=$(sha256sum fimake-macos-x64 | cut -d' ' -f1)
+          SHA_LINUX=$(sha256sum fimake-linux-x64 | cut -d' ' -f1)
+          gh repo clone chavisnguyen/homebrew-fimake tap -- --depth 1
+          cd tap
+          git checkout master
+          python3 - "$TAG" "$SHA_ARM" "$SHA_INTEL" "$SHA_LINUX" <<'EOF'
+          import re, sys
+          tag, arm, intel, linux = sys.argv[1:5]
+          p = "Formula/fimake.rb"
+          s = open(p).read()
+          s = re.sub(r"https://github\.com/chavisnguyen/FiMake/releases/download/[^/\"']+/fimake-macos-arm64",
+                     f"https://github.com/chavisnguyen/FiMake/releases/download/{tag}/fimake-macos-arm64", s)
+          s = re.sub(r"https://github\.com/chavisnguyen/FiMake/releases/download/[^/\"']+/fimake-macos-x64",
+                     f"https://github.com/chavisnguyen/FiMake/releases/download/{tag}/fimake-macos-x64", s)
+          s = re.sub(r"https://github\.com/chavisnguyen/FiMake/releases/download/[^/\"']+/fimake-linux-x64",
+                     f"https://github.com/chavisnguyen/FiMake/releases/download/{tag}/fimake-linux-x64", s)
+          s = re.sub(r'(fimake-macos-arm64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{arm}", s)
+          s = re.sub(r'(fimake-macos-x64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{intel}", s)
+          s = re.sub(r'(fimake-linux-x64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{linux}", s)
+          open(p, "w").write(s)
+          EOF
+          git diff --stat
+          git add Formula/fimake.rb
+          git -c user.name "fimake-bot" -c user.email "fimake-bot@users.noreply.github.com" \
+            commit -m "fimake ${TAG}" && git push || echo "nothing to bump"

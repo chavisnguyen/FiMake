@@ -6,10 +6,15 @@
 //   you exactly which hop swallowed it.
 const DEBUG = process.env.DEBUG === "1" || process.env.DEBUG?.toLowerCase() === "true";
 
+// Toggleable server logging.
+//
+// All server logs go to STDERR, never stdout: in `stdio` transport mode
+// stdout is reserved for JSON-RPC frames — a single stray line there
+// corrupts the MCP stream and disconnects the client.
 export function debugLog(...args: unknown[]): void {
-  if (DEBUG) console.log("[fimake:debug]", ...args);
+  if (DEBUG) console.error("[fimake:debug]", ...args);
 }
 
 export function infoLog(...args: unknown[]): void {
-  console.log("[fimake]", ...args);
+  console.error("[fimake]", ...args);
 }
