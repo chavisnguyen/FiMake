@@ -72,20 +72,17 @@ jobs:
       - name: Build MCP server
         working-directory: ./mcp
         run: pnpm build
-      - name: Build bundled MCP server and standalone binary (caxa bundles Node 22)
+      - name: Install prod deps (npm, real files) and build standalone binary (caxa bundles Node 22)
         working-directory: ./mcp
         shell: bash
         run: |
           # npm creates real files in node_modules (no pnpm symlinks),
-          # so the caxa-extracted binary can resolve external deps
-          # like socket.io and dotenv.
-          # esbuild bundles @modelcontextprotocol/sdk (incl. zod-to-json-schema)
-          # so no nested resolution is needed.
+          # so the caxa-extracted binary can resolve all imports.
+          # zod-to-json-schema is a transitive dep of @modelcontextprotocol/sdk
+          # that npm doesn't hoist, so install it explicitly.
           npm install --ignore-scripts
-          test -f node_modules/esbuild/package.json
-          test -f node_modules/socket.io/package.json
-          test -f node_modules/dotenv/package.json
-          pnpm build:binary
+          npm install zod-to-json-schema --ignore-scripts
+          pnpm build
           pnpm dlx @cdxgen/caxa --input . --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
       - uses: actions/upload-artifact@v4
         with:
