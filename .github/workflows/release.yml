@@ -79,8 +79,7 @@ jobs:
           mkdir stage
           cp mcp/package.json stage/
           cp -rL mcp/dist stage/
-          cd mcp && pnpm install --prod --ignore-scripts
-          cp -rL mcp/node_modules stage/
+          (cd mcp && pnpm install --prod --ignore-scripts && cp -rL node_modules ../stage/)
           echo "STAGE=$(pwd)/stage" >> $GITHUB_ENV
       - name: Build standalone binary (caxa bundles Node 22)
         run: pnpm dlx @cdxgen/caxa --input "${{ env.STAGE }}" --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
