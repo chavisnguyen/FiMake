@@ -72,16 +72,16 @@ jobs:
       - name: Build MCP server
         working-directory: ./mcp
         run: pnpm build
-      - name: Install prod deps (isolated linker) and build binary
+      - name: Install prod deps (npm, real files) and build binary
+        working-directory: ./mcp
         shell: bash
         run: |
-          # --node-linker=isolated writes each package's deps into
-          # its own node_modules as real files (no pnpm symlinks),
-          # so the caxa-extracted binary can resolve nested imports
-          # like @modelcontextprotocol/sdk -> zod-to-json-schema.
-          pnpm --filter @chavisnguyen/fimake install --prod --node-linker=isolated --ignore-scripts
-          test -f mcp/node_modules/@modelcontextprotocol/sdk/node_modules/zod-to-json-schema/package.json
-          pnpm dlx @cdxgen/caxa --input mcp --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
+          # npm creates real files in node_modules (no pnpm symlinks),
+          # so the caxa-extracted binary can resolve all imports
+          # including nested ones like zod-to-json-schema.
+          npm install --prod --ignore-scripts
+          test -f node_modules/zod-to-json-schema/package.json
+          pnpm dlx @cdxgen/caxa --input . --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset }}
