@@ -78,10 +78,12 @@ jobs:
         run: |
           # npm creates real files in node_modules (no pnpm symlinks),
           # so the caxa-extracted binary can resolve all imports.
-          # zod-to-json-schema is a transitive dep of @modelcontextprotocol/sdk
-          # that npm doesn't hoist, so install it explicitly.
-          npm install --ignore-scripts
-          npm install zod-to-json-schema --ignore-scripts --no-save
+          # zod-to-json-schema is now a declared dep of mcp/package.json
+          # (it is imported by @modelcontextprotocol/sdk but missing
+          # from its published package.json).
+          rm -rf node_modules
+          npm install --ignore-scripts --no-package-lock
+          test -f node_modules/zod-to-json-schema/package.json
           pnpm build
           pnpm dlx @cdxgen/caxa --input . --output ${{ matrix.asset }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/dist/index.js"
       - uses: actions/upload-artifact@v4
