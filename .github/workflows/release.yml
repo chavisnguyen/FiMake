@@ -79,10 +79,8 @@ jobs:
           mkdir stage
           cp mcp/package.json stage/
           cp -rL mcp/dist stage/
-          # --filter + --node-linker=hoisted writes real files into
-          # mcp/node_modules, so Node 22 inside the caxa binary can resolve.
           pnpm --filter @chavisnguyen/fimake install --prod --node-linker=hoisted --ignore-scripts
-          test -f mcp/node_modules/zod-to-json-schema/package.json
+          test -f mcp/node_modules/zod-to-json-schema/package.json || (echo "MISSING zod-to-json-schema"; ls mcp/node_modules/ | head; exit 1)
           cp -rL mcp/node_modules stage/
           echo "STAGE=$(pwd)/stage" >> $GITHUB_ENV
       - name: Build standalone binary (caxa bundles Node 22)
