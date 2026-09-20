@@ -14,15 +14,36 @@ export default defineConfig({
   head: [
     ["link", { rel: "icon", type: "image/svg+xml", href: "/icon.svg" }],
     ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+    ["link", { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" }],
+    ["link", { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" }],
+    ["link", { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" }],
+    ["link", { rel: "manifest", href: "/site.webmanifest" }],
     ["meta", { name: "theme-color", content: "#7c3aed" }],
+    ["meta", { property: "og:type", content: "website" }],
+    ["meta", { property: "og:title", content: "FiMake — AI agents inside your Figma documents" }],
     [
       "meta",
       {
-        name: "og:description",
+        property: "og:description",
         content:
           "Fimake lets AI agents work directly in your Figma documents — create, edit, organize, and read.",
       },
     ],
+    ["meta", { property: "og:url", content: "https://chavisnguyen.github.io/FiMake/" }],
+    ["meta", { property: "og:image", content: "https://chavisnguyen.github.io/FiMake/og-image.png" }],
+    ["meta", { property: "og:image:width", content: "1200" }],
+    ["meta", { property: "og:image:height", content: "630" }],
+    ["meta", { name: "twitter:card", content: "summary_large_image" }],
+    ["meta", { name: "twitter:title", content: "FiMake — AI agents inside your Figma documents" }],
+    [
+      "meta",
+      {
+        name: "twitter:description",
+        content:
+          "Fimake lets AI agents work directly in your Figma documents — create, edit, organize, and read.",
+      },
+    ],
+    ["meta", { name: "twitter:image", content: "https://chavisnguyen.github.io/FiMake/og-image.png" }],
   ],
 
   themeConfig: {

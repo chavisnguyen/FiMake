@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="FiMake open graph">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="55%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="iconBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#1ABCFE"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F24E1E"/>
+      <stop offset="50%" stop-color="#A259FF"/>
+      <stop offset="100%" stop-color="#1ABCFE"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" rx="0" fill="url(#bg)"/>
+  <!-- subtle grid -->
+  <g opacity="0.06" stroke="white" stroke-width="1">
+    <line x1="0" y1="120" x2="1200" y2="120"/><line x1="0" y1="240" x2="1200" y2="240"/><line x1="0" y1="360" x2="1200" y2="360"/><line x1="0" y1="480" x2="1200" y2="480"/>
+    <line x1="200" y1="0" x2="200" y2="630"/><line x1="400" y1="0" x2="400" y2="630"/><line x1="600" y1="0" x2="600" y2="630"/><line x1="800" y1="0" x2="800" y2="630"/><line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+  <!-- white card -->
+  <rect x="56" y="56" width="1088" height="518" rx="36" fill="white" opacity="0.98"/>
+  <!-- accent top bar -->
+  <rect x="56" y="56" width="1088" height="7" rx="3.5" fill="url(#accent)"/>
+  <!-- icon  -->
+  <g transform="translate(122 165)">
+    <rect width="200" height="200" rx="44" fill="url(#iconBg)"/>
+    <rect x="38" y="44" width="124" height="124" rx="28" fill="white"/>
+    <circle cx="74" cy="84" r="20" fill="#F24E1E"/>
+    <circle cx="126" cy="84" r="20" fill="#A259FF"/>
+    <circle cx="74" cy="132" r="20" fill="#0ACF83"/>
+    <circle cx="126" cy="132" r="20" fill="#1ABCFE"/>
+    <g transform="translate(100 108)">
+      <path d="M0 -22 L4.2 -4.2 L22 0 L4.2 4.2 L0 22 L-4.2 4.2 L-22 0 L-4.2 -4.2 Z" fill="#0F172A"/>
+      <circle cx="0" cy="0" r="5.2" fill="white"/>
+    </g>
+    <g fill="white">
+      <path d="M172 26 L174.5 33.5 L182 36 L174.5 38.5 L172 46 L169.5 38.5 L162 36 L169.5 33.5 Z"/>
+      <path d="M24 26 L25.5 30.5 L30 32 L25.5 33.5 L24 38 L22.5 33.5 L18 32 L22.5 30.5 Z" opacity="0.95"/>
+    </g>
+  </g>
+  <!-- text -->
+  <g font-family="Helvetica, Arial, sans-serif">
+    <text x="380" y="235" font-size="92" font-weight="800" letter-spacing="-3.5" fill="#0F172A">Fi<tspan fill="#7C3AED">Make</tspan></text>
+    <text x="380" y="278" font-size="20" font-weight="700" letter-spacing="5.5" fill="#64748B">FIGMA  ·  MAKE  ·  AI AGENTS</text>
+    <text x="380" y="337" font-size="27" font-weight="500" fill="#334155">Let AI agents work directly in your</text>
+    <text x="380" y="371" font-size="27" font-weight="500" fill="#334155">Figma documents — create, edit, organize.</text>
+    <g transform="translate(380 410)">
+      <rect width="224" height="44" rx="11" fill="#0F172A"/>
+      <text x="112" y="29" text-anchor="middle" font-size="14.5" font-weight="700" letter-spacing="1.2" fill="white">chavisnguyen.github.io/FiMake</text>
+    </g>
+    <g transform="translate(628 410)">
+      <rect width="150" height="44" rx="11" fill="white" stroke="#E2E8F0" stroke-width="1.6"/>
+      <text x="75" y="29" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0F172A">brew install fimake</text>
+    </g>
+  </g>
+  <!-- footer micro -->
+  <text x="1090" y="548" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="600" letter-spacing="1.6" fill="#94A3B8">27 TOOLS  ·  Hono + Socket.IO  ·  Apache-2.0</text>
+</svg>

@@ -1,0 +1,13 @@
+{
+  "name": "FiMake",
+  "short_name": "FiMake",
+  "description": "Let AI agents work directly in your Figma documents — create, edit, organize, and read.",
+  "icons": [
+    { "src": "/FiMake/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/FiMake/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "theme_color": "#7c3aed",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/FiMake/"
+}
