@@ -12,12 +12,12 @@ export default defineConfig({
   cleanUrls: false,
 
   head: [
-    ["link", { rel: "icon", type: "image/svg+xml", href: "/icon.svg" }],
-    ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
-    ["link", { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" }],
-    ["link", { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" }],
-    ["link", { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" }],
-    ["link", { rel: "manifest", href: "/site.webmanifest" }],
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/FiMake/icon.svg" }],
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/FiMake/favicon.svg" }],
+    ["link", { rel: "icon", type: "image/png", sizes: "32x32", href: "/FiMake/favicon-32x32.png" }],
+    ["link", { rel: "icon", type: "image/png", sizes: "16x16", href: "/FiMake/favicon-16x16.png" }],
+    ["link", { rel: "apple-touch-icon", sizes: "180x180", href: "/FiMake/apple-touch-icon.png" }],
+    ["link", { rel: "manifest", href: "/FiMake/site.webmanifest" }],
     ["meta", { name: "theme-color", content: "#7c3aed" }],
     ["meta", { property: "og:type", content: "website" }],
     ["meta", { property: "og:title", content: "FiMake — AI agents inside your Figma documents" }],
