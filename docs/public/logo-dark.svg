@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 64" role="img" aria-label="FiMake logo dark">
+  <g transform="translate(0 0)">
+    <rect width="64" height="64" rx="18" fill="url(#gLogoDark)"/>
+    <defs>
+      <linearGradient id="gLogoDark" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#7C3AED"/>
+        <stop offset="100%" stop-color="#1ABCFE"/>
+      </linearGradient>
+    </defs>
+    <rect x="14" y="16" width="32" height="32" rx="9" fill="white"/>
+    <circle cx="24.5" cy="26.5" r="5.2" fill="#F24E1E"/>
+    <circle cx="39.5" cy="26.5" r="5.2" fill="#A259FF"/>
+    <circle cx="24.5" cy="38.5" r="5.2" fill="#0ACF83"/>
+    <circle cx="39.5" cy="38.5" r="5.2" fill="#1ABCFE"/>
+    <g transform="translate(32 32)">
+      <path d="M0 -6.2 L1.2 -1.2 L6.2 0 L1.2 1.2 L0 6.2 L-1.2 1.2 L-6.2 0 L-1.2 -1.2 Z" fill="#0F172A"/>
+      <circle cx="0" cy="0" r="1.5" fill="white"/>
+    </g>
+  </g>
+  <g font-family="Inter, system-ui, -apple-system, sans-serif">
+    <text x="78" y="42" font-size="36" font-weight="800" letter-spacing="-1.2" fill="white">Fi<tspan fill="#A78BFA">Make</tspan></text>
+    <text x="78" y="56" font-size="10.5" font-weight="600" letter-spacing="2.2" fill="#94A3B8">FIGMA · MAKE · AI AGENTS</text>
+  </g>
+</svg>

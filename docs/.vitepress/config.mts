@@ -12,6 +12,7 @@ export default defineConfig({
   cleanUrls: false,
 
   head: [
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/icon.svg" }],
     ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
     ["meta", { name: "theme-color", content: "#7c3aed" }],
     [
@@ -26,7 +27,7 @@ export default defineConfig({
 
   themeConfig: {
     siteTitle: "FiMake",
-    logo: "/favicon.svg",
+    logo: "/icon.svg",
 
     nav: [
       { text: "Guide", link: "/usage" },

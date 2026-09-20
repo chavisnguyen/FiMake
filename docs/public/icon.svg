@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="FiMake icon">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="50%" stop-color="#A259FF"/>
+      <stop offset="100%" stop-color="#1ABCFE"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#7C3AED" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <!-- rounded square -->
+  <rect width="64" height="64" rx="18" fill="url(#g)" />
+  <!-- inner card representing Figma frame + Make -->
+  <g filter="url(#shadow)">
+    <!-- white frame background -->
+    <rect x="14" y="16" width="32" height="32" rx="9" fill="white" />
+    <!-- Figma dots inside frame - forming Fi -->
+    <!-- top row -->
+    <circle cx="24.5" cy="26.5" r="5.2" fill="#F24E1E"/>
+    <circle cx="39.5" cy="26.5" r="5.2" fill="#A259FF"/>
+    <!-- middle row -->
+    <circle cx="24.5" cy="38.5" r="5.2" fill="#0ACF83"/>
+    <circle cx="39.5" cy="38.5" r="5.2" fill="#1ABCFE"/>
+    <!-- subtle center spark = Make -->
+    <g transform="translate(32 32)">
+      <path d="M0 -7 L1.4 -1.4 L7 0 L1.4 1.4 L0 7 L-1.4 1.4 L-7 0 L-1.4 -1.4 Z" fill="#0F172A" opacity="0.92"/>
+      <circle cx="0" cy="0" r="1.6" fill="white"/>
+    </g>
+  </g>
+  <!-- outer sparkles = AI / Make magic -->
+  <g fill="white" opacity="0.96">
+    <path d="M52.2 11.2 L53 13.6 L55.5 14.4 L53 15.2 L52.2 17.6 L51.4 15.2 L48.9 14.4 L51.4 13.6 Z"/>
+    <path d="M11.2 11.8 L11.7 13.2 L13.2 13.7 L11.7 14.2 L11.2 15.6 L10.7 14.2 L9.2 13.7 L10.7 13.2 Z" opacity="0.85"/>
+    <path d="M51.2 48.8 L51.6 50 L53 50.4 L51.6 50.8 L51.2 52.2 L50.8 50.8 L49.4 50.4 L50.8 50 Z" opacity="0.9"/>
+  </g>
+</svg>
