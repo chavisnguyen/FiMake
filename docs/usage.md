@@ -13,6 +13,10 @@ Default flow uses **`TRANSPORT=streamable-http`** (matches `mcp/.env.example`). 
 
 ## 2. Install and build (once)
 
+For **users** (no clone): `brew tap chavisnguyen/fimake && brew install fimake` then `fimake --version` — update with `brew upgrade fimake`. The plugin zip must be from the same release tag (e.g. both `v1.0.32`).
+
+For **contributors** (clone):
+
 ```bash
 make install   # pnpm install at the workspace root (mcp + plugin)
 make build     # builds mcp/dist + plugin/dist

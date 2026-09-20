@@ -31,19 +31,25 @@ features:
 ## How it works
 
 1. **Sideload the dev plugin** in Figma (`fimake-plugin.zip` from [GitHub Releases](https://github.com/chavisnguyen/FiMake/releases)) and keep its window open.
-2. **Run the MCP server** — standalone binary (no Node needed) or from source.
+2. **Run the MCP server** — `brew install fimake` (or standalone binary, no Node needed) or from source.
 3. **Point your client** (Claude Code / Cursor / Claude Desktop / Inspector) at Fimake and ask, e.g. *“list the pages in this Figma file”*.
+
+```bash
+brew tap chavisnguyen/fimake && brew install fimake
+```
 
 ```json
 {
   "mcpServers": {
     "fimake": {
-      "command": "/absolute/path/to/fimake-macos-arm64",
+      "command": "fimake",
       "env": { "TRANSPORT": "stdio", "PORT": "10101" }
     }
   }
 }
 ```
+
+> Prefer direct download? Use `fimake-macos-arm64` etc. from Releases with `command: "/absolute/path/to/fimake-macos-arm64"`.
 
 > New here? Follow [Quickstart](/quickstart) (5 minutes), then [Usage](/usage) for HTTP configs, env table, and custom `PORT`. Stuck? See [Troubleshooting](/troubleshooting).
 

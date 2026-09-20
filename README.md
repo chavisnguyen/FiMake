@@ -27,7 +27,28 @@ Fimake ships as a **dev plugin** (sideload from manifest). There is no Figma Com
 
 ### 2. Run the MCP server (pick one)
 
-**A. Standalone binary (recommended, no Node needed).** Download `fimake-<your-os>` from [GitHub Releases](../../releases) (`fimake-macos-arm64`, `fimake-macos-x64`, `fimake-linux-x64`), make it executable (`chmod +x fimake-*` on macOS/Linux), then point your client at it:
+**A. Homebrew (macOS / Linux, no Node needed).** Tap is auto-bumped on every release:
+
+```bash
+brew tap chavisnguyen/fimake
+brew install fimake
+fimake --version
+```
+
+```json
+{
+  "mcpServers": {
+    "fimake": {
+      "command": "fimake",
+      "env": { "TRANSPORT": "stdio", "PORT": "10101" }
+    }
+  }
+}
+```
+
+Update with `brew upgrade fimake`.
+
+**B. Standalone binary (no Node needed).** Download `fimake-<your-os>` from [GitHub Releases](../../releases) (`fimake-macos-arm64`, `fimake-macos-x64`, `fimake-linux-x64`), make it executable (`chmod +x fimake-*` on macOS/Linux), then point your client at it:
 
 ```json
 {
@@ -40,7 +61,7 @@ Fimake ships as a **dev plugin** (sideload from manifest). There is no Figma Com
 }
 ```
 
-**B. From source (contributors).** Clone, build once, point at the local file (needs `Node.js >= 22`):
+**C. From source (contributors).** Clone, build once, point at the local file (needs `Node.js >= 22`):
 
 ```bash
 git clone https://github.com/chavisnguyen/FiMake.git
