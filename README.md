@@ -86,9 +86,14 @@ TRANSPORT=streamable-http ./fimake-macos-arm64
 
 Full client configs, env table, and custom `PORT` checklist live in [docs/usage.md](docs/usage.md).
 
+📖 **Hosted docs:** [chavisnguyen.github.io/FiMake](https://chavisnguyen.github.io/FiMake) — same content with search, sidebar, and diagrams (deployed from `docs/` via VitePress + GitHub Pages).
+
 | Guide | When to read it |
 |---|---|
+| [Quickstart](docs/quickstart.md) | 5-minute install (plugin + server + client config) |
 | [docs/usage.md](docs/usage.md) | Full setup, HTTP + `stdio` configs, env table, custom `PORT` |
+| [docs/tools.md](docs/tools.md) | All 27 tools reference |
+| [docs/architecture.md](docs/architecture.md) | Bridge, task map, diagrams, security |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | `Not connected`, port in use, timeouts, logs |
 | [docs/development.md](docs/development.md) | Contributor guide: `make` targets, watch mode, tests, architecture |
 

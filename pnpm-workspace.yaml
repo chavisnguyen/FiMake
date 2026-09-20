@@ -1,6 +1,7 @@
 packages:
   - mcp
   - plugin
+  - docs
 ignoredBuiltDependencies:
   - '@parcel/watcher'
   - esbuild

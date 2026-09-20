@@ -1,6 +1,6 @@
 # Fimake Usage
 
-This is the full end-user guide. The [README](../README.md) has the 5-minute quickstart; this page covers every step in detail.
+This is the full end-user guide. The [Quickstart](./quickstart.md) has the 5-minute version; this page covers every step in detail.
 
 Default flow uses **`TRANSPORT=streamable-http`** (matches `mcp/.env.example`). `stdio` is documented at the end as an alternative for local-only clients.
 

@@ -7,6 +7,7 @@ test-results/
 .playwright/
 .env
 mcp/.env
+docs/.vitepress/cache
 exports/
 fimake-plugin*.zip
 fimake-macos-*

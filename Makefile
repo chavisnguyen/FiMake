@@ -1,9 +1,9 @@
 # Unified entrypoint for the mcp server and the Figma plugin.
 # Usage: `make <target>` — every target runs in both packages.
-.PHONY: help install test typecheck lint build check dev-mcp dev-plugin package-plugin release clean
+.PHONY: help install test typecheck lint build check dev-mcp dev-plugin docs-dev docs-build docs-preview package-plugin release clean
 
 help:
-	@echo "install    Install dependencies (mcp + plugin)"
+	@echo "install    Install dependencies (mcp + plugin + docs)"
 	@echo "test       Run vitest suites (mcp + plugin)"
 	@echo "typecheck  Typecheck sources and tests (mcp + plugin)"
 	@echo "lint       Forbid explicit any and friends (mcp + plugin)"
@@ -12,6 +12,9 @@ help:
 	@echo "release    Verify versions, run check, push + create GitHub Release (usage: make release V=1.0.33)"
 	@echo "dev-mcp    Watch + restart the MCP server"
 	@echo "dev-plugin Watch + rebuild the plugin (re-run it in Figma to reload)"
+	@echo "docs-dev   Local docs preview with hot reload (http://localhost:5173/FiMake/)"
+	@echo "docs-build Static build of the docs site (docs/.vitepress/dist)"
+	@echo "docs-preview Serve the built docs site locally"
 	@echo "package-plugin Zip the sideload plugin (manifest.json + dist/) for GitHub Releases"
 	@echo "clean      Remove build outputs and coverage"
 
@@ -42,6 +45,15 @@ dev-mcp:
 dev-plugin:
 	cd plugin && pnpm dev
 
+docs-dev:
+	cd docs && pnpm dev
+
+docs-build:
+	cd docs && pnpm build
+
+docs-preview:
+	cd docs && pnpm preview
+
 # Sideload bundle for GitHub Releases: import the zip's manifest.json in Figma.
 package-plugin: build
 	rm -f fimake-plugin.zip
@@ -68,4 +80,4 @@ release:
 	gh release create "v$(V)" --target master --title "v$(V)" --notes "$$NOTES"
 
 clean:
-	rm -rf mcp/dist mcp/coverage plugin/dist plugin/coverage
+	rm -rf mcp/dist mcp/coverage plugin/dist plugin/coverage docs/.vitepress/dist docs/.vitepress/cache
