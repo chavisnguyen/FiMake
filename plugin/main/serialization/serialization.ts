@@ -206,14 +206,36 @@ function serializeTextGroup(_n: NodeRecord, node: SceneNode, out: SerializedNode
 // Guarded: reading component/variant props on a component set with existing
 // errors used to throw and fail the whole node read. Now it degrades to a
 // marker and the rest of the node still serializes.
+//
+// Field differs by node kind (real-file finding): INSTANCE nodes expose
+// `componentProperties` (live values), while COMPONENT / COMPONENT_SET nodes
+// expose `componentPropertyDefinitions` (defs with type + defaultValue).
+// Reading the wrong field silently drops props — components looked
+// property-less even right after add-component-property succeeded.
 function serializeComponentPropsGroup(n: NodeRecord, node: SceneNode, out: SerializedNode): void {
-    if (!(node.type === "INSTANCE" || node.type === "COMPONENT")) return;
+    if (!(node.type === "INSTANCE" || node.type === "COMPONENT" || node.type === "COMPONENT_SET")) return;
     try {
-        const props: unknown = n.componentProperties;
-        if (props !== null && typeof props === "object") {
+        if (node.type === "INSTANCE") {
+            const props: unknown = n.componentProperties;
+            if (props !== null && typeof props === "object") {
+                const cp: Record<string, unknown> = {};
+                for (const [key, value] of Object.entries(props)) {
+                    cp[key] = (value as { value?: unknown }).value;
+                }
+                if (Object.keys(cp).length) out.componentProperties = cp;
+            }
+            return;
+        }
+        const defs: unknown = n.componentPropertyDefinitions;
+        if (defs !== null && typeof defs === "object") {
             const cp: Record<string, unknown> = {};
-            for (const [key, value] of Object.entries(props)) {
-                cp[key] = (value as { value?: unknown }).value;
+            for (const [key, value] of Object.entries(defs)) {
+                if (value !== null && typeof value === "object" && "defaultValue" in (value as Record<string, unknown>)) {
+                    const d = value as { type?: unknown; defaultValue?: unknown };
+                    cp[key] = { type: d.type, defaultValue: d.defaultValue };
+                } else {
+                    cp[key] = value;
+                }
             }
             if (Object.keys(cp).length) out.componentProperties = cp;
         }

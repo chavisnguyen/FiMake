@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "export-file",
-    "recordedAt": "2026-09-21T10:25:50.246Z",
+    "recordedAt": "2026-09-21T10:41:23.293Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
@@ -16,7 +16,7 @@
     "content": {
       "outputDir": "/var/folders/tf/18k9tj_d0v3cs2yp1zc6g1619r5297/T/fimake-e2e-record",
       "manifest": "/var/folders/tf/18k9tj_d0v3cs2yp1zc6g1619r5297/T/fimake-e2e-record/manifest.json",
-      "fileCount": 21,
+      "fileCount": 23,
       "truncatedFiles": [
         "Cover/Slide 16_9 - 1-10_46388.json",
         "Design System & Components/Components-27_1833.json",

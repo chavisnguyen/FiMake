@@ -1,21 +1,21 @@
 {
   "_meta": {
     "command": "set-stroke-color",
-    "recordedAt": "2026-09-21T10:25:49.323Z",
+    "recordedAt": "2026-09-21T10:41:22.269Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "set-stroke-color",
     "args": {
-      "id": "2045:12696",
+      "id": "2045:12714",
       "color": "#00FF00FF"
     }
   },
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12696",
+      "id": "2045:12714",
       "name": "e2e-rect",
       "type": "RECTANGLE",
       "x": 42,

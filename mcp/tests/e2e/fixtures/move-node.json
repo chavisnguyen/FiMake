@@ -1,14 +1,14 @@
 {
   "_meta": {
     "command": "move-node",
-    "recordedAt": "2026-09-21T10:25:49.293Z",
+    "recordedAt": "2026-09-21T10:41:22.232Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "move-node",
     "args": {
-      "id": "2045:12696",
+      "id": "2045:12714",
       "x": 42,
       "y": 77
     }
@@ -16,7 +16,7 @@
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12696",
+      "id": "2045:12714",
       "name": "e2e-rect",
       "type": "RECTANGLE",
       "x": 42,

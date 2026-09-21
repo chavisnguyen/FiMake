@@ -60,3 +60,15 @@ describe("getSolidColorPaint", () => {
     expect(getSolidHEXColorPaint("#ff0000FF")).toMatchObject({ type: "SOLID" });
   });
 });
+
+describe("resolvePropertyKey", () => {
+  it("exact match wins, short name resolves via # suffix, miss passes through", async () => {
+    const { resolvePropertyKey } = await import("../../main/utils/component-property-key");
+    const comp = { componentPropertyDefinitions: { "Label#2045:2": { type: "TEXT" } } };
+    expect(resolvePropertyKey(comp, "Label#2045:2")).toBe("Label#2045:2");
+    expect(resolvePropertyKey(comp, "Label")).toBe("Label#2045:2");
+    expect(resolvePropertyKey(comp, "Nope")).toBe("Nope");
+    expect(resolvePropertyKey(null, "Label")).toBe("Label");
+    expect(resolvePropertyKey({}, "Label")).toBe("Label");
+  });
+});

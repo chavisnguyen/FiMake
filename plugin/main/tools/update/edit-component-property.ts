@@ -1,5 +1,6 @@
 import { EditComponentPropertyParams } from "@shared/types";
 import { ToolResult } from "tools/tool-result";
+import { resolvePropertyKey } from "utils/component-property-key";
 
 export async function editComponentProperty(args: EditComponentPropertyParams): Promise<ToolResult> {
     const component = await figma.getNodeByIdAsync(args.componentId);
@@ -11,22 +12,25 @@ export async function editComponentProperty(args: EditComponentPropertyParams): 
     }
     const componentNode = component as ComponentNode;
 
-    let preferredValues: InstanceSwapPreferredValue[] = [];
+    // preferredValues is INSTANCE_SWAP-only: Figma rejects even an empty
+    // array for TEXT/BOOLEAN/VARIANT ("Preferred values are not supported
+    // for this property type" — real-file finding), so omit it entirely.
+    const options: { name: string; defaultValue: string; preferredValues?: InstanceSwapPreferredValue[] } = {
+        name: args.name,
+        defaultValue: args.defaultValue,
+    };
     if (args.type === "INSTANCE_SWAP") {
         if (!args.preferredValues) {
             return { isError: true, content: "Preferred values are required for instance swap property" };
         }
-        preferredValues = args.preferredValues.map(value => ({
+        options.preferredValues = args.preferredValues.map(value => ({
             type: "COMPONENT",
             key: value,
         })) || [];
     }
 
-    const componentProperty = componentNode.editComponentProperty(args.name, {
-        name: args.name,
-        defaultValue: args.defaultValue,
-        preferredValues: preferredValues,
-    });
+    const key = resolvePropertyKey(componentNode, args.name);
+    const componentProperty = componentNode.editComponentProperty(key, options);
 
     return { isError: false, content: componentProperty };
 }

@@ -1,14 +1,14 @@
 {
   "_meta": {
     "command": "set-layout",
-    "recordedAt": "2026-09-21T10:25:49.354Z",
+    "recordedAt": "2026-09-21T10:41:22.302Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "set-layout",
     "args": {
-      "id": "2045:12695",
+      "id": "2045:12713",
       "mode": "HORIZONTAL",
       "itemSpacing": 8
     }
@@ -16,7 +16,7 @@
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12695",
+      "id": "2045:12713",
       "name": "fimake-e2e-sandbox",
       "type": "FRAME",
       "x": -5000,
@@ -41,17 +41,17 @@
       ],
       "children": [
         {
-          "id": "2045:12696",
+          "id": "2045:12714",
           "name": "e2e-rect",
           "type": "RECTANGLE"
         },
         {
-          "id": "2045:12697",
+          "id": "2045:12715",
           "name": "Text",
           "type": "TEXT"
         },
         {
-          "id": "2045:12698",
+          "id": "2045:12716",
           "name": "E2EComp",
           "type": "COMPONENT"
         }

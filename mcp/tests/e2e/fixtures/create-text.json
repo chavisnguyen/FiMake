@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "create-text",
-    "recordedAt": "2026-09-21T10:25:49.004Z",
+    "recordedAt": "2026-09-21T10:41:21.965Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
@@ -11,13 +11,13 @@
       "x": 10,
       "y": 80,
       "text": "e2e",
-      "parentId": "2045:12695"
+      "parentId": "2045:12713"
     }
   },
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12697",
+      "id": "2045:12715",
       "x": 10,
       "y": 80,
       "width": 25,
@@ -33,7 +33,7 @@
         }
       },
       "fontColor": "#000000FF",
-      "parentId": "2045:12695:FRAME"
+      "parentId": "2045:12713:FRAME"
     }
   }
 }

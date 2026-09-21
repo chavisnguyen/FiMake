@@ -1,14 +1,14 @@
 {
   "_meta": {
     "command": "resize-node",
-    "recordedAt": "2026-09-21T10:25:49.304Z",
+    "recordedAt": "2026-09-21T10:41:22.236Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "resize-node",
     "args": {
-      "id": "2045:12696",
+      "id": "2045:12714",
       "width": 120,
       "height": 60
     }
@@ -16,7 +16,7 @@
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12696",
+      "id": "2045:12714",
       "name": "e2e-rect",
       "type": "RECTANGLE",
       "x": 42,

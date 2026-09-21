@@ -1,21 +1,33 @@
 {
   "_meta": {
     "command": "set-instance-properties",
-    "recordedAt": "2026-09-21T10:25:49.240Z",
+    "recordedAt": "2026-09-21T10:41:22.205Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "set-instance-properties",
     "args": {
-      "instanceId": "2045:12699",
+      "instanceId": "2045:12717",
       "properties": {
         "Label": "hello"
       }
     }
   },
   "response": {
-    "isError": true,
-    "content": "in setProperties: Could not find a component property with name: 'Label'"
+    "isError": false,
+    "content": {
+      "id": "2045:12717",
+      "name": "Instance",
+      "x": 200,
+      "y": 10,
+      "parentId": "87:7157",
+      "properties": {
+        "Label#2045:3": {
+          "type": "TEXT",
+          "value": "hello"
+        }
+      }
+    }
   }
 }

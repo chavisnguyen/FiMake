@@ -1,21 +1,21 @@
 {
   "_meta": {
     "command": "set-parent-id",
-    "recordedAt": "2026-09-21T10:25:49.401Z",
+    "recordedAt": "2026-09-21T10:41:22.317Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "set-parent-id",
     "args": {
-      "id": "2045:12700",
-      "parentId": "2045:12695"
+      "id": "2045:12718",
+      "parentId": "2045:12713"
     }
   },
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12700",
+      "id": "2045:12718",
       "name": "e2e-rect",
       "type": "RECTANGLE",
       "x": 269,

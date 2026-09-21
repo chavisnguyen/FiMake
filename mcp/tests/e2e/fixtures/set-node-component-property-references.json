@@ -1,14 +1,14 @@
 {
   "_meta": {
     "command": "set-node-component-property-references",
-    "recordedAt": "2026-09-21T10:25:49.243Z",
+    "recordedAt": "2026-09-21T10:41:22.224Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "set-node-component-property-references",
     "args": {
-      "id": "2045:12699",
+      "id": "2045:12717",
       "componentPropertyReferences": {
         "characters": "Label"
       }

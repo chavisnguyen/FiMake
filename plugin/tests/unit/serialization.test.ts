@@ -76,4 +76,22 @@ describe("serializeNode", () => {
     expect(out["x"]).toBeDefined();
     expect(out["fills"]).toBeUndefined();
   });
+
+  it("COMPONENT reads componentPropertyDefinitions (real-file finding)", () => {
+    const node: SceneNodeStub = {
+      ...rect({ id: "3:1", type: "COMPONENT" }),
+      componentPropertyDefinitions: { "Label#3:1": { type: "TEXT", defaultValue: "hi" } },
+    };
+    const out: SerializedNode = serializeNode(asSceneNode(node));
+    expect(out["componentProperties"]).toEqual({ "Label#3:1": { type: "TEXT", defaultValue: "hi" } });
+  });
+
+  it("INSTANCE still reads live componentProperties values", () => {
+    const node: SceneNodeStub = {
+      ...rect({ id: "4:1", type: "INSTANCE" }),
+      componentProperties: { "Label#3:1": { type: "TEXT", value: "hello" } },
+    };
+    const out: SerializedNode = serializeNode(asSceneNode(node));
+    expect(out["componentProperties"]).toEqual({ "Label#3:1": "hello" });
+  });
 });

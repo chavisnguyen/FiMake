@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "get-pages",
-    "recordedAt": "2026-09-21T10:25:48.542Z",
+    "recordedAt": "2026-09-21T10:41:21.730Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
@@ -355,6 +355,12 @@
             ],
             "strokeWeight": 1,
             "strokeAlign": "INSIDE",
+            "componentProperties": {
+              "Property 1": {
+                "type": "VARIANT",
+                "defaultValue": "Default"
+              }
+            },
             "children": [
               {
                 "id": "1530:1857",
@@ -597,6 +603,12 @@
             ],
             "strokeWeight": 1,
             "strokeAlign": "INSIDE",
+            "componentProperties": {
+              "Property 1": {
+                "type": "VARIANT",
+                "defaultValue": "Inactive"
+              }
+            },
             "children": [
               {
                 "id": "5:26875",
@@ -1068,6 +1080,12 @@
             ],
             "strokeWeight": 1,
             "strokeAlign": "INSIDE",
+            "componentProperties": {
+              "Property 1": {
+                "type": "VARIANT",
+                "defaultValue": "Default"
+              }
+            },
             "children": [
               {
                 "id": "113:4685",
@@ -1101,6 +1119,12 @@
             ],
             "strokeWeight": 1,
             "strokeAlign": "INSIDE",
+            "componentProperties": {
+              "Active": {
+                "type": "VARIANT",
+                "defaultValue": "No"
+              }
+            },
             "children": [
               {
                 "id": "38:3597",
@@ -1778,6 +1802,24 @@
                 "color": "#ffffffFF"
               }
             ]
+          },
+          {
+            "id": "2045:12702",
+            "name": "Instance",
+            "type": "FRAME",
+            "x": 200,
+            "y": 10,
+            "width": 100,
+            "height": 100,
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": false,
+                "color": "#ffffffFF"
+              }
+            ]
           }
         ]
       },
@@ -1800,6 +1842,32 @@
                 "id": "850:10104",
                 "name": "Container",
                 "type": "FRAME"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "2045:12711",
+            "name": "Instance",
+            "type": "FRAME",
+            "x": 300,
+            "y": 10,
+            "width": 100,
+            "height": 100,
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": false,
+                "color": "#ffffffFF"
+              }
+            ],
+            "children": [
+              {
+                "id": "2045:12712",
+                "name": "Text",
+                "type": "TEXT"
               }
             ],
             "childrenTruncated": true

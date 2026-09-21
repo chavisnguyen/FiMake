@@ -3,6 +3,8 @@ import { getFigma, setupFigma, type MockFigma, type SceneNodeStub } from "../hel
 import type { ToolResult } from "../../main/tools/tool-result";
 
 import { editComponentProperty } from "../../main/tools/update/edit-component-property";
+import { deleteComponentProperty } from "../../main/tools/delete/delete-component-property";
+import { setInstanceProperties } from "../../main/tools/update/set-instance-properties";
 import { setCornerRadius } from "../../main/tools/update/set-corner-radius";
 import { setLayout } from "../../main/tools/update/set-layout";
 import { setFillColor } from "../../main/tools/update/set-fill-color";
@@ -21,6 +23,53 @@ describe("plugin branch coverage fill", () => {
     const ok: ToolResult = await editComponentProperty({ componentId: "1:1", name: "n", type: "INSTANCE_SWAP", defaultValue: "d", preferredValues: ["k1"] });
     expect(ok.isError).toBe(false);
     expect(comp.editComponentProperty).toHaveBeenCalledWith("n", expect.objectContaining({ preferredValues: [{ type: "COMPONENT", key: "k1" }] }));
+  });
+
+  it("editComponentProperty TEXT omits preferredValues + resolves short name", async () => {
+    const figma: MockFigma = getFigma();
+    const comp = {
+      type: "COMPONENT",
+      componentPropertyDefinitions: { "Label#1:2": { type: "TEXT", defaultValue: "hi" } },
+      editComponentProperty: vi.fn(() => ({})),
+    };
+    figma.getNodeByIdAsync.mockResolvedValue(comp);
+    const res: ToolResult = await editComponentProperty({ componentId: "1:1", name: "Label", type: "TEXT", defaultValue: "hey" });
+    expect(res.isError).toBe(false);
+    // Full key resolved + no preferredValues (Figma rejects even [] for TEXT).
+    expect(comp.editComponentProperty).toHaveBeenCalledWith("Label#1:2", { name: "Label", defaultValue: "hey" });
+  });
+
+  it("deleteComponentProperty resolves short name to full key", async () => {
+    const figma: MockFigma = getFigma();
+    const comp = {
+      type: "COMPONENT",
+      componentPropertyDefinitions: { "Label#1:2": { type: "TEXT", defaultValue: "hi" } },
+      deleteComponentProperty: vi.fn(),
+    };
+    figma.getNodeByIdAsync.mockResolvedValue(comp);
+    const res: ToolResult = await deleteComponentProperty({ componentId: "1:1", name: "Label" });
+    expect(res.isError).toBe(false);
+    expect(comp.deleteComponentProperty).toHaveBeenCalledWith("Label#1:2");
+  });
+
+  it("setInstanceProperties resolves short names via mainComponent", async () => {
+    const figma: MockFigma = getFigma();
+    const inst = {
+      type: "INSTANCE",
+      // Sync mainComponent throws under dynamic-page access — impl must use
+      // getMainComponentAsync (mirrors the real Figma crash).
+      get mainComponent(): never {
+        throw new Error("in get_mainComponent: Cannot call with documentAccess: dynamic-page.");
+      },
+      getMainComponentAsync: vi.fn(async () => ({
+        componentPropertyDefinitions: { "Label#1:2": { type: "TEXT", defaultValue: "hi" } },
+      })),
+      setProperties: vi.fn(),
+    };
+    figma.getNodeByIdAsync.mockResolvedValue(inst);
+    const res: ToolResult = await setInstanceProperties({ instanceId: "4:1", properties: { Label: "hello" } });
+    expect(res.isError).toBe(false);
+    expect(inst.setProperties).toHaveBeenCalledWith({ "Label#1:2": "hello" });
   });
 
   it("setCornerRadius per-side radii", async () => {

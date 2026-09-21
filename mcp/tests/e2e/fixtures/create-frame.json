@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "create-frame",
-    "recordedAt": "2026-09-21T10:25:48.791Z",
+    "recordedAt": "2026-09-21T10:41:21.881Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
@@ -18,13 +18,13 @@
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12695",
+      "id": "2045:12713",
       "x": -5000,
       "y": -5000,
       "width": 600,
       "height": 600,
       "name": "fimake-e2e-sandbox",
-      "parentId": "0:1:PAGE"
+      "parentId": "87:7157:PAGE"
     }
   }
 }
