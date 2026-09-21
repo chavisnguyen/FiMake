@@ -23,15 +23,26 @@ cd mcp && pnpm test
 
 ## Record lại data thật
 
-Khi Figma Desktop đang mở + plugin Connected:
+Khi Figma Desktop đang mở + plugin Connected (bản plugin mới nhất):
 
 ```bash
 # terminal 1: server nối với plugin THẬT
 cd mcp && TRANSPORT=streamable-http PORT=10101 pnpm start
 # terminal 2: dump response thật vào fixtures/
-cd mcp && RECORD_PORT=10101 RECORD_NODE_ID=1:1 pnpm record:e2e
+cd mcp && RECORD_PORT=10101 RECORD_NODE_ID=113:24364 pnpm record:e2e
 git diff mcp/tests/e2e/fixtures  # review thay đổi data thật sau khi sửa code
 ```
+
+An toàn: mọi write-tool chạy trong frame `fimake-e2e-sandbox` ở (-5000,-5000),
+cuối script tự xóa — file của bạn không dính rác.
+
+Phủ 26/27 tools. Ngoại lệ có chủ đích:
+- `create-image` KHÔNG record (fetch URL ngoài + nhét ảnh lạ vào file).
+  E2E dùng nó làm case fail-fast.
+- `export-file` (node-only fan-out) chỉ lock shape summary, không deep-equal
+  số liệu — vì nó tự tính từ nhiều sub-call.
+- `get-selection` bọc nguyên TaskResult nên replay ra double-envelope —
+  test so inner content.
 
 ## Khi đổi code
 

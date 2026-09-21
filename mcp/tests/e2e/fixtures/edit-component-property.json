@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "command": "edit-component-property",
+    "recordedAt": "2026-09-21T10:25:49.235Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "edit-component-property",
+    "args": {
+      "componentId": "2045:12698",
+      "name": "Label",
+      "type": "TEXT",
+      "defaultValue": "hello"
+    }
+  },
+  "response": {
+    "isError": true,
+    "content": "in editComponentProperty: Can only set variant property on a component set"
+  }
+}

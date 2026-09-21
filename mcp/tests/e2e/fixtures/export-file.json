@@ -1,0 +1,35 @@
+{
+  "_meta": {
+    "command": "export-file",
+    "recordedAt": "2026-09-21T10:25:50.246Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "export-file",
+    "args": {
+      "outputDir": "/var/folders/tf/18k9tj_d0v3cs2yp1zc6g1619r5297/T/fimake-e2e-record"
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": {
+      "outputDir": "/var/folders/tf/18k9tj_d0v3cs2yp1zc6g1619r5297/T/fimake-e2e-record",
+      "manifest": "/var/folders/tf/18k9tj_d0v3cs2yp1zc6g1619r5297/T/fimake-e2e-record/manifest.json",
+      "fileCount": 21,
+      "truncatedFiles": [
+        "Cover/Slide 16_9 - 1-10_46388.json",
+        "Design System & Components/Components-27_1833.json",
+        "Design System & Components/Lucide Icons-38_6598.json",
+        "Design/[Employer & Applicant] Auth & Onboarding-5_25784.json",
+        "Design/[Employer] Dashboard & Job Management-5_26881.json",
+        "Design/Employer-1490_10390.json",
+        "Design/[Employer] Assessment-5_43617.json",
+        "Design/System Admin-113_9244.json",
+        "Design/Candidate Portal-166_6204.json",
+        "Design/Applicant-1490_10118.json",
+        "Design/Job Management - Discrepancy Fixes-1510_8766.json"
+      ]
+    }
+  }
+}

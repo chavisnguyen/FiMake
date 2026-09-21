@@ -1,0 +1,62 @@
+{
+  "_meta": {
+    "command": "set-layout",
+    "recordedAt": "2026-09-21T10:25:49.354Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "set-layout",
+    "args": {
+      "id": "2045:12695",
+      "mode": "HORIZONTAL",
+      "itemSpacing": 8
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": {
+      "id": "2045:12695",
+      "name": "fimake-e2e-sandbox",
+      "type": "FRAME",
+      "x": -5000,
+      "y": -5000,
+      "width": 261,
+      "height": 600,
+      "layoutMode": "HORIZONTAL",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "itemSpacing": 8,
+      "primaryAxisAlignItems": "MIN",
+      "counterAxisAlignItems": "MIN",
+      "layoutSizingHorizontal": "HUG",
+      "layoutSizingVertical": "FIXED",
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": "#ffffffFF"
+        }
+      ],
+      "children": [
+        {
+          "id": "2045:12696",
+          "name": "e2e-rect",
+          "type": "RECTANGLE"
+        },
+        {
+          "id": "2045:12697",
+          "name": "Text",
+          "type": "TEXT"
+        },
+        {
+          "id": "2045:12698",
+          "name": "E2EComp",
+          "type": "COMPONENT"
+        }
+      ],
+      "childrenTruncated": true
+    }
+  }
+}

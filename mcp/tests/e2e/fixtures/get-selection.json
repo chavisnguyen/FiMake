@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "get-selection",
-    "recordedAt": "2026-09-21T10:21:53.704Z",
+    "recordedAt": "2026-09-21T10:25:48.643Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },

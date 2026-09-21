@@ -1,0 +1,24 @@
+{
+  "_meta": {
+    "command": "create-component",
+    "recordedAt": "2026-09-21T10:25:49.097Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "create-component",
+    "args": {
+      "name": "E2EComp",
+      "parentId": "2045:12695"
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": {
+      "id": "2045:12698",
+      "name": "E2EComp",
+      "key": "539086ce27e4d89001077f758e7a3c86751d164d",
+      "properties": {}
+    }
+  }
+}

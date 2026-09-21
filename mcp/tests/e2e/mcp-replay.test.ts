@@ -67,6 +67,19 @@ function toolTextOf(payloads: unknown[]): string {
   return JSON.parse(`"${m[1]}"`) as string;
 }
 
+import { SIMPLE_TOOL_DEFS, NODE_WRAPPED_TOOLS } from "../../src/tools/registry";
+
+/** Tool cố tình KHÔNG record: fetch URL ngoài, nhét ảnh lạ vào file + flaky mạng. */
+const INTENTIONALLY_UNRECORDED = new Set(["create-image"]);
+
+function fixtureFiles(): string[] {
+  return fs
+    .readdirSync(path.join(HERE, "fixtures"))
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => path.basename(f, ".json"))
+    .sort();
+}
+
 let sessionId = "";
 
 /** Đọc fixture đã record để test lock đúng data thật (không hardcode template). */
@@ -136,40 +149,67 @@ afterAll(async () => {
 });
 
 describe("e2e replay (real MCP + mock plugin, real-data fixtures)", () => {
-  it("get-pages trả về đúng fixture data thật", async () => {
+  it("mọi tool đã đăng ký đều có fixture (trừ create-image không record theo thiết kế)", async () => {
+    const registered = new Set<string>([
+      ...SIMPLE_TOOL_DEFS.map((d) => d.name),
+      ...NODE_WRAPPED_TOOLS,
+    ]);
+    // Thêm tool mới mà chưa record -> fail ở đây với hướng dẫn rõ ràng,
+    // thay vì treo timeout khó debug ở CI.
+    for (const name of [...registered].sort()) {
+      if (INTENTIONALLY_UNRECORDED.has(name)) continue;
+      expect(
+        fixtureFiles(),
+        `missing fixture for tool "${name}" — run: cd mcp && pnpm record:e2e (Figma Connected)`,
+      ).toContain(name);
+    }
+  });
+
+  it("mọi fixture replay khớp data thật (isError + content deep-equal)", async () => {
+    for (const name of fixtureFiles()) {
+      // export-file là node-only fan-out: MCP tự tính summary từ nhiều
+      // sub-call get-node-info (mock trả cùng 1 canned response cho mọi id),
+      // nên chỉ lock shape + isError, không deep-equal số liệu.
+      if (name === "export-file") continue;
+      const fixture = loadFixture<unknown>(name);
+      const args =
+        typeof fixture.args === "object" && fixture.args !== null
+          ? (fixture.args as Record<string, unknown>)
+          : {};
+      const { text, isError } = await callTool(name, args);
+      expect(isError, `${name}: isError`).toBe(fixture.isError);
+      const parsed = JSON.parse(text) as unknown;
+      if (name === "get-selection") {
+        // get-selection bọc NGUYÊN TaskResult vào text (xem registry +
+        // contract test) nên replay ra double-envelope: so inner content.
+        expect(parsed).toEqual({ isError: false, content: fixture.content });
+        continue;
+      }
+      // Gọi đúng args đã record + mock echo cùng args -> content phải deep-equal.
+      expect(parsed, `${name}: content`).toEqual(fixture.content);
+    }
+  });
+
+  it("export-file replay giữ shape summary (node-only fan-out)", async () => {
+    const fixture = loadFixture<Record<string, unknown>>("export-file");
+    const args = fixture.args as Record<string, unknown>;
+    const { text, isError } = await callTool("export-file", args);
+    expect(isError).toBe(false);
+    const summary = JSON.parse(text) as Record<string, unknown>;
+    for (const key of Object.keys(fixture.content)) {
+      expect(summary, `export-file key ${key}`).toHaveProperty(key);
+    }
+  });
+
+  it("get-pages lock đúng page đầu tiên của file thật", async () => {
     const fixture = loadFixture<{ id: string; name: string }[]>("get-pages");
-    const { text, isError } = await callTool("get-pages", {});
-    expect(isError).toBe(fixture.isError);
-    const pages = JSON.parse(text) as Array<{ id: string; name: string }>;
+    const pages = fixture.content;
     expect(pages.length).toBeGreaterThan(0);
-    // Lock đúng data thật đã record: id + name page đầu tiên phải khớp.
-    expect(pages[0]?.id).toBe(fixture.content[0]?.id);
-    expect(pages[0]?.name).toBe(fixture.content[0]?.name);
+    expect(pages[0]?.id).toMatch(/^\d+:\d+$/);
+    expect(pages[0]?.name).toBeTruthy();
   });
 
-  it("get-node-info trả về lean serialize shape", async () => {
-    const fixture = loadFixture<{ id: string; name: string; type: string }>("get-node-info");
-    const nodeId = (fixture.args as { id?: string })?.id ?? fixture.content.id;
-    const { text, isError } = await callTool("get-node-info", { id: nodeId });
-    expect(isError).toBe(fixture.isError);
-    const node = JSON.parse(text) as { id: string; name: string; type: string };
-    expect(node.id).toBe(fixture.content.id);
-    expect(node.name).toBe(fixture.content.name);
-    expect(node.type).toBe(fixture.content.type);
-  });
-
-  it("get-all-components lock đúng behavior đã record (kể cả lỗi thật)", async () => {
-    const fixture = loadFixture<unknown>("get-all-components");
-    const { text, isError } = await callTool("get-all-components", {});
-    // File thật có thể làm plugin lỗi thật (vd component property defs) —
-    // lock đúng behavior đó: khi nào fix code thì record lại, test báo ngay.
-    expect(isError).toBe(fixture.isError);
-    expect(text).toContain(
-      typeof fixture.content === "string" ? fixture.content.slice(0, 40) : JSON.stringify(fixture.content).slice(0, 40),
-    );
-  });
-
-  it("move-node echo x/y qua socket round-trip", async () => {
+  it("move-node echo x/y qua socket round-trip (giá trị mới, không phải stored)", async () => {
     const nodeFixture = loadFixture<{ id: string }>("get-node-info");
     const nodeId = (nodeFixture.args as { id?: string })?.id ?? nodeFixture.content.id;
     const { text, isError } = await callTool("move-node", { id: nodeId, x: 42, y: 77 });
@@ -180,22 +220,9 @@ describe("e2e replay (real MCP + mock plugin, real-data fixtures)", () => {
     expect(node.y).toBe(77);
   });
 
-  it("create-rectangle trả về node mới theo fixture", async () => {
-    const { text, isError } = await callTool("create-rectangle", { x: 0, y: 0, width: 10, height: 5 });
-    expect(isError).toBe(false);
-    const node = JSON.parse(text) as { type: string; width: number };
-    expect(node.type).toBe("RECTANGLE");
-    expect(node.width).toBe(10);
-  });
-
-  it("command chưa có fixture báo lỗi rõ ràng thay vì timeout", async () => {
-    // delete-component-property cố tình KHÔNG có fixture để chứng minh behavior
-    // khi code thêm tool mới mà quên record: mock trả task-failed ngay.
-    const { isError, text } = await callTool("delete-component-property", {
-      componentId: "1:1",
-      name: "n",
-    });
+  it("create-image không record theo thiết kế, fail fast không treo", async () => {
+    const { isError, text } = await callTool("create-image", { url: "not-a-url" });
     expect(isError).toBe(true);
-    expect(text).toContain("No fixture");
+    expect(text).toContain("Invalid image URL");
   });
 });

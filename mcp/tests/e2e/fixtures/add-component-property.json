@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "command": "add-component-property",
+    "recordedAt": "2026-09-21T10:25:49.143Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "add-component-property",
+    "args": {
+      "componentId": "2045:12698",
+      "name": "Label",
+      "type": "TEXT",
+      "defaultValue": "hi"
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": "Component properties added successfully"
+  }
+}

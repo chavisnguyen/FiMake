@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "command": "move-node",
-    "recordedAt": "2026-09-21T10:25:49.293Z",
+    "command": "resize-node",
+    "recordedAt": "2026-09-21T10:25:49.304Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
-    "command": "move-node",
+    "command": "resize-node",
     "args": {
       "id": "2045:12696",
-      "x": 42,
-      "y": 77
+      "width": 120,
+      "height": 60
     }
   },
   "response": {
@@ -21,8 +21,8 @@
       "type": "RECTANGLE",
       "x": 42,
       "y": 77,
-      "width": 100,
-      "height": 50,
+      "width": 120,
+      "height": 60,
       "layoutSizingHorizontal": "FIXED",
       "layoutSizingVertical": "FIXED",
       "fills": [

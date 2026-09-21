@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "command": "delete-component-property",
+    "recordedAt": "2026-09-21T10:25:49.410Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "delete-component-property",
+    "args": {
+      "componentId": "2045:12698",
+      "name": "Label"
+    }
+  },
+  "response": {
+    "isError": true,
+    "content": "in deleteComponentProperty: Invalid component property name"
+  }
+}

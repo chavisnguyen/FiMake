@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "command": "set-node-component-property-references",
+    "recordedAt": "2026-09-21T10:25:49.243Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "set-node-component-property-references",
+    "args": {
+      "id": "2045:12699",
+      "componentPropertyReferences": {
+        "characters": "Label"
+      }
+    }
+  },
+  "response": {
+    "isError": true,
+    "content": "in set_componentPropertyReferences: Can only set component property references on symbol sublayer"
+  }
+}

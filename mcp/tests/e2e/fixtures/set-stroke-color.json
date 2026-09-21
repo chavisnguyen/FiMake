@@ -1,16 +1,15 @@
 {
   "_meta": {
-    "command": "move-node",
-    "recordedAt": "2026-09-21T10:25:49.293Z",
+    "command": "set-stroke-color",
+    "recordedAt": "2026-09-21T10:25:49.323Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
-    "command": "move-node",
+    "command": "set-stroke-color",
     "args": {
       "id": "2045:12696",
-      "x": 42,
-      "y": 77
+      "color": "#00FF00FF"
     }
   },
   "response": {
@@ -21,16 +20,24 @@
       "type": "RECTANGLE",
       "x": 42,
       "y": 77,
-      "width": 100,
-      "height": 50,
+      "width": 120,
+      "height": 60,
       "layoutSizingHorizontal": "FIXED",
       "layoutSizingVertical": "FIXED",
       "fills": [
         {
           "type": "SOLID",
-          "color": "#d9d9d9FF"
+          "color": "#ff0000FF"
         }
-      ]
+      ],
+      "strokes": [
+        {
+          "type": "SOLID",
+          "color": "#00ff00FF"
+        }
+      ],
+      "strokeWeight": 1,
+      "strokeAlign": "INSIDE"
     }
   }
 }

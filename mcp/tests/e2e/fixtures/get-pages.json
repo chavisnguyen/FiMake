@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "get-pages",
-    "recordedAt": "2026-09-21T10:21:53.601Z",
+    "recordedAt": "2026-09-21T10:25:48.542Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
@@ -1760,6 +1760,24 @@
               }
             ],
             "childrenTruncated": true
+          },
+          {
+            "id": "2045:12694",
+            "name": "Instance",
+            "type": "FRAME",
+            "x": 200,
+            "y": 10,
+            "width": 100,
+            "height": 100,
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": false,
+                "color": "#ffffffFF"
+              }
+            ]
           }
         ]
       },

@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "command": "create-frame",
+    "recordedAt": "2026-09-21T10:25:48.791Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "create-frame",
+    "args": {
+      "x": -5000,
+      "y": -5000,
+      "width": 600,
+      "height": 600,
+      "name": "fimake-e2e-sandbox"
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": {
+      "id": "2045:12695",
+      "x": -5000,
+      "y": -5000,
+      "width": 600,
+      "height": 600,
+      "name": "fimake-e2e-sandbox",
+      "parentId": "0:1:PAGE"
+    }
+  }
+}

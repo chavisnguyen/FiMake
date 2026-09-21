@@ -1,26 +1,25 @@
 {
   "_meta": {
-    "command": "move-node",
-    "recordedAt": "2026-09-21T10:25:49.293Z",
+    "command": "set-parent-id",
+    "recordedAt": "2026-09-21T10:25:49.401Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
-    "command": "move-node",
+    "command": "set-parent-id",
     "args": {
-      "id": "2045:12696",
-      "x": 42,
-      "y": 77
+      "id": "2045:12700",
+      "parentId": "2045:12695"
     }
   },
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12696",
+      "id": "2045:12700",
       "name": "e2e-rect",
       "type": "RECTANGLE",
-      "x": 42,
-      "y": 77,
+      "x": 269,
+      "y": 0,
       "width": 100,
       "height": 50,
       "layoutSizingHorizontal": "FIXED",
