@@ -15,6 +15,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { MockFigmaPlugin } from "./mock-figma-plugin";
@@ -192,7 +193,11 @@ describe("e2e replay (real MCP + mock plugin, real-data fixtures)", () => {
 
   it("export-file replay giữ shape summary (node-only fan-out)", async () => {
     const fixture = loadFixture<Record<string, unknown>>("export-file");
-    const args = fixture.args as Record<string, unknown>;
+    // Không dùng lại outputDir tuyệt đối đã record (os.tmpdir() của máy record,
+    // ví dụ /var/folders/... trên macOS) — máy khác/CI không có path đó nên
+    // mkdir EACCES. Dùng tmpdir tươi của máy đang chạy, chỉ lock shape summary.
+    const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "fimake-export-replay-"));
+    const args = { ...((fixture.args as Record<string, unknown>) ?? {}), outputDir };
     const { text, isError } = await callTool("export-file", args);
     expect(isError).toBe(false);
     const summary = JSON.parse(text) as Record<string, unknown>;
