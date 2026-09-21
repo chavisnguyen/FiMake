@@ -26,7 +26,7 @@ import {
   SetParentIdParamsSchema,
   SetStrokeColorParamsSchema,
 } from "@shared/types";
-import { safeToolProcessor } from "./safe-tool-processor";
+import { wrapToolHandler } from "./wrap-tool-handler";
 import type { ToolResult } from "./tool-result";
 import { createRectangle } from "./create/create-rectangle";
 import { createFrame } from "./create/create-frame";
@@ -92,7 +92,7 @@ const PARAM_SCHEMAS: Record<string, z.ZodTypeAny> = {
  * a clear TASK_FAILED instead of a crash or a silent hang.
  */
 function wrap<T>(command: string, fn: (args: T) => Promise<ToolResult>): DispatchFn {
-  const run = safeToolProcessor(fn);
+  const run = wrapToolHandler(fn);
   const schema = PARAM_SCHEMAS[command];
   return (args: unknown) => {
     if (args === undefined) return run({} as T);

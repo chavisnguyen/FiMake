@@ -27,6 +27,9 @@ const PORT = 38991;
 
 let mcp: ChildProcess | undefined;
 let mock: MockFigmaPlugin | undefined;
+// Tmp dirs created by the export-file replay test (see below) — removed in
+// afterAll so repeated runs don't leak fimake-export-replay-* into os.tmpdir().
+const tmpDirs: string[] = [];
 
 async function waitFor(fn: () => Promise<boolean>, timeoutMs: number, label: string): Promise<void> {
   const start = Date.now();
@@ -147,6 +150,9 @@ beforeAll(async () => {
 afterAll(async () => {
   mock?.disconnect();
   mcp?.kill("SIGKILL");
+  for (const dir of tmpDirs) {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 describe("e2e replay (real MCP + mock plugin, real-data fixtures)", () => {
@@ -197,6 +203,7 @@ describe("e2e replay (real MCP + mock plugin, real-data fixtures)", () => {
     // ví dụ /var/folders/... trên macOS) — máy khác/CI không có path đó nên
     // mkdir EACCES. Dùng tmpdir tươi của máy đang chạy, chỉ lock shape summary.
     const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "fimake-export-replay-"));
+    tmpDirs.push(outputDir);
     const args = { ...((fixture.args as Record<string, unknown>) ?? {}), outputDir };
     const { text, isError } = await callTool("export-file", args);
     expect(isError).toBe(false);
