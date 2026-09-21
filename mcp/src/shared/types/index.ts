@@ -1,5 +1,6 @@
 // Export all shared types
 export * from './transport/from-plugin';
+export * from './transport/socket-protocol';
 // Create
 export * from './params/create/create-rectangle';
 export * from './params/create/create-frame';

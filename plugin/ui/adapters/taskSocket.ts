@@ -4,19 +4,18 @@
 
 import { io, type Socket } from "socket.io-client";
 import { emit, on } from "@create-figma-plugin/utilities";
+import {
+  SOCKET_EVENTS,
+  acknowledgeStartTask,
+  isStartTaskPayload,
+  type StartTaskPayload,
+} from "@shared/types";
 import type {
   StartTaskHandler,
   TaskFailedHandler,
   TaskFinishedHandler,
 } from "../../main/types";
 import { describeContent } from "../domain/tasks";
-
-/** Payload the MCP server sends over the socket for a `start-task` message. */
-export interface StartTaskPayload {
-  id: string;
-  command: string;
-  args: unknown;
-}
 
 export type SettleStatus = "done" | "failed";
 
@@ -28,15 +27,6 @@ export interface TaskSocketEvents {
 
 export interface TaskSocketHandle {
   disconnect: () => void;
-}
-
-function isStartTaskPayload(value: unknown): value is StartTaskPayload {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as StartTaskPayload).id === "string" &&
-    typeof (value as StartTaskPayload).command === "string"
-  );
 }
 
 /**
@@ -59,10 +49,10 @@ export function connectTaskSocket(url: string, events: TaskSocketEvents): TaskSo
     events.onStatus(false);
   });
 
-  socket.on("start-task", (task: StartTaskPayload, ack?: (received: boolean) => void) => {
+  socket.on(SOCKET_EVENTS.START_TASK, (task: StartTaskPayload, ack?: (received: boolean) => void) => {
     if (!isStartTaskPayload(task)) {
       console.error("Ignoring malformed start-task payload:", task);
-      ack?.(true);
+      acknowledgeStartTask(ack);
       return;
     }
     emit<StartTaskHandler>("START_TASK", {
@@ -73,15 +63,15 @@ export function connectTaskSocket(url: string, events: TaskSocketEvents): TaskSo
     events.onStartTask(task);
     // Acknowledge receipt so the server knows this task doesn't need to be
     // queued for retry on the next connection.
-    ack?.(true);
+    acknowledgeStartTask(ack);
   });
 
   const offFinished = on<TaskFinishedHandler>("TASK_FINISHED", (task) => {
-    socket.emit("task-finished", task);
+    socket.emit(SOCKET_EVENTS.TASK_FINISHED, task);
     events.onSettle(task.taskId, "done");
   });
   const offFailed = on<TaskFailedHandler>("TASK_FAILED", (task) => {
-    socket.emit("task-failed", task);
+    socket.emit(SOCKET_EVENTS.TASK_FAILED, task);
     events.onSettle(task.taskId, "failed", describeContent(task.content));
   });
 

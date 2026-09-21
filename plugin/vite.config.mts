@@ -63,6 +63,14 @@ function touchManifest(): Plugin {
 export default defineConfig({
   root: "./ui",
   plugins: [react(), viteSingleFile(), touchManifest()],
+  // Mirrors esbuild.config.mjs + vitest.config.ts + tsconfig paths:
+  // `@shared/*` is the single source in mcp/src/shared. Needed now that
+  // ui/adapters/taskSocket.ts value-imports the socket protocol.
+  resolve: {
+    alias: {
+      "@shared": resolve(__dirname, "../mcp/src/shared"),
+    },
+  },
   build: {
     target: "es2017",
     assetsInlineLimit: 100000000,

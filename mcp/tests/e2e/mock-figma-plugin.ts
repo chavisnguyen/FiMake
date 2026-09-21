@@ -15,12 +15,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { io, type Socket } from "socket.io-client";
-
-export interface StartTaskPayload {
-  id: string;
-  command: string;
-  args: unknown;
-}
+import {
+  SOCKET_EVENTS,
+  acknowledgeStartTask,
+  isStartTaskPayload,
+  type StartTaskPayload,
+} from "@shared/types";
 
 interface FixtureFile {
   _meta?: { command?: string };
@@ -33,15 +33,6 @@ export interface MockPluginOptions {
   fixturesDir?: string;
   /** giả lập độ trễ plugin thật (ms) */
   latencyMs?: number;
-}
-
-function isStartTaskPayload(v: unknown): v is StartTaskPayload {
-  return (
-    typeof v === "object" &&
-    v !== null &&
-    typeof (v as StartTaskPayload).id === "string" &&
-    typeof (v as StartTaskPayload).command === "string"
-  );
 }
 
 /** Merge args của write-tools vào template để E2E assert được round-trip. */
@@ -108,14 +99,11 @@ export class MockFigmaPlugin {
         clearTimeout(timer);
         reject(e);
       });
-      // Quan trọng: ack để server xóa pending queue (giống plugin thật ở
-      // plugin/ui/adapters/taskSocket.ts). Không ack -> server retry + warn.
-      s.on("start-task", (task: unknown, ack?: (ok: boolean) => void) => {
-        try {
-          ack?.(true);
-        } catch {
-          // ignore ack errors
-        }
+      // Quan trọng: ack để server xóa pending queue (shared
+      // acknowledgeStartTask — cùng 1 hàm plugin thật dùng).
+      // Không ack -> server retry + warn.
+      s.on(SOCKET_EVENTS.START_TASK, (task: unknown, ack?: (ok: boolean) => void) => {
+        acknowledgeStartTask(ack);
         void this.handle(task);
       });
     });
@@ -129,7 +117,7 @@ export class MockFigmaPlugin {
 
     const hit = this.fixtures.get(task.command);
     if (!hit) {
-      this.socket?.emit("task-failed", {
+      this.socket?.emit(SOCKET_EVENTS.TASK_FAILED, {
         taskId: task.id,
         isError: true,
         content: `No fixture for command "${task.command}" (fixtureCommands: [${this.fixtureCommands().join(", ")}]). Did you add a new tool without recording? Run pnpm record:e2e with real Figma open.`,
@@ -138,9 +126,9 @@ export class MockFigmaPlugin {
     }
     const content = echoArgs(task.command, task.args, structuredClone(hit.content));
     if (hit.isError) {
-      this.socket?.emit("task-failed", { taskId: task.id, isError: true, content });
+      this.socket?.emit(SOCKET_EVENTS.TASK_FAILED, { taskId: task.id, isError: true, content });
     } else {
-      this.socket?.emit("task-finished", { taskId: task.id, isError: false, content });
+      this.socket?.emit(SOCKET_EVENTS.TASK_FINISHED, { taskId: task.id, isError: false, content });
     }
   }
 
