@@ -111,6 +111,23 @@ export function exportFile(server: McpServer, taskManager: TaskManager) {
                     throw new Error(`Export exceeds ${MAX_EXPORT_FRAMES} frames; narrow the file or raise the limit in code.`);
                 }
 
+                // Deduplicate sanitized page dir names by appending page id on collision
+                const pageDirById = new Map<string, string>();
+                const usedDirNames = new Map<string, string>(); // sanitized -> pageId that owns it
+                for (const { page } of jobs) {
+                    if (pageDirById.has(page.id)) continue;
+                    const base = sanitizeFileName(page.name);
+                    const owner = usedDirNames.get(base);
+                    if (owner === undefined) {
+                        usedDirNames.set(base, page.id);
+                        pageDirById.set(page.id, path.join(outputDir, base));
+                    } else if (owner !== page.id) {
+                        // Collision: disambiguate with page id suffix
+                        const disambiguated = `${base}-${page.id.replace(/[:]/g, "_")}`;
+                        pageDirById.set(page.id, path.join(outputDir, disambiguated));
+                    }
+                }
+
                 const pageDirs = new Set<string>();
                 for (let i = 0; i < jobs.length; i += EXPORT_CONCURRENCY) {
                     const batch = jobs.slice(i, i + EXPORT_CONCURRENCY);
@@ -123,7 +140,7 @@ export function exportFile(server: McpServer, taskManager: TaskManager) {
                                 maxChars: params.maxChars ?? 35000,
                             })) as TaskResult;
 
-                            const pageDir = path.join(outputDir, sanitizeFileName(page.name));
+                            const pageDir = pageDirById.get(page.id) ?? path.join(outputDir, sanitizeFileName(page.name));
                             assertInsideDir(outputDir, pageDir);
                             const fileName = `${sanitizeFileName(nodeStub.name)}-${nodeStub.id.replace(/[:]/g, "_")}.json`;
                             const filePath = path.join(pageDir, fileName);

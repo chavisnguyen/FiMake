@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const ResizeNodeParamsSchema = z.object({
-    id: z.string().describe("Node id"),
+    id: z.string().regex(/^\d*:\d*$/).describe("Node id (page:node)"),
     width: z.number().describe("Width"),
     height: z.number().describe("Height"),
 });

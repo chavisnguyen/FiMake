@@ -331,9 +331,11 @@ export function serializeNode(
         if (want(group)) runField(group, n, node, out, FIELD_HANDLERS[group]);
     }
 
-    // Charge this node's own serialized size against the char budget (children
-    // are added below and charged by their own recursion).
-    budget.chars -= JSON.stringify(out).length;
+    // Reserve a small overhead for JSON wrappers; actual children accounted below.
+    // We charge the node's own fields now, and each child's full serialized size
+    // is charged inside its recursive call, so the sum is accurate.
+    const ownSize = JSON.stringify(out).length;
+    budget.chars -= ownSize;
 
     if (want("children") && Array.isArray(n.children) && n.children.length) {
         if (depth > 0) {
@@ -341,7 +343,8 @@ export function serializeNode(
             let truncated = false;
             for (const child of n.children as SceneNode[]) {
                 // Stop expanding when EITHER budget is spent (node count or size).
-                if (budget.nodes <= 0 || budget.chars <= 0) {
+                // Estimate remaining wrapper overhead (~2 chars per child for commas/brackets)
+                if (budget.nodes <= 0 || budget.chars <= 2) {
                     kids.push({
                         id: child.id,
                         name: child.name,
@@ -352,15 +355,24 @@ export function serializeNode(
                     continue;
                 }
                 budget.nodes--;
-                kids.push(
-                    serializeNode(
-                        child,
-                        { depth: depth - 1, fields, maxNodes: opts.maxNodes, maxChars: opts.maxChars },
-                        visited,
-                        budget
-                    )
+                // Snapshot chars before recursing to detect if child pushes us over
+                const beforeChars = budget.chars;
+                const serializedChild = serializeNode(
+                    child,
+                    { depth: depth - 1, fields, maxNodes: opts.maxNodes, maxChars: opts.maxChars },
+                    visited,
+                    budget
                 );
+                // If child's subtree exhausted the char budget, we already counted it
+                // accurately inside recursion (each node stringifies its own `out`).
+                // No extra adjustment needed — just continue. The budget now reflects reality.
+                void beforeChars;
+                kids.push(serializedChild);
             }
+            // Account for children array wrapper overhead (brackets, commas, key)
+            // Approx: `{"children":[]}` ~14 chars + 1 per child comma
+            const wrapperOverhead = 14 + Math.max(0, kids.length - 1);
+            budget.chars -= wrapperOverhead;
             out.children = kids;
             if (truncated) {
                 out.childrenTruncated = true;
@@ -371,12 +383,14 @@ export function serializeNode(
             // them as stubs AND flag, so nothing below is dropped silently.
             // (This is the caller's explicit depth choice, not a budget wall,
             // so it does NOT count toward _truncatedCount.)
-            out.children = n.children.map((child: SceneNode) => ({
+            out.children = (n.children as SceneNode[]).map((child: SceneNode) => ({
                 id: child.id,
                 name: child.name,
                 type: child.type,
             }));
             out.childrenTruncated = true;
+            // Charge stub size too for accurate budget tracking
+            budget.chars -= JSON.stringify(out.children).length;
         }
     }
 
@@ -385,6 +399,8 @@ export function serializeNode(
     // `childrenTruncated` flags).
     if (isRoot && budget.truncated > 0) {
         out._truncatedCount = budget.truncated;
+        // Reserve for _truncatedCount field itself
+        budget.chars -= JSON.stringify({ _truncatedCount: budget.truncated }).length;
     }
 
     return out;

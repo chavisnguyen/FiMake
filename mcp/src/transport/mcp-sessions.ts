@@ -21,22 +21,45 @@ function readRawBody(req: IncomingMessage, limit: number): Promise<{ ok: true; t
     return new Promise((resolve) => {
         const len = Number(req.headers["content-length"] ?? 0);
         if (len > limit) {
-            req.resume();
+            // Destroy if available (real IncomingMessage), else resume for test fakes
+            if (typeof (req as unknown as { destroy?: () => void }).destroy === "function") {
+                (req as unknown as { destroy: () => void }).destroy();
+            } else {
+                req.resume();
+            }
             resolve({ ok: false, status: 413 });
             return;
         }
         const chunks: Buffer[] = [];
         let size = 0;
+        let settled = false;
+        const settle = (result: { ok: true; text: string } | { ok: false; status: number }) => {
+            if (settled) return;
+            settled = true;
+            // Cleanup listeners to avoid leaks
+            req.removeAllListeners("data");
+            req.removeAllListeners("end");
+            req.removeAllListeners("error");
+            resolve(result);
+        };
         req.on("data", (c: Buffer) => {
+            if (settled) return;
             chunks.push(c);
             size += c.length;
             if (size > limit) {
-                req.resume();
-                resolve({ ok: false, status: 413 });
+                if (typeof (req as unknown as { destroy?: () => void }).destroy === "function") {
+                    (req as unknown as { destroy: () => void }).destroy();
+                } else {
+                    req.resume();
+                }
+                settle({ ok: false, status: 413 });
             }
         });
-        req.on("end", () => resolve({ ok: true, text: Buffer.concat(chunks).toString("utf-8") }));
-        req.on("error", () => resolve({ ok: false, status: 400 }));
+        req.on("end", () => settle({ ok: true, text: Buffer.concat(chunks).toString("utf-8") }));
+        req.on("error", () => settle({ ok: false, status: 400 }));
+        req.on("close", () => {
+            if (!settled) settle({ ok: false, status: 400 });
+        });
     });
 }
 

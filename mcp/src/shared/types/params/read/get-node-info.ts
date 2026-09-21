@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const GetNodeInfoParamsSchema = z.object({
-    id: z.string(),
+    id: z.string().regex(/^\d*:\d*$/).describe("Node id (page:node)"),
     // How many levels of children to serialize inline.
     //   0  = only this node (children returned as id/name/type stubs)
     //   N  = N levels deep

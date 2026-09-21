@@ -74,22 +74,27 @@ function main() {
 
   on<StartTaskHandler>('START_TASK', handleStartTask);
 
-  // NOTE: figma.ui.onmessage holds a SINGLE handler. The utilities `on()`
-  // above assigns it, so the resize branch must chain to that handler —
-  // overwriting it silently drops every START_TASK (green pill, all tasks
-  // time out). This exact bug shipped before and hid because nothing
-  // asserted the wiring.
+  // figma.ui.onmessage is a SINGLE slot. `on()` above assigns it, so we
+  // wrap it once to also handle resize requests — without wrapping, a later
+  // `figma.ui.onmessage = ...` would silently drop START_TASK and every
+  // tool call would time out. We capture the handler set by `on()` and
+  // dispatch explicitly.
   const prevOnMessage = figma.ui.onmessage as ((msg: unknown) => void) | undefined;
   figma.ui.onmessage = (msg: unknown) => {
     if (isResizeRequest(msg)) {
-      if (msg.type === "expand") {
-        figma.ui.resize(CONSOLE_WIDTH, CONSOLE_HEIGHT);
-      } else {
-        figma.ui.resize(PILL_WIDTH, PILL_HEIGHT);
-      }
+      figma.ui.resize(msg.type === "expand" ? CONSOLE_WIDTH : PILL_WIDTH, msg.type === "expand" ? CONSOLE_HEIGHT : PILL_HEIGHT);
       return;
     }
-    prevOnMessage?.(msg);
+    // Delegate START_TASK (and any future plugin messages) to the utilities handler
+    if (typeof prevOnMessage === "function") {
+      prevOnMessage(msg);
+      return;
+    }
+    // Fallback if `on()` didn't set a handler (defensive)
+    const rec = msg as Record<string, unknown>;
+    if (rec && rec.name === "START_TASK") {
+      void handleStartTask(msg as unknown as StartTaskHandler);
+    }
   };
 
   figma.showUI(__html__, { width: PILL_WIDTH, height: PILL_HEIGHT });

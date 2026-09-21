@@ -2,7 +2,7 @@ import z from "zod";
 import { ColorHexSchema } from "../shared/color-hex";
 
 export const SetFillColorParamsSchema = z.object({
-    id: z.string().describe("Node id"),
+    id: z.string().regex(/^\d*:\d*$/).describe("Node id (page:node)"),
     color: ColorHexSchema,
 });
 

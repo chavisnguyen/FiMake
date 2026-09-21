@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const SetLayoutParamsSchema = z.object({
-    id: z.string().describe("Node id"),
+    id: z.string().regex(/^\d*:\d*$/).describe("Node id (page:node)"),
     mode: z.enum(["NONE", "HORIZONTAL", "VERTICAL"]).describe("Layout mode"),
     wrap: z.boolean().optional().describe("Layer should use wrapping auto-layout"),
     clip: z.boolean().optional().describe("Clip content"),

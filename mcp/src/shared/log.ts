@@ -4,7 +4,10 @@
 //   payloads, acks, session sweeps. Use it when a task hangs: the last
 //   "task added" line without a matching "task completed/failed" tells
 //   you exactly which hop swallowed it.
-const DEBUG = process.env.DEBUG === "1" || process.env.DEBUG?.toLowerCase() === "true";
+function isDebugEnabled(): boolean {
+  const v = process.env.DEBUG;
+  return v === "1" || v?.toLowerCase() === "true";
+}
 
 // Toggleable server logging.
 //
@@ -12,7 +15,7 @@ const DEBUG = process.env.DEBUG === "1" || process.env.DEBUG?.toLowerCase() === 
 // stdout is reserved for JSON-RPC frames — a single stray line there
 // corrupts the MCP stream and disconnects the client.
 export function debugLog(...args: unknown[]): void {
-  if (DEBUG) console.error("[fimake:debug]", ...args);
+  if (isDebugEnabled()) console.error("[fimake:debug]", ...args);
 }
 
 export function infoLog(...args: unknown[]): void {

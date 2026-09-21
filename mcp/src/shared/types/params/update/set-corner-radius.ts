@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const SetCornerRadiusParamsSchema = z.object({
-    id: z.string().describe("Node id"),
+    id: z.string().regex(/^\d*:\d*$/).describe("Node id (page:node)"),
     cornerRadius: z.number().describe("Corner radius"),
     topLeftRadius: z.number().optional().describe("Top left corner radius"),
     topRightRadius: z.number().optional().describe("Top right corner radius"),

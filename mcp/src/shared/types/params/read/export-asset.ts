@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const ExportAssetParamsSchema = z.object({
-    id: z.string(),
+    id: z.string().regex(/^\d*:\d*$/).describe("Node id (page:node)"),
     // "SVG" (default) returns real path data as ready-to-use markup — always
     // prefer this over reconstructing icon paths by hand from get-node-info,
     // since get-node-info deliberately omits vector geometry.

@@ -114,23 +114,34 @@ export class SocketManager {
     }
 
     private deliver(message: SocketMessage, data: unknown) {
-        if (!this.activeSocket) {
+        // Broadcast to all connected plugin sockets (if multiple Figma windows open)
+        // instead of single activeSocket — prevents race where second window never
+        // receives tasks. Ack from any socket clears the pending queue.
+        const targets = [...this.sockets];
+        if (targets.length === 0) {
             if (message === 'start-task') {
                 console.warn(`[fimake] No plugin connected; queuing "${message}" (task ${taskIdOf(data) ?? "unknown"}) for the next connection.`);
             }
             return;
         }
         const taskId = message === 'start-task' ? taskIdOf(data) : undefined;
-        this.activeSocket.timeout(this.ackTimeoutMs).emit(message, data, (err: unknown) => {
-            if (err) {
-                console.error(`Plugin did not acknowledge "${message}" within ${this.ackTimeoutMs}ms; it will be retried on the next connection if still pending.`);
-                return;
-            }
-            if (message === 'start-task' && taskId !== undefined) {
-                debugLog(`Plugin acknowledged "${message}" (task ${taskId}).`);
-                this.pending.delete(taskId);
-            }
-        });
+        let acked = false;
+        for (const sock of targets) {
+            sock.timeout(this.ackTimeoutMs).emit(message, data, (err: unknown) => {
+                if (err) {
+                    if (!acked) {
+                        console.error(`Plugin did not acknowledge "${message}" within ${this.ackTimeoutMs}ms; it will be retried on the next connection if still pending.`);
+                    }
+                    return;
+                }
+                if (acked) return;
+                acked = true;
+                if (message === 'start-task' && taskId !== undefined) {
+                    debugLog(`Plugin acknowledged "${message}" (task ${taskId}).`);
+                    this.pending.delete(taskId);
+                }
+            });
+        }
     }
 
     private flushPending() {

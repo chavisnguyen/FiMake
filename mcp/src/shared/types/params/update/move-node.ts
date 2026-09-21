@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const MoveNodeParamsSchema = z.object({
-    id: z.string().describe("Node id"),
+    id: z.string().regex(/^\d*:\d*$/).describe("Node id (page:node)"),
     x: z.number().describe("X coordinate"),
     y: z.number().describe("Y coordinate"),
 });

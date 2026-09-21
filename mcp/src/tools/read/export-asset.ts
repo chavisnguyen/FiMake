@@ -41,10 +41,6 @@ export function exportAsset(server: McpServer, taskManager: TaskManager) {
 
                 const asset = result.content as { format?: string; data: string };
                 if (typeof asset.data !== "string") throw new Error("Plugin returned non-string asset data");
-                // Rough size guard before decoding (base64 ~4/3 of raw).
-                if (asset.data.length > MAX_ASSET_BYTES * 2) {
-                    throw new Error(`Asset exceeds ${MAX_ASSET_BYTES} bytes; omit outputPath to stream inline instead.`);
-                }
                 const resolvedPath = resolveAssetPath(outputPath);
                 await fs.mkdir(path.dirname(resolvedPath), { recursive: true });
 

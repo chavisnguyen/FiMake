@@ -24,8 +24,11 @@ export async function createImage(args: CreateImagePluginParams): Promise<ToolRe
 
     if (args.parentId) {
         const parent = await figma.getNodeByIdAsync(args.parentId);
-        if (parent) {
-            (parent as FrameNode).appendChild(node);
+        if (parent && "appendChild" in parent && typeof (parent as unknown as { appendChild: unknown }).appendChild === "function") {
+            (parent as unknown as { appendChild: (c: SceneNode) => void }).appendChild(node);
+        } else if (parent) {
+            node.remove();
+            return { isError: true, content: `Parent ${args.parentId} does not support children (type: ${parent.type})` };
         }
     }
 

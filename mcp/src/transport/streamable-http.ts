@@ -18,7 +18,22 @@ export async function startStreamableHTTP() {
         allowMethods: ["GET", "POST", "DELETE", "OPTIONS"],
         allowHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "mcp-session-id"],
     }));
-    app.get("/health", (c) => c.json({ ok: true }));
+
+    // Health is set up after bridge is created below (needs live counts),
+    // but register a placeholder now so Hono has the route; handler reads
+    // from the mutable holder.
+    const healthHolder: { bridge?: ReturnType<typeof createBridge>; store?: McpSessionStore } = {};
+    app.get("/health", (c) => c.json({
+        ok: true,
+        port: config.PORT,
+        transport: config.TRANSPORT,
+        pendingTasks: healthHolder.bridge?.taskManager.getPendingCount(),
+        queuedMessages: healthHolder.bridge?.socketManager.getPendingCount(),
+        sessions: healthHolder.store?.size,
+        pluginConnected: (healthHolder.bridge?.socketManager as unknown as { sockets?: Set<unknown> })?.sockets !== undefined
+            ? ((healthHolder.bridge?.socketManager as unknown as { sockets: Set<unknown> }).sockets.size > 0)
+            : undefined,
+    }));
 
     // Single shared Figma bridge (one plugin socket namespace).
     const sessionsPlaceholder = { store: null as McpSessionStore | null };
@@ -39,6 +54,8 @@ export async function startStreamableHTTP() {
     const bridge = createBridge(io);
     const store = new McpSessionStore(bridge);
     sessionsPlaceholder.store = store;
+    healthHolder.bridge = bridge;
+    healthHolder.store = store;
 
     // Start the HTTP server (Socket.IO shares this port).
     httpServer.listen(config.PORT, () => {
