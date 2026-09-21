@@ -1,0 +1,67 @@
+{
+  "_meta": {
+    "command": "get-selection",
+    "recordedAt": "2026-09-21T10:21:53.704Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "get-selection",
+    "args": {}
+  },
+  "response": {
+    "isError": false,
+    "content": {
+      "isError": false,
+      "content": [
+        {
+          "id": "113:24364",
+          "name": "Dashboard",
+          "type": "FRAME",
+          "x": 642,
+          "y": 2446,
+          "width": 1440,
+          "height": 930,
+          "layoutMode": "HORIZONTAL",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "itemSpacing": 0,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "MIN",
+          "layoutSizingHorizontal": "FIXED",
+          "layoutSizingVertical": "FIXED",
+          "cornerRadius": 14,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": "#f5f3f0FF"
+            }
+          ],
+          "strokes": [
+            {
+              "type": "SOLID",
+              "color": "#e5e5e5FF"
+            }
+          ],
+          "strokeWeight": 1,
+          "strokeAlign": "INSIDE",
+          "children": [
+            {
+              "id": "113:24367",
+              "name": "Container",
+              "type": "FRAME"
+            },
+            {
+              "id": "113:24393",
+              "name": "Frame",
+              "type": "FRAME"
+            }
+          ],
+          "childrenTruncated": true
+        }
+      ]
+    }
+  }
+}

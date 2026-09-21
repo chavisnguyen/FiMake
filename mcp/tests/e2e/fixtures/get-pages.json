@@ -1,0 +1,1793 @@
+{
+  "_meta": {
+    "command": "get-pages",
+    "recordedAt": "2026-09-21T10:21:53.601Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "get-pages",
+    "args": {}
+  },
+  "response": {
+    "isError": false,
+    "content": [
+      {
+        "id": "10:46387",
+        "name": "Cover",
+        "nodes": [
+          {
+            "id": "10:46388",
+            "name": "Slide 16:9 - 1",
+            "type": "FRAME",
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1080,
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "fills": [
+              {
+                "type": "GRADIENT_LINEAR",
+                "gradientStops": [
+                  {
+                    "position": 0,
+                    "color": "#ff4404ff"
+                  },
+                  {
+                    "position": 1,
+                    "color": "#ff7337ff"
+                  }
+                ]
+              }
+            ],
+            "children": [
+              {
+                "id": "10:46396",
+                "name": "Frame 1",
+                "type": "FRAME"
+              },
+              {
+                "id": "10:46392",
+                "name": "Packtech Logo",
+                "type": "GROUP"
+              },
+              {
+                "id": "10:46781",
+                "name": "Packtech Logo",
+                "type": "VECTOR"
+              },
+              {
+                "id": "10:46397",
+                "name": "Dashboard",
+                "type": "FRAME"
+              },
+              {
+                "id": "10:46782",
+                "name": "Line 1",
+                "type": "LINE"
+              },
+              {
+                "id": "10:46783",
+                "name": "Web Portal",
+                "type": "TEXT"
+              }
+            ],
+            "childrenTruncated": true
+          }
+        ]
+      },
+      {
+        "id": "5:2",
+        "name": "Design System & Components",
+        "nodes": [
+          {
+            "id": "27:1833",
+            "name": "Components",
+            "type": "SECTION",
+            "x": -2806,
+            "y": -1781,
+            "width": 6000,
+            "height": 3921,
+            "cornerRadius": 2,
+            "fills": [
+              {
+                "type": "SOLID",
+                "color": "#cfcfcfFF"
+              }
+            ],
+            "strokes": [
+              {
+                "type": "SOLID",
+                "opacity": 0.1,
+                "color": "#000000FF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "27:1834",
+                "name": "image 12",
+                "type": "RECTANGLE"
+              },
+              {
+                "id": "27:1835",
+                "name": "Logo",
+                "type": "FRAME"
+              },
+              {
+                "id": "27:1837",
+                "name": "Pop Up",
+                "type": "FRAME"
+              },
+              {
+                "id": "27:1843",
+                "name": "Dashboard",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:45072",
+                "name": "Sidebar",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "27:2165",
+                "name": "Frame 1618868331",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:45127",
+                "name": "input",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "5:45220",
+                "name": "button-2",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "27:2169",
+                "name": "Container",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:45280",
+                "name": "eye",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "5:45285",
+                "name": "Multi Selector",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "5:45292",
+                "name": "Check mark",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "5:45297",
+                "name": "Rounded check",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "5:45303",
+                "name": "Single Selector",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "5:45314",
+                "name": "Arrow Down",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "27:2617",
+                "name": "lucide/map-pin",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "27:2793",
+                "name": "dollar-sign",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "87:6058",
+                "name": "Badge",
+                "type": "FRAME"
+              },
+              {
+                "id": "87:6089",
+                "name": "Select",
+                "type": "FRAME"
+              },
+              {
+                "id": "87:6134",
+                "name": "Select",
+                "type": "FRAME"
+              },
+              {
+                "id": "87:3673",
+                "name": "Score",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "87:3771",
+                "name": "Status",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "132:25886",
+                "name": "Table/Header",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "135:26163",
+                "name": "Table/Cell",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "135:26592",
+                "name": "Pop Up",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "138:28154",
+                "name": "Toggle",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "166:8690",
+                "name": "Bell",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "166:8434",
+                "name": "Job card - Candidate",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "1490:11376",
+                "name": "Job card - Candidate",
+                "type": "FRAME"
+              },
+              {
+                "id": "201:5254",
+                "name": "Empty State",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "224:6970",
+                "name": "Pagination (V1)",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "47:3780",
+                "name": "Segment select",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "285:6490",
+                "name": "Segment select with Icon",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "55:4436",
+                "name": "Toggle",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "1490:11314",
+                "name": "Bubble - hover",
+                "type": "FRAME"
+              },
+              {
+                "id": "1490:11459",
+                "name": "Bubble - hover",
+                "type": "FRAME"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "38:6598",
+            "name": "Lucide Icons",
+            "type": "FRAME",
+            "x": -2806,
+            "y": 2837,
+            "width": 2584,
+            "height": 1704,
+            "layoutMode": "VERTICAL",
+            "paddingLeft": 56,
+            "paddingRight": 56,
+            "paddingTop": 56,
+            "paddingBottom": 56,
+            "itemSpacing": 40,
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "layoutSizingHorizontal": "HUG",
+            "layoutSizingVertical": "HUG",
+            "cornerRadius": 24,
+            "fills": [
+              {
+                "type": "SOLID",
+                "color": "#ffffffFF"
+              }
+            ],
+            "strokes": [
+              {
+                "type": "SOLID",
+                "color": "#e5e5e5FF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "38:6599",
+                "name": "Frame 2",
+                "type": "FRAME"
+              },
+              {
+                "id": "38:6606",
+                "name": "Lucide Icons",
+                "type": "FRAME"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "1547:13974",
+            "name": "Company card - Candidate",
+            "type": "COMPONENT_SET",
+            "x": 793.67,
+            "y": 2806,
+            "width": 1137,
+            "height": 436,
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "cornerRadius": 5,
+            "strokes": [
+              {
+                "type": "SOLID",
+                "color": "#8a38f5FF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "1530:1857",
+                "name": "Property 1=Default",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "1547:13975",
+                "name": "Property 1=Featured",
+                "type": "COMPONENT"
+              }
+            ],
+            "childrenTruncated": true
+          }
+        ]
+      },
+      {
+        "id": "0:1",
+        "name": "Design",
+        "nodes": [
+          {
+            "id": "5:25784",
+            "name": "[Employer & Applicant] Auth & Onboarding",
+            "type": "SECTION",
+            "x": 6171,
+            "y": 0,
+            "width": 7763,
+            "height": 5908,
+            "cornerRadius": 2,
+            "fills": [
+              {
+                "type": "SOLID",
+                "color": "#cfcfcfFF"
+              }
+            ],
+            "strokes": [
+              {
+                "type": "SOLID",
+                "opacity": 0.1,
+                "color": "#000000FF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "5:25785",
+                "name": "1 - Registration",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:25812",
+                "name": "1 - Registration",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:25840",
+                "name": "2 - Check your email",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:25882",
+                "name": "3 - Login Page",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:25898",
+                "name": "3 - Login Page with Invalided email error",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:25918",
+                "name": "3 - Login Page with \"Wrong Account\" error ",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:25938",
+                "name": "2 - Email Verification navigator",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:25957",
+                "name": "2 - Email Verification navigator",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:25970",
+                "name": "Container",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:25985",
+                "name": "4 Set Up Account",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26024",
+                "name": "4 Set Up Account",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26063",
+                "name": "5 Fields of Expertise",
+                "type": "FRAME"
+              },
+              {
+                "id": "16:47518",
+                "name": "5 Fields of Expertise",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26097",
+                "name": "6 Level of Professional",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26124",
+                "name": "7 Company Infor",
+                "type": "FRAME"
+              },
+              {
+                "id": "16:47296",
+                "name": "7 Company Infor",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26249",
+                "name": "6 Level of Professional",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26485",
+                "name": "8 Successful toast",
+                "type": "FRAME"
+              },
+              {
+                "id": "27:2815",
+                "name": "8 Successful toast",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26507",
+                "name": "9 Career Infor",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26570",
+                "name": "10 Education",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26658",
+                "name": "11 Resume ",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26777",
+                "name": "Slice 1",
+                "type": "SLICE"
+              },
+              {
+                "id": "5:26778",
+                "name": "Container",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26807",
+                "name": "Forgot Password",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26825",
+                "name": "Forgot Password",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26845",
+                "name": "Container",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26862",
+                "name": "lucide/lock-keyhole",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "5:26864",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26866",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26868",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26870",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:26872",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "27:2323",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "841:7364",
+                "name": "image 15",
+                "type": "RECTANGLE"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "5:26874",
+            "name": "Container",
+            "type": "COMPONENT_SET",
+            "x": 6000,
+            "y": 2700,
+            "width": 80,
+            "height": 200,
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "cornerRadius": 5,
+            "strokes": [
+              {
+                "type": "SOLID",
+                "color": "#8a38f5FF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "5:26875",
+                "name": "Property 1=Inactive",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "5:26877",
+                "name": "Property 1=Active",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "5:26879",
+                "name": "Property 1=Finished",
+                "type": "COMPONENT"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "5:26881",
+            "name": "[Employer] Dashboard & Job Management",
+            "type": "SECTION",
+            "x": 6174,
+            "y": 6980,
+            "width": 12090,
+            "height": 3950,
+            "cornerRadius": 2,
+            "fills": [
+              {
+                "type": "SOLID",
+                "color": "#cfcfcfFF"
+              }
+            ],
+            "strokes": [
+              {
+                "type": "SOLID",
+                "opacity": 0.1,
+                "color": "#000000FF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "38:3208",
+                "name": "Dashboard",
+                "type": "FRAME"
+              },
+              {
+                "id": "113:24762",
+                "name": "Dropdown",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "38:3614",
+                "name": "Frame 1618868328",
+                "type": "FRAME"
+              },
+              {
+                "id": "38:13730",
+                "name": "Job Management",
+                "type": "FRAME"
+              },
+              {
+                "id": "47:1743",
+                "name": "button-2",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "47:3307",
+                "name": "Job Management",
+                "type": "FRAME"
+              },
+              {
+                "id": "87:2649",
+                "name": "Job Management",
+                "type": "FRAME"
+              },
+              {
+                "id": "89:5971",
+                "name": "AI",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "87:3952",
+                "name": "21 View Assessment Evaluation",
+                "type": "FRAME"
+              },
+              {
+                "id": "96:9156",
+                "name": "Advance Candidate",
+                "type": "FRAME"
+              },
+              {
+                "id": "96:9525",
+                "name": "Advance Candidate",
+                "type": "FRAME"
+              },
+              {
+                "id": "55:4550",
+                "name": "Job Management",
+                "type": "FRAME"
+              },
+              {
+                "id": "87:6916",
+                "name": "Job Management",
+                "type": "FRAME"
+              },
+              {
+                "id": "87:3897",
+                "name": "Action",
+                "type": "FRAME"
+              },
+              {
+                "id": "278:5719",
+                "name": "Offered - Action",
+                "type": "FRAME"
+              },
+              {
+                "id": "87:4517",
+                "name": "22 View CV Evaluation",
+                "type": "FRAME"
+              },
+              {
+                "id": "87:6418",
+                "name": "22 View CV Evaluation",
+                "type": "TEXT"
+              },
+              {
+                "id": "89:5945",
+                "name": "Badge",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "96:9154",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "96:8804",
+                "name": "image 13",
+                "type": "RECTANGLE"
+              },
+              {
+                "id": "96:9615",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "138:29815",
+                "name": "Vector 24",
+                "type": "VECTOR"
+              },
+              {
+                "id": "1690:10927",
+                "name": "Job Management - Level multi-select (open)",
+                "type": "FRAME"
+              },
+              {
+                "id": "1689:14485",
+                "name": "Dropdown Multi Select Box",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "1689:14460",
+                "name": "Dropdown multi",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "1690:11222",
+                "name": "Note - #358 Level multi-select behaviour",
+                "type": "FRAME"
+              },
+              {
+                "id": "1689:14487",
+                "name": "image 16",
+                "type": "RECTANGLE"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "1502:11963",
+            "name": "Job card - Candidate",
+            "type": "INSTANCE",
+            "x": 4474,
+            "y": 7976,
+            "width": 351.33,
+            "height": 310,
+            "layoutMode": "VERTICAL",
+            "paddingLeft": 0,
+            "paddingRight": 0,
+            "paddingTop": 0,
+            "paddingBottom": 0,
+            "itemSpacing": 0,
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "cornerRadius": 16,
+            "fills": [
+              {
+                "type": "SOLID",
+                "color": "#fef5f2FF"
+              }
+            ],
+            "strokes": [
+              {
+                "type": "SOLID",
+                "color": "#e2e8f0FF"
+              }
+            ],
+            "strokeWeight": 0,
+            "strokeAlign": "INSIDE",
+            "effects": [
+              {
+                "type": "DROP_SHADOW",
+                "color": "#0000001a",
+                "offset": {
+                  "x": 2,
+                  "y": 2
+                },
+                "radius": 4,
+                "spread": 0
+              }
+            ],
+            "children": [
+              {
+                "id": "I1502:11963;166:8349",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "I1502:11963;166:8355",
+                "name": "Frame",
+                "type": "FRAME"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "1490:10390",
+            "name": "Employer",
+            "type": "FRAME",
+            "x": 3492,
+            "y": 11312,
+            "width": 1112,
+            "height": 636,
+            "layoutMode": "GRID",
+            "paddingLeft": 0,
+            "paddingRight": 0,
+            "paddingTop": 8,
+            "paddingBottom": 0,
+            "itemSpacing": 24,
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "HUG",
+            "children": [
+              {
+                "id": "1490:10391",
+                "name": "Job card",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "1490:10392",
+                "name": "Job card",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "1490:10393",
+                "name": "Job card",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "1490:10394",
+                "name": "Job card",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "1490:10395",
+                "name": "Job card",
+                "type": "INSTANCE"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "5:43613",
+            "name": "image 1",
+            "type": "RECTANGLE",
+            "x": 33650,
+            "y": 52523,
+            "width": 1910,
+            "height": 1018,
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "fills": [
+              {
+                "type": "IMAGE"
+              }
+            ]
+          },
+          {
+            "id": "5:43617",
+            "name": "[Employer] Assessment",
+            "type": "SECTION",
+            "x": 6174,
+            "y": 11244,
+            "width": 13005,
+            "height": 8518,
+            "cornerRadius": 2,
+            "fills": [
+              {
+                "type": "SOLID",
+                "color": "#cfcfcfFF"
+              }
+            ],
+            "strokes": [
+              {
+                "type": "SOLID",
+                "opacity": 0.1,
+                "color": "#ffffffFF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "5:43618",
+                "name": "AI Interview Platform Flow",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:43712",
+                "name": "AI Interview Platform Flow",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:43852",
+                "name": "AI Interview Platform Flow",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:43930",
+                "name": "Container",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:43942",
+                "name": "AI Interview Platform Flow",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:44089",
+                "name": "AI Interview Platform Flow",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:44167",
+                "name": "AI Interview Platform Flow",
+                "type": "FRAME"
+              },
+              {
+                "id": "859:8865",
+                "name": "Dropdown Custom Rubrics",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:44340",
+                "name": "AI Interview Platform Flow",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:44473",
+                "name": "AI Interview - Transcript",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:44575",
+                "name": "AI Interview - Participants",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:44635",
+                "name": "Dashboard",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:44704",
+                "name": "Dashboard",
+                "type": "FRAME"
+              },
+              {
+                "id": "5:44716",
+                "name": "Recording",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "5:44739",
+                "name": "button-2",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "89:5097",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "89:5099",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "89:5101",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "89:5103",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "89:5502",
+                "name": "Dashboard",
+                "type": "FRAME"
+              },
+              {
+                "id": "113:2037",
+                "name": "Dashboard",
+                "type": "FRAME"
+              },
+              {
+                "id": "829:6725",
+                "name": "Share Your Experience",
+                "type": "FRAME"
+              },
+              {
+                "id": "831:6887",
+                "name": "Grading round",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "859:8902",
+                "name": "Container",
+                "type": "FRAME"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "113:4686",
+            "name": "Assessment Card",
+            "type": "COMPONENT_SET",
+            "x": 7234,
+            "y": 10918,
+            "width": 394.67,
+            "height": 568,
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "cornerRadius": 5,
+            "strokes": [
+              {
+                "type": "SOLID",
+                "color": "#8a38f5FF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "113:4685",
+                "name": "Property 1=Default",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "113:4687",
+                "name": "Property 1=Variant2",
+                "type": "COMPONENT"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "38:3598",
+            "name": "Sidemenu",
+            "type": "COMPONENT_SET",
+            "x": 4224,
+            "y": 7538,
+            "width": 263,
+            "height": 132,
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "cornerRadius": 5,
+            "strokes": [
+              {
+                "type": "SOLID",
+                "color": "#8a38f5FF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "38:3597",
+                "name": "Active=No",
+                "type": "COMPONENT"
+              },
+              {
+                "id": "38:3599",
+                "name": "Active=Yes",
+                "type": "COMPONENT"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "113:9244",
+            "name": "System Admin",
+            "type": "SECTION",
+            "x": 28123,
+            "y": -1844,
+            "width": 9530,
+            "height": 17729,
+            "cornerRadius": 2,
+            "fills": [
+              {
+                "type": "SOLID",
+                "color": "#cfcfcfFF"
+              }
+            ],
+            "strokes": [
+              {
+                "type": "SOLID",
+                "opacity": 0.1,
+                "color": "#000000FF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "113:24364",
+                "name": "Dashboard",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:33626",
+                "name": "Dashboard",
+                "type": "FRAME"
+              },
+              {
+                "id": "113:25320",
+                "name": "Accounts",
+                "type": "FRAME"
+              },
+              {
+                "id": "135:27424",
+                "name": "Roles & Permissions",
+                "type": "FRAME"
+              },
+              {
+                "id": "138:28568",
+                "name": "Roles & Permissions",
+                "type": "FRAME"
+              },
+              {
+                "id": "135:26988",
+                "name": "Accounts",
+                "type": "FRAME"
+              },
+              {
+                "id": "1054:7536",
+                "name": "Accounts",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:35403",
+                "name": "Pop Up",
+                "type": "FRAME"
+              },
+              {
+                "id": "135:26369",
+                "name": "Action",
+                "type": "FRAME"
+              },
+              {
+                "id": "1171:8164",
+                "name": "Action - Pending",
+                "type": "FRAME"
+              },
+              {
+                "id": "138:29472",
+                "name": "Action",
+                "type": "FRAME"
+              },
+              {
+                "id": "940:8059",
+                "name": "Action",
+                "type": "FRAME"
+              },
+              {
+                "id": "938:7271",
+                "name": "Action",
+                "type": "FRAME"
+              },
+              {
+                "id": "873:9026",
+                "name": "Action",
+                "type": "FRAME"
+              },
+              {
+                "id": "940:8069",
+                "name": "Action",
+                "type": "FRAME"
+              },
+              {
+                "id": "135:26397",
+                "name": "Dropdown",
+                "type": "FRAME"
+              },
+              {
+                "id": "135:27416",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "135:27418",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "135:27422",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "138:29410",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:32397",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:32942",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:33624",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:34493",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:35044",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "135:26597",
+                "name": "Pop Up",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "135:26620",
+                "name": "Pop Up",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "138:29104",
+                "name": "Pop Up",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "873:9105",
+                "name": "Pop Up",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "135:27420",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "138:29128",
+                "name": "Employers",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:34495",
+                "name": "Question Bank",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:35046",
+                "name": "Question Bank",
+                "type": "FRAME"
+              },
+              {
+                "id": "138:29490",
+                "name": "Employers",
+                "type": "FRAME"
+              },
+              {
+                "id": "138:31585",
+                "name": "Employers",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:32399",
+                "name": "Job Listings",
+                "type": "FRAME"
+              },
+              {
+                "id": "940:7436",
+                "name": "Job Listings -> Job Details",
+                "type": "FRAME"
+              },
+              {
+                "id": "965:7421",
+                "name": "Job Listings -> Job Details",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:32944",
+                "name": "Candidate Management",
+                "type": "FRAME"
+              },
+              {
+                "id": "940:8315",
+                "name": "Candidate Management",
+                "type": "FRAME"
+              },
+              {
+                "id": "150:31911",
+                "name": "Employers",
+                "type": "FRAME"
+              },
+              {
+                "id": "831:6951",
+                "name": "Deactivate Account",
+                "type": "FRAME"
+              },
+              {
+                "id": "873:9151",
+                "name": "Close Job",
+                "type": "FRAME"
+              },
+              {
+                "id": "873:9083",
+                "name": "Company Listings",
+                "type": "TEXT"
+              },
+              {
+                "id": "1092:68",
+                "name": "Email Templates - List",
+                "type": "FRAME"
+              },
+              {
+                "id": "1155:68",
+                "name": "Email Templates - Detail (Job Closed)",
+                "type": "FRAME"
+              },
+              {
+                "id": "1164:68",
+                "name": "Email Templates - Editor (Job Closed v3)",
+                "type": "FRAME"
+              },
+              {
+                "id": "1168:68",
+                "name": "Email Templates - Generate with AI (Account Activated)",
+                "type": "FRAME"
+              },
+              {
+                "id": "1175:164",
+                "name": "Preview Modal",
+                "type": "FRAME"
+              },
+              {
+                "id": "1224:8245",
+                "name": "Account Setup (Issue #353)",
+                "type": "TEXT"
+              },
+              {
+                "id": "1224:8246",
+                "name": "Account Setup - Form",
+                "type": "FRAME"
+              },
+              {
+                "id": "1224:8282",
+                "name": "Account Setup - Success",
+                "type": "FRAME"
+              },
+              {
+                "id": "1224:8295",
+                "name": "Account Setup - Expired",
+                "type": "FRAME"
+              },
+              {
+                "id": "1224:8311",
+                "name": "Account Setup - Invalid",
+                "type": "FRAME"
+              },
+              {
+                "id": "1224:8324",
+                "name": "Account Setup - Verifying",
+                "type": "FRAME"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "166:6204",
+            "name": "Candidate Portal",
+            "type": "SECTION",
+            "x": 38973,
+            "y": -234,
+            "width": 10544,
+            "height": 13100,
+            "cornerRadius": 2,
+            "fills": [
+              {
+                "type": "SOLID",
+                "color": "#cfcfcfFF"
+              }
+            ],
+            "strokes": [
+              {
+                "type": "SOLID",
+                "opacity": 0.1,
+                "color": "#000000FF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "96:9617",
+                "name": "My Applications",
+                "type": "FRAME"
+              },
+              {
+                "id": "257:5381",
+                "name": "CV Builder",
+                "type": "FRAME"
+              },
+              {
+                "id": "199:4974",
+                "name": "My Applications - Empty State",
+                "type": "FRAME"
+              },
+              {
+                "id": "166:6824",
+                "name": "Browse Jobs",
+                "type": "FRAME"
+              },
+              {
+                "id": "317:8961",
+                "name": "Browse Jobs",
+                "type": "FRAME"
+              },
+              {
+                "id": "166:11050",
+                "name": "Browse Jobs - Job Details",
+                "type": "FRAME"
+              },
+              {
+                "id": "285:5899",
+                "name": "CV Builder",
+                "type": "FRAME"
+              },
+              {
+                "id": "304:6228",
+                "name": "Profile",
+                "type": "FRAME"
+              },
+              {
+                "id": "317:8306",
+                "name": "Profile",
+                "type": "FRAME"
+              },
+              {
+                "id": "317:9313",
+                "name": "Profile",
+                "type": "FRAME"
+              },
+              {
+                "id": "317:9784",
+                "name": "Profile",
+                "type": "FRAME"
+              },
+              {
+                "id": "317:8611",
+                "name": "Frame 1618868509",
+                "type": "FRAME"
+              },
+              {
+                "id": "310:6991",
+                "name": "image 14",
+                "type": "RECTANGLE"
+              },
+              {
+                "id": "285:8134",
+                "name": "CV Builder",
+                "type": "FRAME"
+              },
+              {
+                "id": "293:8577",
+                "name": "CV Builder",
+                "type": "FRAME"
+              },
+              {
+                "id": "293:8916",
+                "name": "CV Builder",
+                "type": "FRAME"
+              },
+              {
+                "id": "300:9419",
+                "name": "CV Builder",
+                "type": "FRAME"
+              },
+              {
+                "id": "300:9624",
+                "name": "CV Builder",
+                "type": "FRAME"
+              },
+              {
+                "id": "293:8448",
+                "name": "Frame 1618868483",
+                "type": "FRAME"
+              },
+              {
+                "id": "230:7277",
+                "name": "Assessment",
+                "type": "FRAME"
+              },
+              {
+                "id": "230:7448",
+                "name": "Assessment",
+                "type": "FRAME"
+              },
+              {
+                "id": "230:7657",
+                "name": "Assessment",
+                "type": "FRAME"
+              },
+              {
+                "id": "230:7773",
+                "name": "Assessment",
+                "type": "FRAME"
+              },
+              {
+                "id": "230:6688",
+                "name": "Browse Jobs - Upload",
+                "type": "FRAME"
+              },
+              {
+                "id": "230:7111",
+                "name": "Browse Jobs - Upload",
+                "type": "FRAME"
+              },
+              {
+                "id": "230:6923",
+                "name": "Pop Up",
+                "type": "FRAME"
+              },
+              {
+                "id": "166:6205",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "257:5379",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "304:6226",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "166:8698",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "230:7444",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "230:7446",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "278:5472",
+                "name": "CV Card",
+                "type": "COMPONENT_SET"
+              },
+              {
+                "id": "278:5486",
+                "name": "Single Selector",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "300:9218",
+                "name": "Container",
+                "type": "FRAME"
+              },
+              {
+                "id": "113:17981",
+                "name": "Profile",
+                "type": "FRAME"
+              },
+              {
+                "id": "317:9873",
+                "name": "Container",
+                "type": "FRAME"
+              },
+              {
+                "id": "317:9899",
+                "name": "Forgot Password",
+                "type": "FRAME"
+              },
+              {
+                "id": "317:9916",
+                "name": "Forgot Password",
+                "type": "FRAME"
+              },
+              {
+                "id": "317:9935",
+                "name": "Container",
+                "type": "FRAME"
+              },
+              {
+                "id": "400:10102",
+                "name": "Application Card",
+                "type": "FRAME"
+              },
+              {
+                "id": "1502:11944",
+                "name": "Bubble - hover",
+                "type": "FRAME"
+              },
+              {
+                "id": "1502:11948",
+                "name": "Bubble - hover",
+                "type": "FRAME"
+              },
+              {
+                "id": "1528:8951",
+                "name": "Frame",
+                "type": "FRAME"
+              },
+              {
+                "id": "1528:8953",
+                "name": "Company Directory",
+                "type": "FRAME"
+              },
+              {
+                "id": "1531:9147",
+                "name": "Company Directory - Company Detail",
+                "type": "FRAME"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "1490:10118",
+            "name": "Applicant",
+            "type": "FRAME",
+            "x": 4723,
+            "y": 11332,
+            "width": 1102,
+            "height": 652,
+            "layoutMode": "GRID",
+            "paddingLeft": 0,
+            "paddingRight": 0,
+            "paddingTop": 8,
+            "paddingBottom": 0,
+            "itemSpacing": 24,
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "HUG",
+            "children": [
+              {
+                "id": "1490:10119",
+                "name": "Job card - Candidate",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "1490:10120",
+                "name": "Job card - Candidate",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "1490:10121",
+                "name": "Job card - Candidate",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "1490:10122",
+                "name": "Job card - Candidate",
+                "type": "INSTANCE"
+              },
+              {
+                "id": "1490:10123",
+                "name": "Job card - Candidate",
+                "type": "INSTANCE"
+              }
+            ],
+            "childrenTruncated": true
+          },
+          {
+            "id": "1510:8766",
+            "name": "Job Management - Discrepancy Fixes",
+            "type": "SECTION",
+            "x": 6171,
+            "y": 53841,
+            "width": 3200,
+            "height": 1200,
+            "cornerRadius": 2,
+            "fills": [
+              {
+                "type": "SOLID",
+                "color": "#ffffffFF"
+              }
+            ],
+            "strokes": [
+              {
+                "type": "SOLID",
+                "opacity": 0.1,
+                "color": "#000000FF"
+              }
+            ],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "children": [
+              {
+                "id": "1510:8767",
+                "name": "Job Management",
+                "type": "FRAME"
+              },
+              {
+                "id": "1511:10380",
+                "name": "Job Management",
+                "type": "FRAME"
+              }
+            ],
+            "childrenTruncated": true
+          }
+        ]
+      },
+      {
+        "id": "87:7157",
+        "name": "Draft",
+        "nodes": [
+          {
+            "id": "850:10103",
+            "name": "3 - Login Page",
+            "type": "FRAME",
+            "x": 1770,
+            "y": 0,
+            "width": 447.99,
+            "height": 309,
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "children": [
+              {
+                "id": "850:10104",
+                "name": "Container",
+                "type": "FRAME"
+              }
+            ],
+            "childrenTruncated": true
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -159,6 +159,31 @@ describe("plugin read tools", () => {
     figma.root.findAllWithCriteria.mockReturnValue([{ id: "3:1", name: "C", key: "k", componentPropertyDefinitions: {} }]);
     expect((await getAllComponents({})).isError).toBe(false);
   });
+  it("getAllComponents survives variant components (real-file crash)", async () => {
+    const figma: MockFigma = setupFigma();
+    // Variant thật trong Figma throw khi đọc getter này — message copy từ
+    // data thật record được (Design System & Components page).
+    const variant = {
+      id: "3:2",
+      name: "V",
+      key: "k2",
+      get componentPropertyDefinitions(): unknown {
+        throw new Error(
+          "in get_componentPropertyDefinitions: Can only get component property definitions of a component set or non-variant component",
+        );
+      },
+    };
+    figma.root.findAllWithCriteria.mockReturnValue([
+      { id: "3:1", name: "C", key: "k", componentPropertyDefinitions: {} },
+      variant,
+    ]);
+    const res = await getAllComponents({});
+    expect(res.isError).toBe(false);
+    const list = res.content as { id: string; properties: unknown }[];
+    expect(list).toHaveLength(2);
+    expect(list[1]?.id).toBe("3:2");
+    expect(JSON.stringify(list[1]?.properties)).toContain("non-variant component");
+  });
   it("exportAsset SVG/PNG/errors", async () => {
     const figma: MockFigma = setupFigma();
     figma.getNodeByIdAsync.mockResolvedValue(null);

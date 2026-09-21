@@ -12,6 +12,8 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
+    "test:e2e": "vitest run tests/e2e/mcp-replay.test.ts",
+    "record:e2e": "tsx tests/e2e/record-fixtures.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:typecheck": "tsc --noEmit -p tsconfig.test.json",
@@ -36,7 +38,9 @@
     "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^3.2.7",
     "eslint": "^10.10.0",
+    "socket.io-client": "^4.8.1",
     "tsdown": "^0.23.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.70.0",
     "vitest": "^3.2.7"

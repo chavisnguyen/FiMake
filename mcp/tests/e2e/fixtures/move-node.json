@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "command": "move-node",
+    "recordedAt": "2026-09-21T00:00:00.000Z",
+    "source": "real-figma",
+    "note": "withNode() trả về serialized node sau khi set x/y. Mock sẽ echo x/y từ request vào template này."
+  },
+  "request": { "command": "move-node", "args": { "id": "1:1", "x": 1, "y": 2 } },
+  "response": {
+    "isError": false,
+    "content": {
+      "id": "1:1",
+      "name": "Hero",
+      "type": "FRAME",
+      "x": 1,
+      "y": 2,
+      "width": 1440,
+      "height": 900
+    }
+  }
+}

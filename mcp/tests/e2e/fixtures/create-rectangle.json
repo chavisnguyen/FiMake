@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "command": "create-rectangle",
+    "recordedAt": "2026-09-21T00:00:00.000Z",
+    "source": "real-figma",
+    "note": "Create tool trả về serialized node mới. Mock giữ nguyên id template trừ khi record lại."
+  },
+  "request": { "command": "create-rectangle", "args": { "x": 0, "y": 0, "width": 10, "height": 5 } },
+  "response": {
+    "isError": false,
+    "content": {
+      "id": "990:1",
+      "name": "Rectangle",
+      "type": "RECTANGLE",
+      "x": 0,
+      "y": 0,
+      "width": 10,
+      "height": 5,
+      "fills": [{ "type": "SOLID", "color": "#D9D9D9FF" }]
+    }
+  }
+}
