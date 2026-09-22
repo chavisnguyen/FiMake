@@ -187,6 +187,109 @@ describe("create-image fetch failures", () => {
   });
 });
 
+describe("create-image redirects + format guard", () => {
+  const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  const WEBP = [0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50];
+
+  function mockRes(opts: { status?: number; contentType?: string; location?: string; bytes?: number[]; url?: string }): Response {
+    const { status = 200, contentType, location, bytes = PNG, url = "https://x/y.png" } = opts;
+    const headers = new Headers();
+    if (contentType !== undefined) headers.set("content-type", contentType);
+    if (location !== undefined) headers.set("location", location);
+    return cast<Response>({
+      ok: status >= 200 && status < 300,
+      status,
+      url,
+      headers,
+      arrayBuffer: async (): Promise<ArrayBuffer> => new Uint8Array(bytes).buffer as ArrayBuffer,
+    });
+  }
+
+  it("follows a 302 (picsum-style) then forwards final bytes", async () => {
+    const { server, handlers } = mockServerBundle();
+    const tm = mockTaskManager({ isError: false, content: { id: "9:9" } });
+    createImage(server, tm);
+    const fetchMock = vi.fn(async (input: unknown) => {
+      const u = String(input);
+      if (u === "https://x/redirect") return mockRes({ status: 302, location: "https://cdn/x.jpg" });
+      return mockRes({ contentType: "image/png", bytes: PNG, url: u });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const res: CallToolResult = await getHandler(handlers, "create-image")({ url: "https://x/redirect" });
+    expect(res.isError).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[1]?.[0])).toContain("https://cdn/x.jpg");
+    expect(runTaskMock(tm)).toHaveBeenCalledWith(
+      "create-image",
+      expect.objectContaining({ imageData: PNG }),
+    );
+  });
+
+  it("sends User-Agent + Accept preferring Figma-decodable formats", async () => {
+    const { server, handlers } = mockServerBundle();
+    const tm = mockTaskManager({ isError: false, content: { id: "9:9" } });
+    createImage(server, tm);
+    const fetchMock = vi.fn(async () => mockRes({ contentType: "image/jpeg", bytes: [0xff, 0xd8, 0xff, 0xe0] }));
+    vi.stubGlobal("fetch", fetchMock);
+    await getHandler(handlers, "create-image")({ url: "https://x/y.jpg" });
+    const firstCall = fetchMock.mock.calls[0] as unknown as [unknown, RequestInit & { headers: Record<string, string> }] | undefined;
+    const init = firstCall?.[1];
+    expect(init?.redirect).toBe("manual");
+    expect(init?.headers["User-Agent"]).toContain("Fimake");
+    expect(init?.headers["Accept"]).toContain("image/jpeg");
+  });
+
+  it("rejects webp with actionable guidance instead of forwarding", async () => {
+    const { server, handlers } = mockServerBundle();
+    const tm = mockTaskManager();
+    createImage(server, tm);
+    vi.stubGlobal("fetch", vi.fn(async () => mockRes({ contentType: "image/webp", bytes: WEBP })));
+    const res: CallToolResult = await getHandler(handlers, "create-image")({ url: "https://x/y.webp" });
+    expect(res.isError).toBe(true);
+    expect(toolText(res)).toContain("only JPG/PNG/GIF");
+    expect(runTaskMock(tm)).not.toHaveBeenCalled();
+  });
+
+  it("blocks redirect to private/internal network (SSRF)", async () => {
+    const { server, handlers } = mockServerBundle();
+    const tm = mockTaskManager();
+    createImage(server, tm);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => mockRes({ status: 302, location: "http://169.254.169.254/latest/meta-data/" })),
+    );
+    const res: CallToolResult = await getHandler(handlers, "create-image")({ url: "https://x/redirect" });
+    expect(res.isError).toBe(true);
+    expect(toolText(res)).toContain("blocked");
+    expect(runTaskMock(tm)).not.toHaveBeenCalled();
+  });
+
+  it("rejects redirect loops after max hops", async () => {
+    const { server, handlers } = mockServerBundle();
+    const tm = mockTaskManager();
+    createImage(server, tm);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => mockRes({ status: 302, location: "https://x/loop" })),
+    );
+    const res: CallToolResult = await getHandler(handlers, "create-image")({ url: "https://x/loop" });
+    expect(res.isError).toBe(true);
+    expect(toolText(res)).toContain("Too many redirects");
+  });
+
+  it("rejects URLs with embedded credentials", async () => {
+    const { server, handlers } = mockServerBundle();
+    const tm = mockTaskManager();
+    createImage(server, tm);
+    const fetchMock = vi.fn(async () => mockRes({}));
+    vi.stubGlobal("fetch", fetchMock);
+    const res: CallToolResult = await getHandler(handlers, "create-image")({ url: "https://user:pass@x/y.png" });
+    expect(res.isError).toBe(true);
+    expect(toolText(res)).toContain("credentials");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
 describe("export-asset outputPath", () => {
   it("inline SVG without outputPath", async () => {
     const { server, handlers } = mockServerBundle();
