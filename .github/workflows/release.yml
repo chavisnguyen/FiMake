@@ -29,6 +29,11 @@ jobs:
           cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      # NOTE: build BEFORE check — the e2e replay suite spawns mcp/dist and
+      # fails on a fresh checkout without it (`make check` runs test first).
+      # (test.yml already builds first for the same reason.)
+      - name: Build first (e2e needs dist)
+        run: make build
       - name: Gate (typecheck + lint + test + build)
         run: make check
 
