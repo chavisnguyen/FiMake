@@ -3,10 +3,10 @@ import { cors } from "hono/cors";
 import { getRequestListener } from "@hono/node-server";
 import { createBridge } from "../bridge/server";
 import { config } from "../config/config";
-import { infoLog } from "../shared/log";
 import { createServer } from "node:http";
 import type { Server as HttpServer } from "node:http";
 import { createSocketServer } from "./socket-server";
+import { listenWithFriendlyError } from "./listen";
 import { McpSessionStore } from "./mcp-sessions";
 
 export async function startStreamableHTTP() {
@@ -58,7 +58,5 @@ export async function startStreamableHTTP() {
     healthHolder.store = store;
 
     // Start the HTTP server (Socket.IO shares this port).
-    httpServer.listen(config.PORT, () => {
-        infoLog(`Server listening on http://localhost:${config.PORT}`);
-    });
+    listenWithFriendlyError(httpServer, config.PORT, "Server");
 }

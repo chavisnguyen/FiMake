@@ -18,6 +18,29 @@ make dev-plugin  # watch + rebuild the plugin (cd plugin && pnpm dev)
 make clean       # remove build outputs and coverage
 ```
 
+## Run from source (as your MCP server)
+
+Users should prefer the brew/binary from [quickstart](./quickstart.md). From source is for contributors iterating on `mcp/` (needs `Node.js >= 22`):
+
+```bash
+git clone https://github.com/chavisnguyen/FiMake.git
+cd FiMake && make install && make build
+```
+
+```json
+{
+  "mcpServers": {
+    "fimake": {
+      "command": "node",
+      "args": ["/absolute/path/to/FiMake/mcp/dist/index.js"],
+      "env": { "TRANSPORT": "stdio", "PORT": "10101" }
+    }
+  }
+}
+```
+
+Same rule as binaries: with `stdio` the client spawns the server — do NOT also run `make dev-mcp` / `pnpm start` on the same `PORT`, or the spawned server crashes into yours (see [troubleshooting](./troubleshooting.md#mcp-client-fails-to-start-the-server-stdio--port-already-in-use-on-launch)). Use `fimake doctor` when in doubt.
+
 ## Layout
 
 - `mcp/src/index.ts` — entrypoint; picks `TRANSPORT` (`stdio` vs `streamable-http`).

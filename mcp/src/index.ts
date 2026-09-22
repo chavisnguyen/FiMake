@@ -13,6 +13,15 @@ if (args.includes("--version") || args.includes("-V")) {
     process.exit(0);
 }
 
+// Preflight without starting anything: `fimake doctor` answers "can my MCP
+// client spawn a server here?" Exit 0 = port free, 1 = conflict (see doctor.ts).
+if (args.includes("doctor")) {
+    const { formatDoctorReport, runDoctor } = await import("./doctor");
+    const report = await runDoctor(config.PORT);
+    console.log(formatDoctorReport(report));
+    process.exit(report.ok ? 0 : 1);
+}
+
 try {
     if (config.TRANSPORT === "streamable-http") {
         await startStreamableHTTP();

@@ -23,6 +23,17 @@ Either stop the other process or set a new `PORT` in `mcp/.env` (then follow the
 - Try the Inspector first to isolate client vs server: `cd mcp && pnpm inspector`, connect to `http://127.0.0.1:<PORT>/mcp`.
 - Disable tools you do not need; some clients cap the tool count.
 
+## MCP client fails to start the server (stdio) / "port already in use" on launch
+
+Classic double-server: with `TRANSPORT=stdio` your client spawns its own server, so a hand-started one (`pnpm start`, `node dist/index.js`, `./fimake-...`) already holding port `10101` makes the spawned server crash. The server now says so explicitly — look for `[fimake] Port 10101 is already in use` in the client logs.
+
+Fix (pick one):
+
+1. Stop the hand-started server, restart the client (recommended for local use).
+2. Keep the hand-started server and point the client at `http://localhost:<PORT>/mcp` (streamable-http) instead of spawning.
+
+`fimake doctor` diagnoses this without starting anything: port free, fimake already running (with its open windows), or a foreign process — plus what to do in each case.
+
 ## Task times out (`isError:true`, "Task timed out")
 
 - The plugin has `TASK_TIMEOUT_MS` (default 20000ms) to reply. Large `get-node-info` calls on huge files are the usual cause — retry with smaller `depth` / `maxNodes` / `maxChars`, or raise `TASK_TIMEOUT_MS` in `mcp/.env`.

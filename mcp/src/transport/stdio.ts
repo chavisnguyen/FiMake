@@ -1,9 +1,9 @@
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createBridge, createMcpServer } from '../bridge/server';
 import { config } from '../config/config';
-import { infoLog } from '../shared/log';
 import http from 'http';
 import { createSocketServer } from './socket-server';
+import { listenWithFriendlyError } from './listen';
 
 export async function startSTDIO() {
     try {
@@ -16,9 +16,7 @@ export async function startSTDIO() {
         await server.connect(transport);
 
         // Start HTTP server for Socket.IO connections from Figma plugin
-        httpServer.listen(config.PORT, () => {
-            infoLog(`Socket.IO server listening on http://localhost:${config.PORT}`);
-        });
+        listenWithFriendlyError(httpServer, config.PORT, "Socket.IO server");
     } catch (error) {
         console.error('Error starting STDIO server:', error);
         throw error;

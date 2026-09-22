@@ -27,12 +27,15 @@ Fimake ships as a **dev plugin** (sideload from manifest). There is no Figma Com
 
 ### 2. Run the MCP server (pick one)
 
+> Pick **one**: either your client spawns the server (`stdio`, A/B/C below — you run nothing by hand) **or** you run it yourself (`streamable-http`, advanced). Never both — two servers fight over port `10101` and the second one crashes. When in doubt, run `fimake doctor`.
+
 **A. Homebrew (macOS / Linux, no Node needed).** Tap is auto-bumped on every release:
 
 ```bash
 brew tap chavisnguyen/fimake
 brew install fimake
 fimake --version
+fimake doctor   # expect "[ok] port ... is free"
 ```
 
 ```json
@@ -85,6 +88,20 @@ Where to put the config:
 - **Claude Code / generic client / Inspector:** paste into your MCP config.
 - **Cursor:** `~/.cursor/mcp.json` or project `.cursor/mcp.json`.
 - **Claude Desktop:** `claude_desktop_config.json`.
+- **Opencode** (`~/.config/opencode/opencode.json`) — different shape, same idea:
+
+```json
+{
+  "mcp": {
+    "fimake": {
+      "type": "local",
+      "command": ["fimake"],
+      "enabled": true,
+      "environment": { "TRANSPORT": "stdio", "PORT": "10101" }
+    }
+  }
+}
+```
 
 Then restart the client if it requires it and ask something like *"list the pages in this Figma file"*. The plugin window should show the task appear and settle (`Task started: get-pages ...` → `Task finished: ...`).
 
