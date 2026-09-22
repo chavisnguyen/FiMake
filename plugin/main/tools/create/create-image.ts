@@ -7,6 +7,9 @@ export interface CreateImagePluginParams extends CreateImageParams {
 }
 
 export async function createImage(args: CreateImagePluginParams): Promise<ToolResult> {
+    if (!args.imageData || args.imageData.length === 0) {
+        return { isError: true, content: "Missing imageData: MCP must fetch the URL in Node and forward bytes (shared schema must keep imageData, zod strips unknown keys)" };
+    }
     const imageData = new Uint8Array(args.imageData);
     const image = figma.createImage(imageData);
     const node = figma.createRectangle();
