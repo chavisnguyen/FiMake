@@ -30,9 +30,9 @@ export async function startStreamableHTTP() {
         pendingTasks: healthHolder.bridge?.taskManager.getPendingCount(),
         queuedMessages: healthHolder.bridge?.socketManager.getPendingCount(),
         sessions: healthHolder.store?.size,
-        pluginConnected: (healthHolder.bridge?.socketManager as unknown as { sockets?: Set<unknown> })?.sockets !== undefined
-            ? ((healthHolder.bridge?.socketManager as unknown as { sockets: Set<unknown> }).sockets.size > 0)
-            : undefined,
+        pluginConnected: healthHolder.bridge?.socketManager.isPluginConnected(),
+        clientCount: healthHolder.bridge?.socketManager.getClientCount(),
+        clients: healthHolder.bridge?.socketManager.getClients(),
     }));
 
     // Single shared Figma bridge (one plugin socket namespace).

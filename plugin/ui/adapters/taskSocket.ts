@@ -8,6 +8,7 @@ import {
   SOCKET_EVENTS,
   acknowledgeStartTask,
   isStartTaskPayload,
+  type PluginClientInfo,
   type StartTaskPayload,
 } from "@shared/types";
 import type {
@@ -27,6 +28,8 @@ export interface TaskSocketEvents {
 
 export interface TaskSocketHandle {
   disconnect: () => void;
+  /** Tell the server "tao là file X" so /health + future routing can tell windows apart. */
+  announceFile: (info: PluginClientInfo) => void;
 }
 
 /**
@@ -83,6 +86,15 @@ export function connectTaskSocket(url: string, events: TaskSocketEvents): TaskSo
       offFinished();
       offFailed();
       socket.disconnect();
+    },
+    announceFile: (info: PluginClientInfo) => {
+      if (closed) return;
+      try {
+        socket.emit(SOCKET_EVENTS.CLIENT_HELLO, info);
+      } catch {
+        // ignore — server already counts the window as connected,
+        // the name is enrichment, not required for tasks to flow
+      }
     },
   };
 }

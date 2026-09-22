@@ -1,4 +1,4 @@
-import { StartTaskHandler, TaskFinishedHandler, TaskFailedHandler, UiResizeRequest } from './types';
+import { StartTaskHandler, TaskFinishedHandler, TaskFailedHandler, UiResizeRequest, FileInfoHandler } from './types';
 import { emit, on } from '@create-figma-plugin/utilities';
 import { dispatchTask } from './tools/dispatch';
 import { pluginDebug, pluginLog } from './debug';
@@ -70,6 +70,24 @@ async function handleStartTask(task: StartTaskHandler): Promise<void> {
   }
 }
 
+/**
+ * Which file is this plugin window attached to? The UI iframe can't read
+ * this directly, so main posts it over once on startup (FILE_INFO).
+ * Defensive: any read can throw on odd document states — fall back to
+ * "Untitled" rather than breaking startup.
+ */
+function getFileInfo(): { fileName: string; fileKey?: string } {
+  try {
+    const root = figma.root as unknown as { name?: unknown };
+    const fileName = typeof root.name === "string" && root.name.length > 0 ? root.name : "Untitled";
+    const rawKey = (figma as unknown as { fileKey?: unknown }).fileKey;
+    const fileKey = typeof rawKey === "string" && rawKey.length > 0 ? rawKey : undefined;
+    return fileKey !== undefined ? { fileName, fileKey } : { fileName };
+  } catch {
+    return { fileName: "Untitled" };
+  }
+}
+
 function main() {
 
   on<StartTaskHandler>('START_TASK', handleStartTask);
@@ -98,6 +116,19 @@ function main() {
   };
 
   figma.showUI(__html__, { width: PILL_WIDTH, height: PILL_HEIGHT });
+
+  // Tell the UI which project this window belongs to so the pill can show
+  // "project: X" instead of two identical pills for two open files.
+  try {
+    const info = getFileInfo();
+    emit<FileInfoHandler>('FILE_INFO', {
+      name: 'FILE_INFO',
+      fileName: info.fileName,
+      ...(info.fileKey !== undefined ? { fileKey: info.fileKey } : {}),
+    });
+  } catch (error) {
+    console.error('Failed to post FILE_INFO:', error);
+  }
 }
 
 main();

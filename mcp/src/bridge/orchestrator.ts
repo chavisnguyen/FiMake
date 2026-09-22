@@ -1,5 +1,6 @@
 import type { SocketManager } from "../transport/socket-manager";
 import type { TaskManager } from "./task-manager";
+import { splitTarget } from "../shared/types/transport/socket-protocol";
 import { debugLog, infoLog } from "../shared/log";
 
 export class Orchestrator {
@@ -17,11 +18,21 @@ export class Orchestrator {
         this.taskManager.onTaskAdded((task) => {
             infoLog(`task added ${task.id} ${task.command}`);
             debugLog(`task args ${task.id}`, task.args);
-            this.socketManager.sendMessage('start-task', {
-                id: task.id,
-                command: task.command,
-                args: task.args,
-            });
+            // Pull routing fields out of args: the plugin's zod schemas
+            // don't declare them, so they travel in the envelope instead.
+            const { cleanArgs, target } = splitTarget(task.args);
+            this.socketManager.sendMessage('start-task', target === undefined
+                ? {
+                    id: task.id,
+                    command: task.command,
+                    args: cleanArgs,
+                }
+                : {
+                    id: task.id,
+                    command: task.command,
+                    args: cleanArgs,
+                    target,
+                });
         });
 
 

@@ -3,6 +3,7 @@ import * as path from "path";
 import type { TaskManager, TaskResult } from "../../bridge/task-manager";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ExportFileParamsSchema, type ExportFileParams } from "../../shared/types/index";
+import { pickTargetParams, withTarget, type TargetParams } from "../target";
 
 interface PageStubNode {
     id: string;
@@ -75,14 +76,17 @@ function isTruncated(body: unknown): boolean {
 export function exportFile(server: McpServer, taskManager: TaskManager) {
     server.tool(
         "export-file",
-        "Export the ENTIRE current Figma file (all pages, all top-level frames) to local JSON files on disk, instead of returning it all inline (which would blow past response size limits for anything but a trivial file). Writes one JSON file per top-level frame/node plus a manifest.json index (page, node id/name, file path, byte size, whether it was truncated by maxNodes/maxChars). Returns only that manifest summary -- read the individual per-frame files afterward (via the manifest paths) for full detail, and re-request via get-node-info for any file flagged as truncated.",
-        ExportFileParamsSchema.shape,
-        async (params: ExportFileParams) => {
+        "Export the ENTIRE current Figma file (all pages, all top-level frames) to local JSON files on disk, instead of returning it all inline (which would blow past response size limits for anything but a trivial file). Writes one JSON file per top-level frame/node plus a manifest.json index (page, node id/name, file path, byte size, whether it was truncated by maxNodes/maxChars). Returns only that manifest summary -- read the individual per-frame files afterward (via the manifest paths) for full detail, and re-request via get-node-info for any file flagged as truncated. Accepts targetFileKey/targetFileName to export one open file (see list-clients); omit to broadcast.",
+        withTarget(ExportFileParamsSchema.shape),
+        async (params: ExportFileParams & TargetParams) => {
             try {
                 const outputDir = resolveExportDir(params.outputDir);
                 await fs.mkdir(outputDir, { recursive: true });
+                // Fan-out inherits the target so every sub-task lands on the
+                // same plugin window instead of broadcasting per frame.
+                const target = pickTargetParams(params);
 
-                const pagesResult = (await taskManager.runTask("get-pages", {})) as TaskResult;
+                const pagesResult = (await taskManager.runTask("get-pages", { ...target })) as TaskResult;
                 if (pagesResult.isError) {
                     return {
                         content: [{ type: "text", text: JSON.stringify(pagesResult.content) }],
@@ -138,6 +142,7 @@ export function exportFile(server: McpServer, taskManager: TaskManager) {
                                 depth: -1,
                                 maxNodes: params.maxNodes ?? 5000,
                                 maxChars: params.maxChars ?? 35000,
+                                ...target,
                             })) as TaskResult;
 
                             const pageDir = pageDirById.get(page.id) ?? path.join(outputDir, sanitizeFileName(page.name));

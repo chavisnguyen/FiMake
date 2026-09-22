@@ -40,4 +40,19 @@ describe("Orchestrator wiring", () => {
     onError({ taskId: "t2", content: "boom", isError: true });
     expect(taskManagerMock.updateTask).toHaveBeenCalledWith("t2", "boom", "failed");
   });
+
+  it("moves targetFileKey/targetFileName into the envelope, plugin never sees them", () => {
+    const sendMessage = vi.fn();
+    const taskManagerMock = mockOrchestratorTaskManager();
+    const socketManagerMock = mockOrchestratorSocketManager(sendMessage);
+    new Orchestrator(asSocketManager(socketManagerMock), asTaskManager(taskManagerMock));
+    const onAdded = firstCallArg<TaskAddedListener>(taskManagerMock.onTaskAdded);
+    onAdded({ id: "t3", command: "move-node", args: { id: "1:1", targetFileKey: "key-A", targetFileName: "Logo" } });
+    expect(sendMessage).toHaveBeenCalledWith("start-task", {
+      id: "t3",
+      command: "move-node",
+      args: { id: "1:1" },
+      target: { fileKey: "key-A", fileName: "Logo" },
+    });
+  });
 });

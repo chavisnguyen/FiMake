@@ -113,14 +113,16 @@ Full client configs, env table, and custom `PORT` checklist live in [docs/usage.
 |---|---|
 | [Quickstart](docs/quickstart.md) | 5-minute install (plugin + server + client config) |
 | [docs/usage.md](docs/usage.md) | Full setup, HTTP + `stdio` configs, env table, custom `PORT` |
-| [docs/tools.md](docs/tools.md) | All 27 tools reference |
+| [docs/tools.md](docs/tools.md) | All 28 tools reference |
 | [docs/architecture.md](docs/architecture.md) | Bridge, task map, diagrams, security |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | `Not connected`, port in use, timeouts, logs |
 | [docs/development.md](docs/development.md) | Contributor guide: `make` targets, watch mode, tests, architecture |
 
 ## Tools
 
-27 tools: 23 forward directly to the plugin (`name` = task command), 4 have extra Node-side logic.
+28 tools: 23 forward directly to the plugin (`name` = task command), 5 have extra Node-side logic.
+
+Every tool accepts `targetFileKey` / `targetFileName` to pin a task to one open Figma file — call `list-clients` first, omit both to broadcast (see [docs/tools.md](docs/tools.md#multi-window-targeting)).
 
 | Tool | Side | Description |
 |---|---|---|
@@ -151,6 +153,7 @@ Full client configs, env table, and custom `PORT` checklist live in [docs/usage.
 | `create-image` | node+plugin | Fetches `url` in Node (no CORS), forwards `imageData` bytes to plugin. |
 | `export-asset` | node+plugin | Rendered asset with real path data (`SVG` markup or `PNG`/`JPG` base64, `scale` max 4). With `outputPath`, writes to disk and returns `{path, bytes}` (max 20MB). |
 | `export-file` | node-only | Fans out over `get-pages` + `get-node-info` and writes one JSON per top-level frame + `manifest.json`. Params: `outputDir` (default `<cwd>/exports/export-<ts>`), `maxNodes` (default 5000), `maxChars` (default 35000). Guarded: max 500 frames, all writes confined to `outputDir`. No plugin handler by design. |
+| `list-clients` | node-only | List open Figma files with the plugin connected (`fileName`, `fileKey`, `connectedAt`). No plugin handler by design. |
 
 Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_ONLY_TOOLS` in `mcp/src/tools/registry.ts`.
 

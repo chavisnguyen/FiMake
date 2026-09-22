@@ -10,8 +10,8 @@ export async function startSTDIO() {
         const httpServer = http.createServer();
         const socketServer = createSocketServer(httpServer);
 
-        const { taskManager } = createBridge(socketServer);
-        const server = createMcpServer(taskManager);
+        const { taskManager, socketManager } = createBridge(socketServer);
+        const server = createMcpServer(taskManager, socketManager);
         const transport = new StdioServerTransport();
         await server.connect(transport);
 

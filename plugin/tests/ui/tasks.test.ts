@@ -6,6 +6,8 @@ import {
   describeContent,
   filterTasks,
   formatDuration,
+  isFileInfo,
+  projectLabel,
   resolveSocketUrl,
   settleTask,
   statusLabel,
@@ -127,5 +129,21 @@ describe("statusLabel", () => {
   it("covers both states", () => {
     expect(statusLabel(true)).toContain("Connected");
     expect(statusLabel(false)).toContain("Not connected");
+  });
+});
+
+describe("isFileInfo / projectLabel", () => {
+  it("accepts FILE_INFO with fileName, rejects junk", () => {
+    expect(isFileInfo({ fileName: "Landing page" })).toBe(true);
+    expect(isFileInfo({ fileName: "A", fileKey: "abc" })).toBe(true);
+    expect(isFileInfo(null)).toBe(false);
+    expect(isFileInfo({})).toBe(false);
+    expect(isFileInfo({ fileName: "" })).toBe(false);
+  });
+
+  it("renders project: name, truncates long names, empty until known", () => {
+    expect(projectLabel(null)).toBe("");
+    expect(projectLabel({ fileName: "Landing page" })).toBe("project: Landing page");
+    expect(projectLabel({ fileName: "x".repeat(50) })).toContain("…");
   });
 });

@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { TaskManager } from "../../bridge/task-manager";
 import { safeToolProcessor } from "../safe-tool-processor";
+import { withTarget, type TargetParams } from "../target";
 import { CreateImageParamsSchema, type CreateImageParams } from "../../shared/types/index";
 
 /** Abort a fetch that hangs (no timeout in undici by default). */
@@ -50,9 +51,9 @@ function isRateLimited(now: number = Date.now()): boolean {
 export function createImage(server: McpServer, taskManager: TaskManager) {
     server.tool(
         "create-image",
-        "Create a image.",
-        CreateImageParamsSchema.shape,
-        async (params: CreateImageParams) => {
+        "Create a image. Accepts targetFileKey/targetFileName to draw into one open file (see list-clients); omit to broadcast.",
+        withTarget(CreateImageParamsSchema.shape),
+        async (params: CreateImageParams & TargetParams) => {
             // Fetch image in Node.js (no CORS restrictions).
             // Network failures return isError instead of throwing so MCP
             // clients always get a CallToolResult.

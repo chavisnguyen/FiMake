@@ -32,13 +32,13 @@ export function createBridge(server: Server): FigmaBridge {
 }
 
 /** One MCP protocol server per client session, all sharing the same bridge. */
-export function createMcpServer(taskManager: TaskManager): McpServer {
+export function createMcpServer(taskManager: TaskManager, socketManager?: SocketManager): McpServer {
     const mcpServer = new McpServer({
         name: `Fimake`,
         version: SERVER_VERSION,
     });
 
-    registerAllTools(mcpServer, taskManager);
+    registerAllTools(mcpServer, taskManager, socketManager);
 
     return mcpServer;
 }

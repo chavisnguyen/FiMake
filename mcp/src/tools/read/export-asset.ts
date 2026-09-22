@@ -4,6 +4,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { TaskManager, TaskResult } from "../../bridge/task-manager";
 import { ExportAssetParamsSchema, type ExportAssetParams } from "../../shared/types/index";
 import { safeToolProcessor } from "../safe-tool-processor";
+import { withTarget, type TargetParams } from "../target";
 
 /** Max decoded asset bytes accepted before writing to disk (20MB). */
 export const MAX_ASSET_BYTES = 20 * 1024 * 1024;
@@ -19,9 +20,9 @@ export function resolveAssetPath(outputPath: string): string {
 export function exportAsset(server: McpServer, taskManager: TaskManager) {
     server.tool(
         "export-asset",
-        "Export a node as a real rendered asset instead of reconstructing it by hand. Use this for icons, illustrations, logos and other vector graphics so the output matches the design exactly — get-node-info deliberately omits vector path data, so hand-drawn SVGs from its bounding boxes will drift from the real shape. `format`: \"SVG\" (default) returns ready-to-use SVG markup with real path data. \"PNG\"/\"JPG\" return a base64-encoded raster image, sized by `scale` (default 1, max 4). Without `outputPath`, returns `{ id, name, format, mimeType, data }` inline where `data` is raw SVG markup for SVG, or base64 for PNG/JPG. With `outputPath`, writes the asset straight to that file instead and returns `{ path, bytes }`.",
-        ExportAssetParamsSchema.shape,
-        async (params: ExportAssetParams) => {
+        "Export a node as a real rendered asset instead of reconstructing it by hand. Use this for icons, illustrations, logos and other vector graphics so the output matches the design exactly — get-node-info deliberately omits vector path data, so hand-drawn SVGs from its bounding boxes will drift from the real shape. `format`: \"SVG\" (default) returns ready-to-use SVG markup with real path data. \"PNG\"/\"JPG\" return a base64-encoded raster image, sized by `scale` (default 1, max 4). Without `outputPath`, returns `{ id, name, format, mimeType, data }` inline where `data` is raw SVG markup for SVG, or base64 for PNG/JPG. With `outputPath`, writes the asset straight to that file instead and returns `{ path, bytes }`. Accepts targetFileKey/targetFileName to export from one open file (see list-clients); omit to broadcast.",
+        withTarget(ExportAssetParamsSchema.shape),
+        async (params: ExportAssetParams & TargetParams) => {
             const { outputPath, ...taskParams } = params;
 
             if (!outputPath) {

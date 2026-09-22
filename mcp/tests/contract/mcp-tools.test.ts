@@ -88,13 +88,36 @@ describe("registry: every simple tool forwards its command + formats result", ()
     });
   }
 
-  it("registers the full set: simple tools + 4 custom ones", () => {
+  it("registers the full set: simple tools + 4 custom ones (list-clients needs a bridge)", () => {
     const { server, handlers } = mockServerBundle();
     registerAllTools(server, mockTaskManager());
     expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 4);
     for (const name of ["get-selection", "create-image", "export-asset", "export-file"]) {
       expect(handlers.has(name)).toBe(true);
     }
+    expect(handlers.has("list-clients")).toBe(false);
+  });
+
+  it("registers list-clients when a socketManager is passed", async () => {
+    const { server, handlers } = mockServerBundle();
+    const fakeIo = { on: vi.fn() };
+    const { socketManager } = createBridge(fakeIo as unknown as Server);
+    registerAllTools(server, mockTaskManager(), socketManager);
+    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 5);
+    expect(handlers.has("list-clients")).toBe(true);
+    const res: CallToolResult = await getHandler(handlers, "list-clients")({});
+    expect(res.isError).toBe(false);
+    expect(parseToolText<{ count: number; clients: unknown[] }>(res)).toEqual({ count: 0, clients: [] });
+  });
+
+  it("every simple tool accepts targetFileKey/targetFileName and forwards them", async () => {
+    const { server, handlers } = mockServerBundle();
+    const tm = mockTaskManager({ isError: false, content: { id: "9:9" } });
+    registerAllTools(server, tm);
+    const params = { ...sampleParams("move-node"), targetFileKey: "key-A" };
+    const res: CallToolResult = await getHandler(handlers, "move-node")(params);
+    expect(runTaskMock(tm)).toHaveBeenCalledWith("move-node", params);
+    expect(res.isError).toBe(false);
   });
 
   it("propagates isError=true from plugin", async () => {

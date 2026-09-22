@@ -83,7 +83,7 @@ Then restart the client if it requires it and ask something like *"list the page
 
 - [Full usage guide](./usage.md) — HTTP + `stdio` configs, env table, custom `PORT`.
 - [Troubleshooting](./troubleshooting.md) — `Not connected`, port in use, timeouts, logs.
-- [Tools](./tools.md) — what each of the 27 tools does.
+- [Tools](./tools.md) — what each of the 28 tools does.
 
 ## Alternative: `streamable-http` (advanced)
 

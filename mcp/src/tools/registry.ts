@@ -1,7 +1,9 @@
 import type { ZodRawShape } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { TaskManager } from "../bridge/task-manager";
+import type { SocketManager } from "../transport/socket-manager";
 import { safeToolProcessor } from "./safe-tool-processor";
+import { withTarget } from "./target";
 import {
   AddComponentPropertyParamsSchema,
   AddPrototypeLinkParamsSchema,
@@ -31,20 +33,22 @@ import { getSelection } from "./read/get-selection";
 import { createImage } from "./create/create-image";
 import { exportAsset } from "./read/export-asset";
 import { exportFile } from "./read/export-file";
+import { listClients } from "./read/list-clients";
 
 /**
  * Tools that run purely Node-side (fetch, disk writes, fan-out over other
- * tools) and therefore intentionally have NO handler in
+ * tools, connection state) and therefore intentionally have NO handler in
  * plugin/main/tools/dispatch.ts:
  * - get-selection: wraps whole TaskResult (no schema)
  * - create-image: fetches URL in Node, forwards bytes to plugin
  * - export-asset: optionally writes the asset to disk
  * - export-file: fans out over get-pages/get-node-info, writes JSON to disk
+ * - list-clients: reads the bridge's connected plugin windows
  * Every other tool forwards its params to the plugin (`name` doubles as the
  * task command) and must have a matching TOOL_HANDLERS entry.
  */
-export const NODE_ONLY_TOOLS = ["export-file"] as const;
-export const NODE_WRAPPED_TOOLS = ["get-selection", "create-image", "export-asset", "export-file"] as const;
+export const NODE_ONLY_TOOLS = ["export-file", "list-clients"] as const;
+export const NODE_WRAPPED_TOOLS = ["get-selection", "create-image", "export-asset", "export-file", "list-clients"] as const;
 export interface SimpleToolDef {
   name: string;
   description: string;
@@ -78,13 +82,17 @@ export const SIMPLE_TOOL_DEFS: SimpleToolDef[] = [
 ];
 
 export function registerSimpleTool(server: McpServer, taskManager: TaskManager, def: SimpleToolDef): void {
-  server.tool(def.name, def.description, def.shape, async (params: Record<string, unknown>) => {
+  // Every tool accepts routing fields; the orchestrator strips them into
+  // the envelope so the plugin never sees them (parity with dispatch.ts
+  // holds because TOOL_HANDLERS only cares about `name`).
+  const shape = withTarget(def.shape);
+  server.tool(def.name, def.description, shape, async (params: Record<string, unknown>) => {
     return safeToolProcessor(taskManager.runTask(def.name, params));
   });
 }
 
 /** Register every tool: simple forwarding plus the custom ones. */
-export function registerAllTools(server: McpServer, taskManager: TaskManager): void {
+export function registerAllTools(server: McpServer, taskManager: TaskManager, socketManager?: SocketManager): void {
   for (const def of SIMPLE_TOOL_DEFS) {
     registerSimpleTool(server, taskManager, def);
   }
@@ -92,4 +100,7 @@ export function registerAllTools(server: McpServer, taskManager: TaskManager): v
   createImage(server, taskManager);
   exportAsset(server, taskManager);
   exportFile(server, taskManager);
+  if (socketManager !== undefined) {
+    listClients(server, socketManager);
+  }
 }

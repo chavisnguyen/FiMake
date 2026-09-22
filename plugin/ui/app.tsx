@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import type { JSX } from "react";
-import type { UiResizeRequest } from "../main/types";
-import { connectTaskSocket, type SettleStatus } from "./adapters/taskSocket";
+import { on } from "@create-figma-plugin/utilities";
+import type { FileInfoHandler, UiResizeRequest } from "../main/types";
+import { connectTaskSocket, type SettleStatus, type TaskSocketHandle } from "./adapters/taskSocket";
 import {
   MAX_TASKS,
   appendTask,
   clearFinished,
   createTask,
   filterTasks,
+  isFileInfo,
+  projectLabel,
   resolveSocketUrl,
   settleTask,
   statusLabel,
+  type FileInfo,
   type Task,
   type TaskFilter,
 } from "./domain/tasks";
@@ -74,7 +78,9 @@ export function App(): JSX.Element {
   const [filter, setFilter] = useState<TaskFilter>("all");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [serverUrl] = useState(resolveSocketUrl);
+  const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
+  const socketRef = useRef<TaskSocketHandle | null>(null);
 
   useEffect(() => {
     document.body.dataset.status = connected ? "online" : "offline";
@@ -95,8 +101,34 @@ export function App(): JSX.Element {
         setTasks((prev) => settleTask(prev, taskId, status, note));
       },
     });
-    return () => handle.disconnect();
+    socketRef.current = handle;
+    return () => {
+      socketRef.current = null;
+      handle.disconnect();
+    };
   }, [serverUrl]);
+
+  // Main thread posts FILE_INFO once on startup ("tao là file X").
+  // Show it in the pill + forward it to the server as client-hello so
+  // /health can tell multiple open files apart.
+  useEffect(() => {
+    const off = on<FileInfoHandler>("FILE_INFO", (msg) => {
+      if (!isFileInfo(msg)) return;
+      const info: FileInfo =
+        typeof msg.fileKey === "string" && msg.fileKey.length > 0
+          ? { fileName: msg.fileName, fileKey: msg.fileKey }
+          : { fileName: msg.fileName };
+      setFileInfo(info);
+      socketRef.current?.announceFile(info);
+    });
+    return () => {
+      try {
+        (off as unknown as () => void)();
+      } catch {
+        // ignore — older utilities return void
+      }
+    };
+  }, []);
 
   function showConsole(): void {
     setView("console");
@@ -115,16 +147,18 @@ export function App(): JSX.Element {
   // settleTask stamps duration from the task's startedAt.
   const visibleTasks = filterTasks(tasks, filter);
   const label = statusLabel(connected);
+  const project = projectLabel(fileInfo);
 
   return (
     <>
       <div id="dot-view" hidden={view !== "dot"}>
-        <button id="dot" aria-label={`Fimake status — ${label}`} onClick={showConsole}>
+        <button id="dot" aria-label={`Fimake status — ${label}${project ? ` — ${project}` : ""}`} onClick={showConsole}>
           <span id="dot-logo" aria-hidden="true">
             <LogoSvg size={20} />
           </span>
           <span id="dot-body">
             <span id="dot-title">Fimake</span>
+            {project ? <span id="dot-project">{project}</span> : null}
             <span id="dot-status">
               <span id="dot-status-dot" />
               <span id="dot-status-label">{label}</span>
@@ -143,6 +177,7 @@ export function App(): JSX.Element {
           <div id="brand-text">
             <div id="brand-title">Fimake</div>
             <div id="status-text">{connected ? "Connected to MCP server" : "Not connected to MCP server"}</div>
+            {project ? <div id="project-text">{project}</div> : null}
           </div>
           <button id="collapse" aria-label="Collapse to status pill" onClick={showDot}>
             –

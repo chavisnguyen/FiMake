@@ -19,13 +19,13 @@ hero:
 features:
   - icon: "🎨"
     title: Write, not just read
-    details: 27 tools — create frames, rectangles, text, components, instances, prototype links, colors, layout, and more. The official MCP server can't change anything; Fimake can.
+    details: 28 tools — create frames, rectangles, text, components, instances, prototype links, colors, layout, and more. The official MCP server can't change anything; Fimake can.
   - icon: "🔌"
     title: One port, two transports
     details: A single Hono + Socket.IO server on PORT 10101 serves the MCP endpoint (/mcp) and the Figma plugin bridge. stdio for local clients, streamable-http for Inspector and HTTP clients.
   - icon: "🛡️"
     title: Contract-tested parity
-    details: 23 tools forward directly to the plugin, 4 have Node-side logic. Parity is enforced by mcp/tests/contract/mcp-tools.test.ts so agents never hit a ghost tool.
+    details: 23 tools forward directly to the plugin, 5 have Node-side logic. Parity is enforced by mcp/tests/contract/mcp-tools.test.ts so agents never hit a ghost tool.
 ---
 
 ## How it works

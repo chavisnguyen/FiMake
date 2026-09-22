@@ -21,3 +21,12 @@ export interface TaskFailedHandler extends EventHandler, FromPluginMessage {
 export interface UiResizeRequest {
   type: 'expand' | 'collapse'
 }
+
+/** Main -> UI: which Figma file this plugin window is attached to.
+ *  The UI iframe can't read it directly, so main posts it once on startup.
+ *  `fileKey` is stable across renames, `fileName` is what we display. */
+export interface FileInfoHandler extends EventHandler {
+  name: 'FILE_INFO'
+  fileName: string
+  fileKey?: string
+}

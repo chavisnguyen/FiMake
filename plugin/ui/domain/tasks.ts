@@ -134,3 +134,21 @@ export function resolveSocketUrl(search: string = window.location.search): strin
 export function statusLabel(connected: boolean): string {
   return connected ? "Connected — click to open" : "Not connected — click to open";
 }
+
+/** Which Figma file this plugin window belongs to (posted by main thread). */
+export interface FileInfo {
+  fileName: string;
+  fileKey?: string;
+}
+
+export function isFileInfo(value: unknown): value is FileInfo {
+  if (typeof value !== "object" || value === null) return false;
+  const rec = value as Record<string, unknown>;
+  return typeof rec.fileName === "string" && rec.fileName.length > 0;
+}
+
+/** "project: Landing page" — empty string until main posts FILE_INFO. */
+export function projectLabel(info: FileInfo | null): string {
+  if (info === null || info.fileName.length === 0) return "";
+  return `project: ${info.fileName.length > 40 ? `${info.fileName.slice(0, 40)}…` : info.fileName}`;
+}

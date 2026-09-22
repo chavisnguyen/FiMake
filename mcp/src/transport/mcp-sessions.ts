@@ -169,7 +169,7 @@ export class McpSessionStore {
                 return;
             }
             // New initialization request — fresh protocol server per session.
-            const mcpServer = createMcpServer(this.bridge.taskManager);
+            const mcpServer = createMcpServer(this.bridge.taskManager, this.bridge.socketManager);
             let transport!: StreamableHTTPServerTransport;
             transport = new StreamableHTTPServerTransport({
                 sessionIdGenerator: () => generateUUID(),

@@ -9,7 +9,7 @@ const { captured } = vi.hoisted(() => ({ captured: { events: null as TaskSocketE
 vi.mock("../../ui/adapters/taskSocket", () => ({
   connectTaskSocket: vi.fn((_url: string, events: TaskSocketEvents) => {
     captured.events = events;
-    return { disconnect: vi.fn() };
+    return { disconnect: vi.fn(), announceFile: vi.fn() };
   }),
 }));
 

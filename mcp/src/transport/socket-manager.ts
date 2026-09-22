@@ -1,9 +1,18 @@
 import type { FromPluginMessage } from "@shared/types";
 import { FromPluginMessageSchema } from "../shared/types/transport/from-plugin";
+import { SOCKET_EVENTS, isPluginClientInfo, isTaskTarget, matchesTarget, type PluginClientInfo, type TaskTarget } from "../shared/types/transport/socket-protocol";
 import type { Server, Socket } from "socket.io";
 import { debugLog, infoLog } from "../shared/log";
 
 type SocketMessage = "start-task" | "task-finished" | "task-failed";
+
+/** One connected plugin window (one open Figma file = one socket). */
+export interface PluginClient {
+  socketId?: string;
+  fileName?: string;
+  fileKey?: string;
+  connectedAt: number;
+}
 
 interface QueuedMessage {
     message: SocketMessage;
@@ -19,6 +28,41 @@ function taskIdOf(data: unknown): string | undefined {
         return undefined;
     }
     return typeof data.id === "string" ? data.id : undefined;
+}
+
+/** File identity the UI may already know at handshake time (optional). */
+function readAuthInfo(socket: Socket): PluginClientInfo {
+    try {
+        const auth = (socket as unknown as { handshake?: { auth?: unknown } }).handshake?.auth;
+        if (isPluginClientInfo(auth)) return pickClientInfo(auth);
+    } catch {
+        // ignore — hello event below is the main path
+    }
+    return {};
+}
+
+function pickClientInfo(info: PluginClientInfo): PluginClientInfo {
+    const out: PluginClientInfo = {};
+    if (typeof info.fileName === "string") out.fileName = info.fileName.slice(0, 200);
+    if (typeof info.fileKey === "string") out.fileKey = info.fileKey.slice(0, 200);
+    return out;
+}
+
+/** Routing target carried by a `start-task` envelope, if any. */
+function targetOf(data: unknown): TaskTarget | undefined {
+    if (typeof data !== "object" || data === null || !("target" in data)) {
+        return undefined;
+    }
+    const target = (data as { target?: unknown }).target;
+    return isTaskTarget(target) ? target : undefined;
+}
+
+/** Human summary for logs: fileKey preferred, else fileName. */
+function describeTarget(target: TaskTarget): string {
+    if (typeof target.fileKey === "string" && target.fileKey.length > 0) {
+        return `fileKey ${target.fileKey}`;
+    }
+    return `fileName ${target.fileName ?? "(unknown)"}`;
 }
 
 // Socket manager is the abstraction layer on top of the socket.io library.
@@ -45,6 +89,13 @@ export class SocketManager {
         this.server.on('connection', (socket) => {
             this.sockets.add(socket);
             this.activeSocket = socket;
+            // Register the window immediately (even before it announces its
+            // file name) so getClients() reflects connection count. Auth may
+            // already carry file info when the UI knew it at connect time.
+            this.clients.set(socket, {
+                ...readAuthInfo(socket),
+                connectedAt: Date.now(),
+            });
             this.pruneExpired();
             if (this.pending.size > 0) {
                 infoLog(`Plugin connected; flushing ${this.pending.size} queued message(s).`);
@@ -53,11 +104,28 @@ export class SocketManager {
 
             socket.on('disconnect', () => {
                 this.sockets.delete(socket);
+                this.clients.delete(socket);
                 if (this.activeSocket === socket) {
                     // Fall back to another connected plugin if one exists.
                     const next = this.sockets.values().next();
                     this.activeSocket = next.done ? null : (next.value as Socket);
                 }
+            });
+
+            // A plugin window announces "tao là file X" after the main
+            // thread posts FILE_INFO to the UI. Updates the entry created
+            // above — never creates duplicates on re-announce. Then retries
+            // pending tasks: a task targeted at this file may have been
+            // waiting for it to appear.
+            socket.on(SOCKET_EVENTS.CLIENT_HELLO, (data: unknown) => {
+                if (!isPluginClientInfo(data)) {
+                    console.error('Ignoring malformed client-hello payload:', data);
+                    return;
+                }
+                const prev = this.clients.get(socket) ?? { connectedAt: Date.now() };
+                this.clients.set(socket, { ...prev, ...pickClientInfo(data) });
+                debugLog(`Plugin hello: ${data.fileName ?? "(unnamed)"} ${data.fileKey ?? ""}`.trim());
+                if (this.pending.size > 0) this.flushPending();
             });
 
             socket.on('task-finished', (data: unknown) => {
@@ -114,10 +182,27 @@ export class SocketManager {
     }
 
     private deliver(message: SocketMessage, data: unknown) {
-        // Broadcast to all connected plugin sockets (if multiple Figma windows open)
-        // instead of single activeSocket — prevents race where second window never
+        // Default: broadcast to all connected plugin sockets (if multiple
+        // Figma windows open) — prevents race where second window never
         // receives tasks. Ack from any socket clears the pending queue.
-        const targets = [...this.sockets];
+        // Targeted tasks (targetFileKey/targetFileName) go only to matching
+        // windows; with no match yet the entry stays queued so it fires
+        // when the right file connects (or times out via TaskManager).
+        let targets = [...this.sockets];
+        const target = message === 'start-task' ? targetOf(data) : undefined;
+        if (target !== undefined) {
+            targets = targets.filter((sock) => {
+                const info = this.clients.get(sock);
+                return info !== undefined && matchesTarget(info, target);
+            });
+            if (targets.length === 0) {
+                const known = [...this.clients.values()]
+                    .map((c) => c.fileName ?? "(unnamed)")
+                    .join(", ") || "(no windows connected)";
+                console.warn(`[fimake] No plugin matches target ${describeTarget(target)} (connected: ${known}); keeping task ${taskIdOf(data) ?? "unknown"} queued.`);
+                return;
+            }
+        }
         if (targets.length === 0) {
             if (message === 'start-task') {
                 console.warn(`[fimake] No plugin connected; queuing "${message}" (task ${taskIdOf(data) ?? "unknown"}) for the next connection.`);
@@ -174,9 +259,31 @@ export class SocketManager {
         return this.pending.size;
     }
 
+    /** Snapshot of connected plugin windows (one per open Figma file). */
+    public getClients(): PluginClient[] {
+        return [...this.clients.entries()].map(([socket, info]) => {
+            const socketId = (socket as unknown as { id?: unknown }).id;
+            return {
+                ...(typeof socketId === "string" ? { socketId } : {}),
+                ...(info.fileName !== undefined ? { fileName: info.fileName } : {}),
+                ...(info.fileKey !== undefined ? { fileKey: info.fileKey } : {}),
+                connectedAt: info.connectedAt,
+            };
+        });
+    }
+
+    public getClientCount(): number {
+        return this.clients.size;
+    }
+
+    public isPluginConnected(): boolean {
+        return this.clients.size > 0;
+    }
+
     private server: Server;
     private activeSocket: Socket | null = null;
     private sockets = new Set<Socket>();
+    private clients = new Map<Socket, PluginClientInfo & { connectedAt: number }>();
     private ackTimeoutMs: number;
     private pendingTtlMs: number;
     private maxRetries: number;

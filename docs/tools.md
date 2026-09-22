@@ -1,6 +1,6 @@
-# Tools (27)
+# Tools (28)
 
-23 tools forward directly to the plugin (`name` = task command), 4 have extra Node-side logic.
+23 tools forward directly to the plugin (`name` = task command), 5 have extra Node-side logic.
 
 Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_ONLY_TOOLS` in `mcp/src/tools/registry.ts`.
 
@@ -33,6 +33,15 @@ Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_
 | `create-image` | node+plugin | Fetches `url` in Node (no CORS), forwards `imageData` bytes to plugin. |
 | `export-asset` | node+plugin | Rendered asset with real path data (`SVG` markup or `PNG`/`JPG` base64, `scale` max 4). With `outputPath`, writes to disk and returns `{path, bytes}` (max 20MB). |
 | `export-file` | node-only | Fans out over `get-pages` + `get-node-info` and writes one JSON per top-level frame + `manifest.json`. Params: `outputDir` (default `<cwd>/exports/export-<ts>`), `maxNodes` (default 5000), `maxChars` (default 35000). Guarded: max 500 frames, all writes confined to `outputDir`. No plugin handler by design. |
+| `list-clients` | node-only | List open Figma files with the plugin connected (one entry per window: `fileName`, `fileKey`, `connectedAt`). No plugin handler by design. |
+
+## Multi-window targeting
+
+Every tool accepts `targetFileKey` (stable id, preferred) and `targetFileName` (human fallback). Both omitted = broadcast to all connected windows (old behavior).
+
+1. Call `list-clients` to see what's open.
+2. Pass `targetFileKey` on every follow-up call so only that file executes.
+3. A task targeted at a file that isn't open yet stays queued and fires when its window connects (or times out via `TASK_TIMEOUT_MS`).
 
 ## Tips
 
