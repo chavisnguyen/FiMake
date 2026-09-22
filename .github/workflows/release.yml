@@ -1,7 +1,15 @@
 name: Release assets
 # User flow: create a GitHub Release (tag, e.g. v1.0.0) -> this workflow
 # gates, builds standalone MCP binaries (no Node/npm needed by users) +
-# the sideload plugin zip, and attaches everything to the Release.
+# the sideload plugin zip, attaches everything to the Release, and THEN
+# bumps the Homebrew tap. Strict job order in one workflow:
+#   gate -> {plugin-zip, binary} -> attach -> bump-tap
+# (bump-tap used to be a separate workflow racing release.yml on the same
+# `release: published` event with a 30-minute polling loop — now it simply
+# `needs: [attach]`, so the tap can never point at missing assets.)
+# Requires repo secret TAP_TOKEN: a PAT (classic, `repo` scope — or
+# fine-grained with contents:write on homebrew-fimake), because the default
+# GITHUB_TOKEN cannot push to another repository.
 on:
   release:
     types: [published]
@@ -136,3 +144,50 @@ jobs:
         # NOTE: --repo is required — this job has no checkout, so gh
         # cannot resolve the repo from git remotes.
         run: gh release upload ${{ github.ref_name }} assets/* --clobber --repo chavisnguyen/FiMake
+
+  bump-tap:
+    # Runs only after attach: the tap formula points at release download URLs,
+    # so it must never update before the binaries exist (no polling needed).
+    needs: [attach]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release binaries + bump tap formula
+        env:
+          GH_TOKEN: ${{ secrets.TAP_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ github.ref_name }}"   # e.g. v1.0.0
+          WORK=$(mktemp -d)
+          cd "$WORK"
+          # attach already finished in this workflow run — single download, no retry loop.
+          gh release download "$TAG" --repo chavisnguyen/FiMake \
+            --pattern 'fimake-macos-arm64' \
+            --pattern 'fimake-macos-x64' \
+            --pattern 'fimake-linux-x64'
+          test -f fimake-macos-arm64 && test -f fimake-macos-x64 && test -f fimake-linux-x64
+          SHA_ARM=$(sha256sum fimake-macos-arm64 | cut -d' ' -f1)
+          SHA_INTEL=$(sha256sum fimake-macos-x64 | cut -d' ' -f1)
+          SHA_LINUX=$(sha256sum fimake-linux-x64 | cut -d' ' -f1)
+          git clone "https://${GH_TOKEN}@github.com/chavisnguyen/homebrew-fimake" tap --depth 1
+          cd tap
+          git checkout master
+          python3 - "$TAG" "$SHA_ARM" "$SHA_INTEL" "$SHA_LINUX" <<'EOF'
+          import re, sys
+          tag, arm, intel, linux = sys.argv[1:5]
+          p = "Formula/fimake.rb"
+          s = open(p).read()
+          s = re.sub(r"https://github\.com/chavisnguyen/FiMake/releases/download/[^/\"']+/fimake-macos-arm64",
+                     f"https://github.com/chavisnguyen/FiMake/releases/download/{tag}/fimake-macos-arm64", s)
+          s = re.sub(r"https://github\.com/chavisnguyen/FiMake/releases/download/[^/\"']+/fimake-macos-x64",
+                     f"https://github.com/chavisnguyen/FiMake/releases/download/{tag}/fimake-macos-x64", s)
+          s = re.sub(r"https://github\.com/chavisnguyen/FiMake/releases/download/[^/\"']+/fimake-linux-x64",
+                     f"https://github.com/chavisnguyen/FiMake/releases/download/{tag}/fimake-linux-x64", s)
+          s = re.sub(r'(fimake-macos-arm64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{arm}", s)
+          s = re.sub(r'(fimake-macos-x64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{intel}", s)
+          s = re.sub(r'(fimake-linux-x64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{linux}", s)
+          open(p, "w").write(s)
+          EOF
+          git diff --stat
+          git add Formula/fimake.rb
+          git -c "user.name=fimake-bot" -c "user.email=fimake-bot@users.noreply.github.com" \
+            commit -m "fimake ${TAG}" && git push || echo "nothing to bump"
