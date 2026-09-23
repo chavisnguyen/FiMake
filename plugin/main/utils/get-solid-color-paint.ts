@@ -10,7 +10,7 @@ export function getSolidColorPaint(color: Rgba): SolidPaint {
             g: color.g,
             b: color.b,
         },
-        opacity: color.a || 1,
+        opacity: color.a ?? 1,
     } as SolidPaint;
 }
 

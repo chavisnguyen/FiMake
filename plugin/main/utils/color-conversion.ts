@@ -25,6 +25,6 @@ export function convertToHex(color: Rgba): ColorHex {
     const r = Math.round(color.r * 255).toString(16).padStart(2, '0');
     const g = Math.round(color.g * 255).toString(16).padStart(2, '0');
     const b = Math.round(color.b * 255).toString(16).padStart(2, '0');
-    const a = color.a ? Math.round(color.a * 255).toString(16).padStart(2, '0') : 'FF';
+    const a = color.a !== undefined ? Math.round(color.a * 255).toString(16).padStart(2, '0') : 'FF';
     return `#${r}${g}${b}${a}`;
 }

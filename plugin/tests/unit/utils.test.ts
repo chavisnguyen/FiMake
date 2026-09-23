@@ -13,8 +13,9 @@ describe("convertToHex", () => {
     expect(convertToHex({ r: 0, g: 0, b: 0 })).toBe("#000000FF");
     expect(convertToHex({ r: 1, g: 1, b: 1, a: 1 })).toBe("#ffffffFF".toLowerCase());
   });
-  it("missing/zero alpha falls back to FF (documents a:0 bug)", () => {
-    expect(convertToHex({ r: 0, g: 0, b: 0, a: 0 })).toBe("#000000FF");
+  it("missing alpha falls back to FF, zero alpha stays 00", () => {
+    expect(convertToHex({ r: 0, g: 0, b: 0 })).toBe("#000000FF");
+    expect(convertToHex({ r: 0, g: 0, b: 0, a: 0 })).toBe("#00000000");
   });
 });
 
@@ -53,8 +54,10 @@ describe("getSolidColorPaint", () => {
   it("builds SOLID paint with opacity from alpha", () => {
     expect(getSolidColorPaint({ r: 1, g: 0, b: 0, a: 0.5 })).toMatchObject({ type: "SOLID", opacity: 0.5 });
   });
-  it("defaults opacity 1 when alpha missing (and when a=0 due to ||)", () => {
+  it("defaults opacity 1 only when alpha is missing; a=0 is fully transparent", () => {
     expect(getSolidColorPaint({ r: 0, g: 0, b: 0 }).opacity).toBe(1);
+    expect(getSolidColorPaint({ r: 0, g: 0, b: 0, a: 0 }).opacity).toBe(0);
+    expect(getSolidHEXColorPaint("#FFFFFF00").opacity).toBe(0);
   });
   it("getSolidHEXColorPaint parses hex then builds paint", () => {
     expect(getSolidHEXColorPaint("#ff0000FF")).toMatchObject({ type: "SOLID" });
