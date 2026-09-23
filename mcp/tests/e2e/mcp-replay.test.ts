@@ -77,7 +77,6 @@ import { SIMPLE_TOOL_DEFS, NODE_WRAPPED_TOOLS } from "../../src/tools/registry";
 const INTENTIONALLY_UNRECORDED = new Set([
   "create-image", // needs live network fetch, never recorded by design
   "list-clients", // node-only: reads bridge state, no plugin round-trip to record
-  "create-svg", // TODO: record fixture (pnpm record:e2e with Figma Connected), then remove
 ]);
 
 function fixtureFiles(): string[] {

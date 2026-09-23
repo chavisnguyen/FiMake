@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "command": "create-svg",
+    "recordedAt": "2026-09-23T07:21:17.503Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "create-svg",
+    "args": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\"><circle cx=\"12\" cy=\"12\" r=\"10\" fill=\"#0A84FF\"/></svg>",
+      "name": "e2e-svg",
+      "x": 300,
+      "y": 300,
+      "parentId": "2066:12776"
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": {
+      "id": "2066:12777",
+      "x": 300,
+      "y": 300,
+      "width": 24,
+      "height": 24,
+      "name": "e2e-svg",
+      "parentId": "2066:12776:FRAME"
+    }
+  }
+}
