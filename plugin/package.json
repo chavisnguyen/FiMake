@@ -1,6 +1,6 @@
 {
   "name": "fimake-plugin",
-  "version": "1.0.37",
+  "version": "1.0.38",
   "type": "module",
   "description": "Fimake plugin bridge for working with Figma documents via MCP",
   "scripts": {
