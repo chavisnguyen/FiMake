@@ -130,27 +130,28 @@ Full client configs, env table, and custom `PORT` checklist live in [docs/usage.
 |---|---|
 | [Quickstart](docs/quickstart.md) | 5-minute install (plugin + server + client config) |
 | [docs/usage.md](docs/usage.md) | Full setup, HTTP + `stdio` configs, env table, custom `PORT` |
-| [docs/tools.md](docs/tools.md) | All 34 tools reference |
+| [docs/tools.md](docs/tools.md) | All 35 tools reference |
 | [docs/architecture.md](docs/architecture.md) | Bridge, task map, diagrams, security |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | `Not connected`, port in use, timeouts, logs |
 | [docs/development.md](docs/development.md) | Contributor guide: `make` targets, watch mode, tests, architecture |
 
 ## Tools
 
-34 tools: 27 forward directly to the plugin (`name` = task command), 7 have extra Node-side logic.
+35 tools: 28 forward directly to the plugin (`name` = task command), 7 have extra Node-side logic.
 
 Every tool accepts `targetFileKey` / `targetFileName` to pin a task to one open Figma file — call `list-clients` first, omit both to broadcast (see [docs/tools.md](docs/tools.md#multi-window-targeting)).
 
 | Tool | Side | Description |
 |---|---|---|
 | `create-rectangle` | plugin | Create a rectangle. |
-| `create-frame` | plugin | Create a frame. |
+| `create-frame` | plugin | Create a frame (default white fill — `set-fill-color #00000000` for a transparent container). |
 | `create-text` | plugin | Create a text node. Typography: `fontName` + `fontWeight` or exact `fontStyle`, `fontSize`, `lineHeight` (px), `letterSpacing` (%), `textAlign`. Layout: `width` wraps text, `maxLines` truncates with an ellipsis. |
 | `create-instance` | plugin | Create an instance. |
 | `create-component` | plugin | Create a component. |
 | `clone-node` | plugin | Clone a node. |
 | `add-component-property` | plugin | Add a component property. |
 | `add-prototype-link` | plugin | Add a prototype interaction (click to navigate) between two nodes. |
+| `batch-create` | plugin | Build a subtree in ONE call, in order: up to 50 `{ op, ref?, params }` (ops = create-frame/rectangle/text, set-layout, set-fill-color, set-fill-gradient, set-stroke-color, set-effects, set-corner-radius, set-text-style, set-parent-id). Later ops use `"$ref"` as `id`/`parentId`. Stops at the first failure with `{ failedIndex, reason, created }` (no rollback). |
 | `get-node-info` | plugin | Lean layout/colors/content. `depth`: 0 = node only, N = N levels, -1 = full subtree. `maxNodes` (default 10000) + `maxChars` (default 35000) cap size; overflow becomes `_truncated` stubs with `childrenTruncated: true` and root `_truncatedCount` — re-request flagged ids. `fields` limits groups. |
 | `get-pages` | plugin | Get all pages in the current file. |
 | `get-all-components` | plugin | Get all components in the current file. |

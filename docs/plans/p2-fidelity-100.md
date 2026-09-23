@@ -279,6 +279,13 @@ File changes: shared `text-style.ts` fields + extend create-text + new
 
 ## 7. P2.5 Batch-create (call-count killer)
 
+**Status: done (2026-09-23)** — verified on real Figma: Netflix Email Row (input +
+button, strokes, radius, shadow, 3 auto-layouts) in ONE call, order correct first try;
+a 50-op batch (24 texts + 24 rects) finished in ~1.5s, far under the 20s timeout; a
+mid-batch unknown `$ref` stops with `failedIndex` + `created`. `op` = tool name so the
+plugin reuses TOOL_HANDLERS; ops added beyond the plan: set-fill-gradient, set-effects,
+set-corner-radius, set-text-style, set-parent-id (one schema line each).
+
 Unlocks: Netflix page (~120 calls → ~10), removes parallel-call ordering races.
 
 Key requirement the original draft missed: ops must reference nodes created by
@@ -421,6 +428,6 @@ The agent finishes each item with `make check` green and writes a short handoff
 list in the final message:
 - tools added to `INTENTIONALLY_UNRECORDED` with TODO → record via
   `pnpm record:e2e` (see `mcp/tests/e2e/README.md`), then remove from the set;
-- *verify in E2E* items: P2.5 50-op batch duration vs 20s timeout;
+- *verify in E2E* items: none left (all verified 2026-09-23);
 - infra spike (§8) measurements — needs the heavy Draft file, human-run;
 - manual E2E checklist §10.

@@ -36,7 +36,7 @@ git diff mcp/tests/e2e/fixtures  # review thay đổi data thật sau khi sửa 
 An toàn: mọi write-tool chạy trong frame `fimake-e2e-sandbox` ở (-5000,-5000),
 cuối script tự xóa — file của bạn không dính rác.
 
-Phủ 31/33 tools. Ngoại lệ có chủ đích:
+Phủ 32/34 tools. Ngoại lệ có chủ đích:
 - `create-image` và `set-image-fill` KHÔNG record (fetch URL ngoài + nhét ảnh lạ vào file).
   E2E dùng nó làm case fail-fast.
 - `export-file` (node-only fan-out) chỉ lock shape summary, không deep-equal

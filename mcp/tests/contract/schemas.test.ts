@@ -25,6 +25,7 @@ import { SetFillGradientParamsSchema } from "../../src/shared/types/params/updat
 import { SetImageFillParamsSchema } from "../../src/shared/types/params/update/set-image-fill";
 import { SetTextStyleParamsSchema } from "../../src/shared/types/params/update/set-text-style";
 import { ListFontsParamsSchema } from "../../src/shared/types/params/read/list-fonts";
+import { BatchCreateParamsSchema } from "../../src/shared/types/params/create/batch-create";
 import { SetCornerRadiusParamsSchema } from "../../src/shared/types/params/update/set-corner-radius";
 import { SetLayoutParamsSchema } from "../../src/shared/types/params/update/set-layout";
 import { SetParentIdParamsSchema } from "../../src/shared/types/params/update/set-parent-id";
@@ -153,6 +154,25 @@ describe("delete/update schemas", () => {
     expect(SetTextStyleParamsSchema.parse({ id: "1:1" })).toEqual({ id: "1:1" });
     expect(() => SetTextStyleParamsSchema.parse({ id: "1:1", textAlign: "TOP" })).toThrow();
     expect(ListFontsParamsSchema.parse({})).toEqual({});
+  });
+  it("batch-create: known ops only, $ref ids, 1..50 ops, per-op schema defaults still apply", () => {
+    const ok = BatchCreateParamsSchema.parse({
+      operations: [
+        { op: "create-frame", ref: "row", params: { x: 0, y: 0, width: 600, height: 56 } },
+        { op: "create-text", params: { x: 0, y: 0, text: "Email", parentId: "$row" } },
+        { op: "set-layout", params: { id: "$row", mode: "HORIZONTAL" } },
+        { op: "set-parent-id", params: { id: "$row", parentId: "1:2", index: 0 } },
+      ],
+    });
+    expect(ok.operations[1]?.params).toMatchObject({ fontName: "Inter", parentId: "$row" });
+    const one = (o: unknown) => ({ operations: [o] });
+    expect(() => BatchCreateParamsSchema.parse(one({ op: "delete-node", params: { id: "1:1" } }))).toThrow();
+    expect(() => BatchCreateParamsSchema.parse(one({ op: "set-layout", params: { id: "row", mode: "HORIZONTAL" } }))).toThrow();
+    expect(() => BatchCreateParamsSchema.parse(one({ op: "create-frame", ref: "bad ref", params: { x: 0, y: 0, width: 1, height: 1 } }))).toThrow();
+    expect(() => BatchCreateParamsSchema.parse({ operations: [] })).toThrow();
+    const frame = { op: "create-frame", params: { x: 0, y: 0, width: 1, height: 1 } };
+    expect(() => BatchCreateParamsSchema.parse({ operations: Array(51).fill(frame) })).toThrow();
+    expect(() => BatchCreateParamsSchema.parse({ operations: Array(50).fill(frame) })).not.toThrow();
     expect(() => SetInstancePropertiesParamsSchema.parse({ instanceId: "1:1", properties: { a: 1 } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { characters: "prop" } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { bogus: "x" } })).toThrow();

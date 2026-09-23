@@ -1,0 +1,98 @@
+{
+  "_meta": {
+    "command": "batch-create",
+    "recordedAt": "2026-09-23T11:33:12.933Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "batch-create",
+    "args": {
+      "operations": [
+        {
+          "op": "create-frame",
+          "ref": "row",
+          "params": {
+            "x": 10,
+            "y": 200,
+            "width": 300,
+            "height": 48,
+            "name": "e2e-batch-row",
+            "parentId": "2071:12891"
+          }
+        },
+        {
+          "op": "create-rectangle",
+          "ref": "input",
+          "params": {
+            "x": 0,
+            "y": 0,
+            "width": 200,
+            "height": 48,
+            "name": "e2e-batch-input",
+            "parentId": "$row"
+          }
+        },
+        {
+          "op": "create-text",
+          "params": {
+            "x": 0,
+            "y": 0,
+            "text": "Go",
+            "name": "e2e-batch-label",
+            "parentId": "$row"
+          }
+        },
+        {
+          "op": "set-layout",
+          "params": {
+            "id": "$row",
+            "mode": "HORIZONTAL",
+            "itemSpacing": 8
+          }
+        },
+        {
+          "op": "set-corner-radius",
+          "params": {
+            "id": "$input",
+            "cornerRadius": 4
+          }
+        }
+      ]
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": {
+      "created": [
+        {
+          "index": 0,
+          "op": "create-frame",
+          "id": "2071:12892",
+          "ref": "row"
+        },
+        {
+          "index": 1,
+          "op": "create-rectangle",
+          "id": "2071:12893",
+          "ref": "input"
+        },
+        {
+          "index": 2,
+          "op": "create-text",
+          "id": "2071:12894"
+        },
+        {
+          "index": 3,
+          "op": "set-layout",
+          "id": "2071:12892"
+        },
+        {
+          "index": 4,
+          "op": "set-corner-radius",
+          "id": "2071:12893"
+        }
+      ]
+    }
+  }
+}

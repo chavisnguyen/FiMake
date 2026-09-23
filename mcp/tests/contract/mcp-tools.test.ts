@@ -38,6 +38,7 @@ const SAMPLE_PARAMS: Record<string, Record<string, unknown>> = {
   "clone-node": { id: "1:2" },
   "add-component-property": { componentId: "1:1", name: "n", type: "BOOLEAN", defaultValue: "true" },
   "add-prototype-link": { nodeId: "1:1", destinationId: "2:2" },
+  "batch-create": { operations: [{ op: "create-frame", ref: "row", params: { x: 0, y: 0, width: 10, height: 10 } }, { op: "set-layout", params: { id: "$row", mode: "HORIZONTAL" } }] },
   "get-node-info": { id: "1:1" },
   "get-pages": {},
   "get-all-components": {},

@@ -7,6 +7,7 @@ import { withTarget } from "./target";
 import {
   AddComponentPropertyParamsSchema,
   AddPrototypeLinkParamsSchema,
+  BatchCreateParamsSchema,
   CloneNodeParamsSchema,
   CreateComponentParamsSchema,
   CreateFrameParamsSchema,
@@ -65,13 +66,14 @@ export interface SimpleToolDef {
 
 export const SIMPLE_TOOL_DEFS: SimpleToolDef[] = [
   { name: "create-rectangle", description: "Create a rectangle.", shape: CreateRectangleParamsSchema.shape },
-  { name: "create-frame", description: "Create a frame.", shape: CreateFrameParamsSchema.shape },
+  { name: "create-frame", description: "Create a frame. New frames get Figma's default white fill — use set-fill-color #00000000 for a transparent container (e.g. an auto-layout row).", shape: CreateFrameParamsSchema.shape },
   { name: "create-text", description: "Create a text node. Typography: `fontName` family + `fontWeight` (or exact `fontStyle` from list-fonts), `fontSize`, `lineHeight` px, `letterSpacing` %, `textAlign`. Layout: `width` = fixed width that wraps text; `maxLines` = ellipsis truncation.", shape: CreateTextParamsSchema.shape },
   { name: "create-instance", description: "Create a instance.", shape: CreateInstanceParamsSchema.shape },
   { name: "create-component", description: "Create a component.", shape: CreateComponentParamsSchema.shape },
   { name: "clone-node", description: "Clone a node.", shape: CloneNodeParamsSchema.shape },
   { name: "add-component-property", description: "Add a component property.", shape: AddComponentPropertyParamsSchema.shape },
   { name: "add-prototype-link", description: "Add a prototype interaction (click to navigate) between two nodes.", shape: AddPrototypeLinkParamsSchema.shape },
+  { name: "batch-create", description: "Build a whole subtree in ONE call, in order (no parallel-call ordering races). Up to 50 ops: { op, ref?, params } where op is create-frame / create-rectangle / create-text / set-layout / set-fill-color / set-fill-gradient / set-stroke-color / set-effects / set-corner-radius / set-text-style / set-parent-id and params are exactly that tool's params. Give an op a `ref` and later ops can pass \"$ref\" as id/parentId, e.g. create-frame ref \"row\" then create-text parentId \"$row\" then set-layout id \"$row\". Returns { created: [{ index, op, ref?, id }] }. Stops at the first failing op and returns { failedIndex, op, reason, created } — earlier ops are kept (no rollback).", shape: BatchCreateParamsSchema.shape },
   { name: "get-node-info", description: "Get layout, colors and content of a node (lean output). `depth`: 0 = this node only, N = N levels, -1 = FULL subtree to every leaf. Any node not fully expanded is marked `childrenTruncated: true` (re-request its id to cover it) so no element is ever dropped silently. `maxNodes` caps nodes per response (default 10000) and `maxChars` caps serialized size (default 35000, keeps the response inline); overflow becomes stubs marked `_truncated`, the parent gets `childrenTruncated: true`, and the root reports `_truncatedCount`. When `_truncatedCount` appears, re-request the flagged node ids to cover the rest. `fields` limits groups (geometry, layout, fills, strokes, effects, text, component, children).", shape: GetNodeInfoParamsSchema.shape },
   { name: "get-pages", description: "Get all pages in the current file.", shape: GetPagesParamsSchema.shape },
   { name: "get-all-components", description: "Get all components in the current file.", shape: GetAllComponentsParamsSchema.shape },

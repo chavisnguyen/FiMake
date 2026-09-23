@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   AddComponentPropertyParamsSchema,
   AddPrototypeLinkParamsSchema,
+  BatchCreateParamsSchema,
   CloneNodeParamsSchema,
   CreateComponentParamsSchema,
   CreateFrameParamsSchema,
@@ -44,6 +45,7 @@ import { createSvg } from "./create/create-svg";
 import { cloneNode } from "./create/clone-node";
 import { addComponentProperty } from "./create/add-component-property";
 import { addPrototypeLink } from "./create/add-prototype-link";
+import { batchCreate } from "./create/batch-create";
 import { getSelection } from "./read/get-selection";
 import { getNodeInfo } from "./read/get-node-info";
 import { getPages } from "./read/get-pages";
@@ -81,6 +83,7 @@ const PARAM_SCHEMAS: Record<string, z.ZodTypeAny> = {
   "clone-node": CloneNodeParamsSchema,
   "add-component-property": AddComponentPropertyParamsSchema,
   "add-prototype-link": AddPrototypeLinkParamsSchema,
+  "batch-create": BatchCreateParamsSchema,
   "get-node-info": GetNodeInfoParamsSchema,
   "get-pages": GetPagesParamsSchema,
   "get-all-components": GetAllComponentsParamsSchema,
@@ -160,6 +163,9 @@ export const TOOL_HANDLERS: Record<string, DispatchFn> = {
   "delete-node": wrap("delete-node", deleteNode),
   "delete-component-property": wrap("delete-component-property", deleteComponentProperty),
 };
+
+// Registered after the literal: batch-create dispatches its ops through this same map.
+TOOL_HANDLERS["batch-create"] = wrap("batch-create", (args: Parameters<typeof batchCreate>[0]) => batchCreate(args, TOOL_HANDLERS));
 
 /** Run one plugin task by command; unknown commands become a ToolResult error. */
 export async function dispatchTask(command: string, args: unknown): Promise<ToolResult> {

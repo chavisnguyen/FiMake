@@ -12,6 +12,7 @@ export * from './params/create/create-component';
 export * from './params/create/create-image';
 export * from './params/create/create-svg';
 export * from './params/create/add-prototype-link';
+export * from './params/create/batch-create';
 
 // Read
 export * from './params/read/get-node-info';

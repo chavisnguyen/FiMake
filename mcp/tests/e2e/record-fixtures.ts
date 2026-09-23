@@ -1,4 +1,4 @@
-// Record fixtures từ Figma THẬT — phủ full 33 tools.
+// Record fixtures từ Figma THẬT — phủ full 34 tools.
 //
 // Dùng khi: Figma Desktop đang mở + plugin Fimake (bản mới nhất) Connected.
 // Script gọi MCP server thật (nối plugin thật), dump response vào
@@ -148,6 +148,15 @@ async function main(): Promise<void> {
   if (textId) {
     await rec("set-text-style", { id: textId, width: 200, lineHeight: 20, letterSpacing: -1, textAlign: "CENTER", maxLines: 2 });
   }
+  await rec("batch-create", {
+    operations: [
+      { op: "create-frame", ref: "row", params: { x: 10, y: 200, width: 300, height: 48, name: "e2e-batch-row", parentId: sbId } },
+      { op: "create-rectangle", ref: "input", params: { x: 0, y: 0, width: 200, height: 48, name: "e2e-batch-input", parentId: "$row" } },
+      { op: "create-text", params: { x: 0, y: 0, text: "Go", name: "e2e-batch-label", parentId: "$row" } },
+      { op: "set-layout", params: { id: "$row", mode: "HORIZONTAL", itemSpacing: 8 } },
+      { op: "set-corner-radius", params: { id: "$input", cornerRadius: 4 } },
+    ],
+  });
   const comp = await rec("create-component", { name: "E2EComp", parentId: sbId });
   const compId = contentId(comp.content);
 
