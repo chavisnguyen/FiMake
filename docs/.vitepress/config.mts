@@ -7,6 +7,8 @@ export default defineConfig({
   description:
     "Let AI agents work directly in your Figma documents — create, edit, organize, and read.",
   base: "/FiMake/",
+  // Internal implementation plans live in the repo but not on the site.
+  srcExclude: ["plans/**"],
   lang: "en-US",
   lastUpdated: true,
   cleanUrls: false,
