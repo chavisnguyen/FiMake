@@ -158,4 +158,70 @@ describe("plugin branch coverage fill", () => {
     figma.getNodeByIdAsync.mockImplementation(async (id: string) => (id === "1:1" ? { id } : null));
     expect((await setParentId({ id: "1:1", parentId: "9:9" })).content).toBe("Parent node not found");
   });
+
+  describe("setParentId index + absolute", () => {
+    type Kid = SceneNodeStub & { parent: { id: string } | null };
+    function scene(layoutMode = "HORIZONTAL"): { parent: SceneNodeStub; kids: Kid[]; order: () => string[] } {
+      const kids: Kid[] = [];
+      const parent: SceneNodeStub = { id: "0:1", name: "Row", type: "FRAME", layoutMode, children: kids };
+      const detach = (k: Kid): void => {
+        const i = kids.indexOf(k);
+        if (i >= 0) kids.splice(i, 1);
+      };
+      parent["appendChild"] = vi.fn((k: Kid) => { detach(k); kids.push(k); k.parent = { id: parent.id }; });
+      // Mirrors real Figma (verified 2026-09-23): the index counts the node's old slot,
+      // i.e. insert first, then drop the original occurrence.
+      parent["insertChild"] = vi.fn((i: number, k: Kid) => {
+        const cur = kids.indexOf(k);
+        kids.splice(i, 0, k);
+        if (cur >= 0) kids.splice(cur < i ? cur : cur + 1, 1);
+        k.parent = { id: parent.id };
+      });
+      for (const id of ["1:1", "1:2", "1:3"]) kids.push({ id, name: id, type: "RECTANGLE", parent: { id: parent.id } });
+      const outsider: Kid = { id: "2:1", name: "bg", type: "RECTANGLE", parent: null };
+      getFigma().getNodeByIdAsync.mockImplementation(async (id: string) =>
+        id === parent.id ? parent : id === outsider.id ? outsider : kids.find((k) => k.id === id) ?? null);
+      return { parent, kids, order: () => kids.map((k) => k.id) };
+    }
+
+    it("reorders within the same parent and inserts a new child at an index", async () => {
+      const { order } = scene();
+      expect((await setParentId({ id: "1:3", parentId: "0:1", index: 0 })).isError).toBe(false);
+      expect(order()).toEqual(["1:3", "1:1", "1:2"]);
+      // `index` is the final position, also when moving later in the same parent.
+      await setParentId({ id: "1:3", parentId: "0:1", index: 2 });
+      expect(order()).toEqual(["1:1", "1:2", "1:3"]);
+      await setParentId({ id: "1:1", parentId: "0:1", index: 1 });
+      expect(order()).toEqual(["1:2", "1:1", "1:3"]);
+      await setParentId({ id: "1:2", parentId: "0:1", index: 0 });
+      expect(order()).toEqual(["1:2", "1:1", "1:3"]);
+      await setParentId({ id: "1:3", parentId: "0:1", index: 0 });
+      expect((await setParentId({ id: "2:1", parentId: "0:1", index: 0 })).isError).toBe(false);
+      expect(order()).toEqual(["2:1", "1:3", "1:2", "1:1"]);
+      await setParentId({ id: "1:2", parentId: "0:1" });
+      expect(order()).toEqual(["2:1", "1:3", "1:1", "1:2"]);
+    });
+
+    it("rejects out-of-range index (same parent max = length-1, new parent max = length) without moving", async () => {
+      const { order } = scene();
+      expect((await setParentId({ id: "1:1", parentId: "0:1", index: 3 })).content).toBe("index out of range (0..2)");
+      expect((await setParentId({ id: "2:1", parentId: "0:1", index: 4 })).content).toBe("index out of range (0..3)");
+      expect((await setParentId({ id: "2:1", parentId: "0:1", index: 3 })).isError).toBe(false);
+      expect(order()).toEqual(["1:1", "1:2", "1:3", "2:1"]);
+    });
+
+    it("absolute toggles layoutPositioning, requires an auto-layout parent", async () => {
+      const { kids } = scene();
+      await setParentId({ id: "1:1", parentId: "0:1", absolute: true });
+      expect(kids.find((k) => k.id === "1:1")?.["layoutPositioning"]).toBe("ABSOLUTE");
+      await setParentId({ id: "1:1", parentId: "0:1", absolute: false });
+      expect(kids.find((k) => k.id === "1:1")?.["layoutPositioning"]).toBe("AUTO");
+
+      const flat = scene("NONE");
+      const res = await setParentId({ id: "2:1", parentId: "0:1", absolute: true, index: 0 });
+      expect(res.isError).toBe(true);
+      expect(String(res.content)).toContain("auto-layout parent");
+      expect(flat.order()).toEqual(["1:1", "1:2", "1:3"]);
+    });
+  });
 });

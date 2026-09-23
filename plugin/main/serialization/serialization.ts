@@ -108,6 +108,7 @@ function serializeLayoutGroup(n: NodeRecord, _node: SceneNode, out: SerializedNo
     }
     if (n.layoutSizingHorizontal) out.layoutSizingHorizontal = n.layoutSizingHorizontal;
     if (n.layoutSizingVertical) out.layoutSizingVertical = n.layoutSizingVertical;
+    if (n.layoutPositioning === "ABSOLUTE") out.layoutPositioning = "ABSOLUTE";
 
     const cr = n.cornerRadius;
     if (cr === figma.mixed) {

@@ -160,7 +160,7 @@ Every tool accepts `targetFileKey` / `targetFileName` to pin a task to one open 
 | `set-stroke-color` | plugin | Set the stroke color of a node. |
 | `set-corner-radius` | plugin | Set the corner radius of a node. |
 | `set-layout` | plugin | Set the layout of a node. Turning auto-layout on keeps a FIXED frame's size on any axis whose `layoutSizing*` is omitted (Figma would default to HUG). |
-| `set-parent-id` | plugin | Set the parent id of a node. |
+| `set-parent-id` | plugin | Move a node into a parent or reorder it. `index` = position among children (0 = bottom of z-order, omit = append); `absolute` = ABSOLUTE positioning inside an auto-layout parent (overlays). |
 | `set-instance-properties` | plugin | Set the properties of an instance. |
 | `edit-component-property` | plugin | Edit a component property. |
 | `set-node-component-property-references` | plugin | Set the component property references of a node. |

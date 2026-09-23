@@ -96,7 +96,9 @@ Plugin `plugin/main/tools/update/set-parent-id.ts`:
   `parent.children.length - 1` when `node.parent === parent` (reorder); out of
   range → `isError "index out of range (0..max)"`; then
   `parent.insertChild(index, node)`. Omitted → `appendChild` (today).
-  Same-parent index semantics of `insertChild` are *verify in E2E*.
+  **Verified on real Figma (2026-09-23):** `insertChild` counts the node's own
+  old slot, so moving later in the same parent lands at `index - 1`. Handler adds
+  +1 in that case so `index` is always the final position. **Status: done.**
 - `absolute !== undefined` → requires parent `layoutMode !== "NONE"`, else
   `isError "absolute requires an auto-layout parent"`;
   `node.layoutPositioning = absolute ? "ABSOLUTE" : "AUTO"` (use `!== undefined`,
@@ -402,7 +404,6 @@ The agent finishes each item with `make check` green and writes a short handoff
 list in the final message:
 - tools added to `INTENTIONALLY_UNRECORDED` with TODO → record via
   `pnpm record:e2e` (see `mcp/tests/e2e/README.md`), then remove from the set;
-- *verify in E2E* items: P2.1 same-parent `insertChild` index,
-  P2.2 gradient 90° direction, P2.5 50-op batch duration vs 20s timeout;
+- *verify in E2E* items: P2.2 gradient 90° direction, P2.5 50-op batch duration vs 20s timeout;
 - infra spike (§8) measurements — needs the heavy Draft file, human-run;
 - manual E2E checklist §10.

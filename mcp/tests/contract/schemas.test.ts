@@ -116,6 +116,9 @@ describe("delete/update schemas", () => {
   it("parent/instance/refs/edit", () => {
     expect(() => SetParentIdParamsSchema.parse({ id: "1:1", parentId: "2:2" })).not.toThrow();
     expect(() => SetParentIdParamsSchema.parse({ id: "bad", parentId: "2:2" })).toThrow();
+    expect(SetParentIdParamsSchema.parse({ id: "1:1", parentId: "2:2", index: 0, absolute: false })).toMatchObject({ index: 0, absolute: false });
+    expect(() => SetParentIdParamsSchema.parse({ id: "1:1", parentId: "2:2", index: -1 })).toThrow();
+    expect(() => SetParentIdParamsSchema.parse({ id: "1:1", parentId: "2:2", index: 1.5 })).toThrow();
     expect(() => SetInstancePropertiesParamsSchema.parse({ instanceId: "1:1", properties: { a: 1 } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { characters: "prop" } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { bogus: "x" } })).toThrow();

@@ -75,7 +75,7 @@ export const SIMPLE_TOOL_DEFS: SimpleToolDef[] = [
   { name: "set-stroke-color", description: "Set the stroke color of a node.", shape: SetStrokeColorParamsSchema.shape },
   { name: "set-corner-radius", description: "Set the corner radius of a node.", shape: SetCornerRadiusParamsSchema.shape },
   { name: "set-layout", description: "Set the layout of a node. Turning auto-layout on (NONE -> HORIZONTAL/VERTICAL) keeps the frame FIXED at its current size on any axis whose layoutSizing* you omit; pass HUG/FILL explicitly to change that.", shape: SetLayoutParamsSchema.shape },
-  { name: "set-parent-id", description: "Set the parent id of a node.", shape: SetParentIdParamsSchema.shape },
+  { name: "set-parent-id", description: "Move a node into a parent, or reorder it inside its current parent. `index` sets its position among the parent's children (0 = first = bottom of z-order; omit = append) — use it to fix sibling order or layer something behind/above. `absolute: true` takes the node out of an auto-layout parent's flow (overlays, badges, hero backgrounds; place it with move-node); `false` puts it back.", shape: SetParentIdParamsSchema.shape },
   { name: "set-instance-properties", description: "Set the properties of an instance.", shape: SetInstancePropertiesParamsSchema.shape },
   { name: "edit-component-property", description: "Edit a component property.", shape: EditComponentPropertyParamsSchema.shape },
   { name: "set-node-component-property-references", description: "Set the component property references of a node.", shape: SetNodeComponentPropertyReferencesParamsSchema.shape },
