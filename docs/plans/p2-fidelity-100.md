@@ -58,6 +58,9 @@ Root cause lives in `plugin/main/tools/update/set-layout.ts`: switching
 sizing (hug), shrinking a FIXED frame. **Verified on real Figma (2026-09-23):**
 `layoutSizingHorizontal` flips FIXED → HUG. **Status: done** (plugin fix + unit
 test; E2E re-checked 1440×80 navbar with a child stays FIXED).
+Follow-up found while building a full landing page: when the caller sets only ONE
+axis (e.g. `layoutSizingVertical: HUG`), the other axis must also be resized back —
+Figma had already hugged it (a wrap grid grew to 4624px). Now fixed + tested.
 
 Fix (one place, all callers benefit):
 - Snapshot `width`/`height` before applying entries.

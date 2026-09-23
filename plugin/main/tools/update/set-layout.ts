@@ -15,7 +15,8 @@ export async function setLayout(args: SetLayoutParams): Promise<ToolResult> {
 
     const errors: string[] = [];
     const apply = (prop: string, value: unknown, transform?: (v: never) => unknown): void => {
-        if (value === undefined || value === null || value === false || value === "") return;
+        // `false` is a real value here (clip: false, wrap: false), only skip omitted ones.
+        if (value === undefined || value === null || value === "") return;
         if (!(prop in node)) {
             errors.push(`Node does not have a ${prop} property`);
             return;
@@ -26,7 +27,7 @@ export async function setLayout(args: SetLayoutParams): Promise<ToolResult> {
     const entries: LayoutEntry[] = [
         ["layoutMode", args.mode],
         ["layoutWrap", args.wrap, (v: boolean) => (v ? "WRAP" : "NO_WRAP")],
-        ["clipContent", args.clip],
+        ["clipsContent", args.clip],
         ["itemSpacing", args.itemSpacing],
         ["primaryAxisAlignItems", args.primaryAxisAlignItems],
         ["counterAxisAlignItems", args.counterAxisAlignItems],
@@ -52,12 +53,16 @@ export async function setLayout(args: SetLayoutParams): Promise<ToolResult> {
     if (turningOnAutoLayout) {
         const keepH = args.layoutSizingHorizontal === undefined && "layoutSizingHorizontal" in node;
         const keepV = args.layoutSizingVertical === undefined && "layoutSizingVertical" in node;
-        if (keepH) node.layoutSizingHorizontal = "FIXED";
-        if (keepV) node.layoutSizingVertical = "FIXED";
-        // resize() forces both axes FIXED, so only restore size when the caller chose neither.
-        if (keepH && keepV && typeof node.resize === "function" && typeof width === "number" && typeof height === "number") {
-            (node.resize as (w: number, h: number) => void)(width, height);
+        if ((keepH || keepV) && typeof node.resize === "function" && typeof width === "number" && typeof height === "number") {
+            // Restore each kept axis to its original size (HUG already grew/shrank it),
+            // leave the caller-chosen axis at its current size...
+            (node.resize as (w: number, h: number) => void)(keepH ? width : (node.width as number), keepV ? height : (node.height as number));
         }
+        // ...then re-apply sizing, because resize() forces both axes to FIXED.
+        if (keepH) node.layoutSizingHorizontal = "FIXED";
+        else if (args.layoutSizingHorizontal !== undefined && "layoutSizingHorizontal" in node) node.layoutSizingHorizontal = args.layoutSizingHorizontal;
+        if (keepV) node.layoutSizingVertical = "FIXED";
+        else if (args.layoutSizingVertical !== undefined && "layoutSizingVertical" in node) node.layoutSizingVertical = args.layoutSizingVertical;
     }
 
     return {

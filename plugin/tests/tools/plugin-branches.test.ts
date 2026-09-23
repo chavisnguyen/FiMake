@@ -98,11 +98,15 @@ describe("plugin branch coverage fill", () => {
 
   it("setLayout wrap/clip/sizing branches", async () => {
     const figma: MockFigma = getFigma();
-    const node: SceneNodeStub = { id: "1:1", name: "F", type: "FRAME", x: 0, y: 0, width: 1, height: 1, layoutMode: "NONE", layoutWrap: "NO_WRAP", clipContent: false, layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" };
+    // Figma's property is `clipsContent` (plural) and new frames clip by default.
+    const node: SceneNodeStub = { id: "1:1", name: "F", type: "FRAME", x: 0, y: 0, width: 1, height: 1, layoutMode: "NONE", layoutWrap: "NO_WRAP", clipsContent: true, layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" };
     figma.getNodeByIdAsync.mockResolvedValue(node);
-    const res: ToolResult = await setLayout({ id: "1:1", mode: "NONE", wrap: true, clip: true, layoutSizingHorizontal: "FILL", layoutSizingVertical: "HUG" });
+    const res: ToolResult = await setLayout({ id: "1:1", mode: "NONE", wrap: true, clip: false, layoutSizingHorizontal: "FILL", layoutSizingVertical: "HUG" });
     expect(res.isError).toBe(false);
     expect(node["layoutWrap"]).toBe("WRAP");
+    expect(node["clipsContent"]).toBe(false);
+    await setLayout({ id: "1:1", mode: "NONE", wrap: false, clip: true });
+    expect(node).toMatchObject({ layoutWrap: "NO_WRAP", clipsContent: true });
   });
 
   it("setLayout keeps a FIXED frame's size when turning auto-layout on (Figma defaults to HUG)", async () => {
@@ -136,11 +140,17 @@ describe("plugin branch coverage fill", () => {
     expect((await setLayout({ id: "1:1", mode: "HORIZONTAL", itemSpacing: 8 })).isError).toBe(false);
     expect(kept).toMatchObject({ width: 1440, height: 80, layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" });
 
+    // One axis chosen by the caller: the OTHER axis must come back to its original
+    // size (Figma already hugged it), while the chosen axis keeps HUG.
     const hug = makeFrame();
     figma.getNodeByIdAsync.mockResolvedValue(hug);
     await setLayout({ id: "1:1", mode: "HORIZONTAL", layoutSizingHorizontal: "HUG" });
-    expect(hug).toMatchObject({ layoutSizingHorizontal: "HUG", layoutSizingVertical: "FIXED" });
-    expect(hug["resize"]).not.toHaveBeenCalled();
+    expect(hug).toMatchObject({ width: 100, height: 80, layoutSizingHorizontal: "HUG", layoutSizingVertical: "FIXED" });
+
+    const hugV = makeFrame();
+    figma.getNodeByIdAsync.mockResolvedValue(hugV);
+    await setLayout({ id: "1:1", mode: "VERTICAL", layoutSizingVertical: "HUG" });
+    expect(hugV).toMatchObject({ width: 1440, height: 20, layoutSizingHorizontal: "FIXED", layoutSizingVertical: "HUG" });
 
     const already = makeFrame();
     already["layoutMode"] = "VERTICAL";
