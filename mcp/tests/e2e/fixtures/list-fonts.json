@@ -1,0 +1,49 @@
+{
+  "_meta": {
+    "command": "list-fonts",
+    "recordedAt": "2026-09-23T11:23:37.887Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "list-fonts",
+    "args": {
+      "family": "Inter"
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": [
+      {
+        "family": "Inter",
+        "styles": [
+          "Black",
+          "Black Italic",
+          "Bold",
+          "Bold Italic",
+          "Extra Bold",
+          "Extra Bold Italic",
+          "Extra Light",
+          "Extra Light Italic",
+          "Italic",
+          "Light",
+          "Light Italic",
+          "Medium",
+          "Medium Italic",
+          "Regular",
+          "Semi Bold",
+          "Semi Bold Italic",
+          "Thin",
+          "Thin Italic"
+        ]
+      },
+      {
+        "family": "SignPainter",
+        "styles": [
+          "HouseScript",
+          "HouseScript Semibold"
+        ]
+      }
+    ]
+  }
+}

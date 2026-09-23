@@ -64,7 +64,7 @@ describe("plugin create tools", () => {
 
   it("createText sets fills/font, errors on bad parent + font fail", async () => {
     const figma: MockFigma = setupFigma();
-    const text: SceneNodeStub = { id: "2:1", name: "T", type: "TEXT" };
+    const text: SceneNodeStub = { id: "2:1", name: "T", type: "TEXT", remove: vi.fn() };
     figma.createText.mockReturnValue(text);
     const ok = await createText({ x: 0, y: 0, text: "hi", fontName: "Inter", fontWeight: 400, fontColor: "#FF0000FF", fontSize: 14, name: "T" });
     expect(ok.isError).toBe(false);
@@ -76,6 +76,8 @@ describe("plugin create tools", () => {
     const badFont = await createText({ x: 0, y: 0, text: "hi", fontName: "Nope", fontWeight: 400, fontColor: "#FF0000FF", fontSize: 14, name: "T" });
     expect(badFont.isError).toBe(true);
     expect(String(badFont.content)).toContain("Nope");
+    // Both failures removed the node createText had already put on the page.
+    expect(text["remove"]).toHaveBeenCalledTimes(2);
   });
 
   it("createComponent + cloneNode not-found paths", async () => {

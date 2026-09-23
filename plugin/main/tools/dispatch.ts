@@ -17,6 +17,7 @@ import {
   GetAllComponentsParamsSchema,
   GetNodeInfoParamsSchema,
   GetPagesParamsSchema,
+  ListFontsParamsSchema,
   MoveNodeParamsSchema,
   ResizeNodeParamsSchema,
   SetCornerRadiusParamsSchema,
@@ -29,6 +30,7 @@ import {
   SetNodeComponentPropertyReferencesParamsSchema,
   SetParentIdParamsSchema,
   SetStrokeColorParamsSchema,
+  SetTextStyleParamsSchema,
 } from "@shared/types";
 import { wrapToolHandler } from "./wrap-tool-handler";
 import type { ToolResult } from "./tool-result";
@@ -46,6 +48,7 @@ import { getSelection } from "./read/get-selection";
 import { getNodeInfo } from "./read/get-node-info";
 import { getPages } from "./read/get-pages";
 import { getAllComponents } from "./read/get-all-components";
+import { listFonts } from "./read/list-fonts";
 import { exportAsset } from "./read/export-asset";
 import { moveNode } from "./update/move-node";
 import { resizeNode } from "./update/resize-node";
@@ -54,6 +57,7 @@ import { setFillGradient } from "./update/set-fill-gradient";
 import { setImageFill } from "./update/set-image-fill";
 import { setStrokeColor } from "./update/set-stroke-color";
 import { setEffects } from "./update/set-effects";
+import { setTextStyle } from "./update/set-text-style";
 import { setCornerRadius } from "./update/set-corner-radius";
 import { setLayout } from "./update/set-layout";
 import { setParentId } from "./update/set-parent-id";
@@ -80,6 +84,7 @@ const PARAM_SCHEMAS: Record<string, z.ZodTypeAny> = {
   "get-node-info": GetNodeInfoParamsSchema,
   "get-pages": GetPagesParamsSchema,
   "get-all-components": GetAllComponentsParamsSchema,
+  "list-fonts": ListFontsParamsSchema,
   "export-asset": ExportAssetParamsSchema,
   "move-node": MoveNodeParamsSchema,
   "resize-node": ResizeNodeParamsSchema,
@@ -88,6 +93,7 @@ const PARAM_SCHEMAS: Record<string, z.ZodTypeAny> = {
   "set-image-fill": SetImageFillParamsSchema,
   "set-stroke-color": SetStrokeColorParamsSchema,
   "set-effects": SetEffectsParamsSchema,
+  "set-text-style": SetTextStyleParamsSchema,
   "set-corner-radius": SetCornerRadiusParamsSchema,
   "set-layout": SetLayoutParamsSchema,
   "set-parent-id": SetParentIdParamsSchema,
@@ -135,6 +141,7 @@ export const TOOL_HANDLERS: Record<string, DispatchFn> = {
   "get-node-info": wrap("get-node-info", getNodeInfo),
   "get-pages": wrap("get-pages", getPages),
   "get-all-components": wrap("get-all-components", getAllComponents),
+  "list-fonts": wrap("list-fonts", listFonts),
   "export-asset": wrap("export-asset", exportAsset),
   "move-node": wrap("move-node", moveNode),
   "resize-node": wrap("resize-node", resizeNode),
@@ -143,6 +150,7 @@ export const TOOL_HANDLERS: Record<string, DispatchFn> = {
   "set-image-fill": wrap("set-image-fill", setImageFill),
   "set-stroke-color": wrap("set-stroke-color", setStrokeColor),
   "set-effects": wrap("set-effects", setEffects),
+  "set-text-style": wrap("set-text-style", setTextStyle),
   "set-corner-radius": wrap("set-corner-radius", setCornerRadius),
   "set-layout": wrap("set-layout", setLayout),
   "set-parent-id": wrap("set-parent-id", setParentId),

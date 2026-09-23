@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "command": "set-text-style",
+    "recordedAt": "2026-09-23T11:23:37.900Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "set-text-style",
+    "args": {
+      "id": "2071:12827",
+      "width": 200,
+      "lineHeight": 20,
+      "letterSpacing": -1,
+      "textAlign": "CENTER",
+      "maxLines": 2
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": {
+      "id": "2071:12827",
+      "x": 10,
+      "y": 80,
+      "width": 200,
+      "height": 20,
+      "name": "Text",
+      "fontSize": 14,
+      "fontName": {
+        "family": "Inter",
+        "style": "Regular",
+        "variationSettings": {
+          "slnt": 0,
+          "wght": 400
+        }
+      },
+      "fontColor": "#000000FF",
+      "parentId": "2071:12826:FRAME"
+    }
+  }
+}

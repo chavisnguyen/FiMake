@@ -1,6 +1,6 @@
-# Tools (32)
+# Tools (34)
 
-25 tools forward directly to the plugin (`name` = task command), 7 have extra Node-side logic.
+27 tools forward directly to the plugin (`name` = task command), 7 have extra Node-side logic.
 
 Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_ONLY_TOOLS` in `mcp/src/tools/registry.ts`.
 
@@ -8,7 +8,7 @@ Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_
 |---|---|---|
 | `create-rectangle` | plugin | Create a rectangle. |
 | `create-frame` | plugin | Create a frame. |
-| `create-text` | plugin | Create a text. |
+| `create-text` | plugin | Create a text node. Typography: `fontName` + `fontWeight` or exact `fontStyle`, `fontSize`, `lineHeight` (px), `letterSpacing` (%), `textAlign`. Layout: `width` wraps text, `maxLines` truncates with an ellipsis. |
 | `create-instance` | plugin | Create an instance. |
 | `create-component` | plugin | Create a component. |
 | `clone-node` | plugin | Clone a node. |
@@ -17,11 +17,13 @@ Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_
 | `get-node-info` | plugin | Lean layout/colors/content. `depth`: 0 = node only, N = N levels, -1 = full subtree. `maxNodes` (default 10000) + `maxChars` (default 35000) cap size; overflow becomes `_truncated` stubs with `childrenTruncated: true` and root `_truncatedCount` — re-request flagged ids. `fields` limits groups. |
 | `get-pages` | plugin | Get all pages in the current file. |
 | `get-all-components` | plugin | Get all components in the current file. |
+| `list-fonts` | plugin | Fonts available to Figma (no runtime upload — install locally). No `family`: names only; with `family` substring: exact style names for `fontStyle`. |
 | `move-node` | plugin | Move a node. |
 | `resize-node` | plugin | Resize a node. |
 | `set-fill-color` | plugin | Set a solid fill color (`#RRGGBBAA`; alpha `00` = transparent). |
 | `set-fill-gradient` | plugin | Replace the fill with a `LINEAR` (default) or `RADIAL` gradient: 2–16 `stops` `{position 0..1, color}`, `angle` (LINEAR, degrees: 0 = left→right, 90 = top→bottom). |
 | `set-stroke-color` | plugin | Set the stroke (border): `color`, optional `weight` (px) and `align` (`INSIDE`/`OUTSIDE`/`CENTER`). |
+| `set-text-style` | plugin | Restyle an existing text node (font, size, color, `lineHeight`, `letterSpacing`, `textAlign`, `width`, `maxLines`); omitted fields unchanged. |
 | `set-effects` | plugin | Replace all effects: `DROP_SHADOW`/`INNER_SHADOW` (`color` with alpha, `offset`, `radius`, `spread`) and `LAYER_BLUR`/`BACKGROUND_BLUR` (`radius`). `[]` clears. |
 | `set-corner-radius` | plugin | Set the corner radius of a node. |
 | `set-layout` | plugin | Set the layout of a node. Turning auto-layout on keeps a FIXED frame's size on any axis whose `layoutSizing*` is omitted (Figma would default to HUG). |

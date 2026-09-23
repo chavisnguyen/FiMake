@@ -130,14 +130,14 @@ Full client configs, env table, and custom `PORT` checklist live in [docs/usage.
 |---|---|
 | [Quickstart](docs/quickstart.md) | 5-minute install (plugin + server + client config) |
 | [docs/usage.md](docs/usage.md) | Full setup, HTTP + `stdio` configs, env table, custom `PORT` |
-| [docs/tools.md](docs/tools.md) | All 32 tools reference |
+| [docs/tools.md](docs/tools.md) | All 34 tools reference |
 | [docs/architecture.md](docs/architecture.md) | Bridge, task map, diagrams, security |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | `Not connected`, port in use, timeouts, logs |
 | [docs/development.md](docs/development.md) | Contributor guide: `make` targets, watch mode, tests, architecture |
 
 ## Tools
 
-32 tools: 25 forward directly to the plugin (`name` = task command), 7 have extra Node-side logic.
+34 tools: 27 forward directly to the plugin (`name` = task command), 7 have extra Node-side logic.
 
 Every tool accepts `targetFileKey` / `targetFileName` to pin a task to one open Figma file — call `list-clients` first, omit both to broadcast (see [docs/tools.md](docs/tools.md#multi-window-targeting)).
 
@@ -145,7 +145,7 @@ Every tool accepts `targetFileKey` / `targetFileName` to pin a task to one open 
 |---|---|---|
 | `create-rectangle` | plugin | Create a rectangle. |
 | `create-frame` | plugin | Create a frame. |
-| `create-text` | plugin | Create a text. |
+| `create-text` | plugin | Create a text node. Typography: `fontName` + `fontWeight` or exact `fontStyle`, `fontSize`, `lineHeight` (px), `letterSpacing` (%), `textAlign`. Layout: `width` wraps text, `maxLines` truncates with an ellipsis. |
 | `create-instance` | plugin | Create an instance. |
 | `create-component` | plugin | Create a component. |
 | `clone-node` | plugin | Clone a node. |
@@ -154,11 +154,13 @@ Every tool accepts `targetFileKey` / `targetFileName` to pin a task to one open 
 | `get-node-info` | plugin | Lean layout/colors/content. `depth`: 0 = node only, N = N levels, -1 = full subtree. `maxNodes` (default 10000) + `maxChars` (default 35000) cap size; overflow becomes `_truncated` stubs with `childrenTruncated: true` and root `_truncatedCount` — re-request flagged ids. `fields` limits groups. |
 | `get-pages` | plugin | Get all pages in the current file. |
 | `get-all-components` | plugin | Get all components in the current file. |
+| `list-fonts` | plugin | Fonts available to Figma (no runtime upload — install locally). No `family`: names only; with `family` substring: exact style names for `fontStyle`. |
 | `move-node` | plugin | Move a node. |
 | `resize-node` | plugin | Resize a node. |
 | `set-fill-color` | plugin | Set a solid fill color (`#RRGGBBAA`; alpha `00` = transparent). |
 | `set-fill-gradient` | plugin | Replace the fill with a `LINEAR` (default) or `RADIAL` gradient: 2–16 `stops` `{position 0..1, color}`, `angle` (LINEAR, degrees: 0 = left→right, 90 = top→bottom). |
 | `set-stroke-color` | plugin | Set the stroke (border): `color`, optional `weight` (px) and `align` (`INSIDE`/`OUTSIDE`/`CENTER`). |
+| `set-text-style` | plugin | Restyle an existing text node (font, size, color, `lineHeight`, `letterSpacing`, `textAlign`, `width`, `maxLines`); omitted fields unchanged. |
 | `set-effects` | plugin | Replace all effects: `DROP_SHADOW`/`INNER_SHADOW` (`color` with alpha, `offset`, `radius`, `spread`) and `LAYER_BLUR`/`BACKGROUND_BLUR` (`radius`). `[]` clears. |
 | `set-corner-radius` | plugin | Set the corner radius of a node. |
 | `set-layout` | plugin | Set the layout of a node. Turning auto-layout on keeps a FIXED frame's size on any axis whose `layoutSizing*` is omitted (Figma would default to HUG). |

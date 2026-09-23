@@ -23,6 +23,8 @@ import { SetStrokeColorParamsSchema } from "../../src/shared/types/params/update
 import { SetEffectsParamsSchema } from "../../src/shared/types/params/update/set-effects";
 import { SetFillGradientParamsSchema } from "../../src/shared/types/params/update/set-fill-gradient";
 import { SetImageFillParamsSchema } from "../../src/shared/types/params/update/set-image-fill";
+import { SetTextStyleParamsSchema } from "../../src/shared/types/params/update/set-text-style";
+import { ListFontsParamsSchema } from "../../src/shared/types/params/read/list-fonts";
 import { SetCornerRadiusParamsSchema } from "../../src/shared/types/params/update/set-corner-radius";
 import { SetLayoutParamsSchema } from "../../src/shared/types/params/update/set-layout";
 import { SetParentIdParamsSchema } from "../../src/shared/types/params/update/set-parent-id";
@@ -142,6 +144,15 @@ describe("delete/update schemas", () => {
     expect(() => SetFillGradientParamsSchema.parse({ id: "1:1", stops, type: "ANGULAR" })).toThrow();
     const img = SetImageFillParamsSchema.parse({ id: "1:1", url: "https://x/y.png", imageData: [1, 2] });
     expect(img).toMatchObject({ scaleMode: "FILL", imageData: [1, 2] });
+  });
+  it("text style fields on create-text + set-text-style (all optional, no defaults) + list-fonts", () => {
+    const t = CreateTextParamsSchema.parse({ x: 0, y: 0, text: "hi", width: 320, lineHeight: 20, letterSpacing: -2, textAlign: "CENTER", maxLines: 2, fontStyle: "Semibold" });
+    expect(t).toMatchObject({ width: 320, lineHeight: 20, letterSpacing: -2, textAlign: "CENTER", maxLines: 2, fontStyle: "Semibold", fontName: "Inter" });
+    expect(() => CreateTextParamsSchema.parse({ x: 0, y: 0, text: "hi", maxLines: 0 })).toThrow();
+    expect(() => CreateTextParamsSchema.parse({ x: 0, y: 0, text: "hi", width: -1 })).toThrow();
+    expect(SetTextStyleParamsSchema.parse({ id: "1:1" })).toEqual({ id: "1:1" });
+    expect(() => SetTextStyleParamsSchema.parse({ id: "1:1", textAlign: "TOP" })).toThrow();
+    expect(ListFontsParamsSchema.parse({})).toEqual({});
     expect(() => SetInstancePropertiesParamsSchema.parse({ instanceId: "1:1", properties: { a: 1 } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { characters: "prop" } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { bogus: "x" } })).toThrow();

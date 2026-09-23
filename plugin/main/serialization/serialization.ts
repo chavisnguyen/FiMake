@@ -164,6 +164,8 @@ function serializeTextGroup(_n: NodeRecord, node: SceneNode, out: SerializedNode
     if (t.letterSpacing !== figma.mixed) out.letterSpacing = t.letterSpacing;
     out.textAlignHorizontal = t.textAlignHorizontal;
     out.textAlignVertical = t.textAlignVertical;
+    if (t.textAutoResize && t.textAutoResize !== "WIDTH_AND_HEIGHT") out.textAutoResize = t.textAutoResize;
+    if (t.textTruncation === "ENDING") out.maxLines = t.maxLines;
     if (t.textCase !== figma.mixed && t.textCase !== "ORIGINAL") out.textCase = t.textCase;
     if (t.textDecoration !== figma.mixed && t.textDecoration !== "NONE") out.textDecoration = t.textDecoration;
 

@@ -231,6 +231,14 @@ plugin handler → dispatch → docs (+1 tool).
 
 ## 6. P2.4 Text controls + fonts
 
+**Status: done (2026-09-23)** — verified on real Figma via PNG export (SF Pro
+Semibold wrap + 2-line ellipsis, restyle of an existing text). Deviations: `maxLines`
+replaces `truncate` (Figma only truncates with maxLines under HEIGHT auto-resize);
+added `fontStyle` because weight→style mapping misses real names (SF Pro "Semibold"
+vs mapped "Semi Bold"). `list-fonts` expands styles only for ≤30 matching families
+(2111 families here; a 1-letter filter was 143KB). Also fixed: create-text left an
+empty orphan text node on the page whenever it failed.
+
 Unlocks: small-text fidelity (the most visible remaining gap after P2.1–P2.3).
 
 Shared text-style fields (one zod object, reused by two schemas):

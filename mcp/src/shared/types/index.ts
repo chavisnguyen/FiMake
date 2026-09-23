@@ -19,6 +19,7 @@ export * from './params/read/get-all-components';
 export * from './params/read/get-pages';
 export * from './params/read/export-asset';
 export * from './params/read/export-file';
+export * from './params/read/list-fonts';
 
 // Delete
 export * from './params/delete/delete-node';
@@ -31,6 +32,7 @@ export * from './params/update/resize-node';
 export * from './params/update/set-fill-color';
 export * from './params/update/set-fill-gradient';
 export * from './params/update/set-image-fill';
+export * from './params/update/set-text-style';
 export * from './params/update/set-stroke-color';
 export * from './params/update/set-effects';
 export * from './params/update/set-corner-radius';

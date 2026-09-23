@@ -13,6 +13,9 @@ import { setParentId } from "../../main/tools/update/set-parent-id";
 import { setEffects } from "../../main/tools/update/set-effects";
 import { gradientTransform, setFillGradient } from "../../main/tools/update/set-fill-gradient";
 import { setImageFill } from "../../main/tools/update/set-image-fill";
+import { setTextStyle } from "../../main/tools/update/set-text-style";
+import { createText } from "../../main/tools/create/create-text";
+import { listFonts } from "../../main/tools/read/list-fonts";
 
 describe("plugin branch coverage fill", () => {
   beforeEach(() => setupFigma());
@@ -236,6 +239,84 @@ describe("plugin branch coverage fill", () => {
     expect((await setImageFill({ id: "1:1", url: "https://x", scaleMode: "CROP", imageData: [1, 2, 3] })).isError).toBe(false);
     expect(figma.createImage).toHaveBeenCalled();
     expect((node["fills"] as ImagePaint[])[0]).toEqual({ type: "IMAGE", imageHash: "h1", scaleMode: "CROP" });
+  });
+
+  function textStub(overrides: Partial<SceneNodeStub> = {}): SceneNodeStub {
+    const t: SceneNodeStub = {
+      id: "3:1", name: "T", type: "TEXT", x: 0, y: 0, width: 40, height: 16, characters: "",
+      fontName: { family: "Inter", style: "Regular" }, fontSize: 14, fills: [], parent: null,
+      ...overrides,
+    };
+    t["resize"] = vi.fn((w: number, h: number) => { t["width"] = w; t["height"] = h; });
+    t["remove"] = vi.fn();
+    return t;
+  }
+
+  it("createText applies fontStyle + width/lineHeight/letterSpacing/align/maxLines", async () => {
+    const figma: MockFigma = getFigma();
+    const text = textStub();
+    figma.createText.mockReturnValue(text);
+    const res = await createText({
+      x: 0, y: 0, text: "Unlimited movies, TV shows, and more", fontSize: 12, fontName: "SF Pro", fontWeight: 600,
+      fontStyle: "Semibold", fontColor: "#FFFFFFFF", name: "T", width: 320, lineHeight: 18, letterSpacing: -2, textAlign: "CENTER", maxLines: 2,
+    });
+    expect(res.isError).toBe(false);
+    expect(figma.loadFontAsync).toHaveBeenCalledWith({ family: "SF Pro", style: "Semibold" });
+    expect(text["resize"]).toHaveBeenCalledWith(320, 16);
+    expect(text).toMatchObject({
+      textAutoResize: "HEIGHT", lineHeight: { value: 18, unit: "PIXELS" }, letterSpacing: { value: -2, unit: "PERCENT" },
+      textAlignHorizontal: "CENTER", textTruncation: "ENDING", maxLines: 2,
+    });
+
+    figma.loadFontAsync.mockRejectedValueOnce(new Error("not available"));
+    const bad = await createText({ x: 0, y: 0, text: "x", fontSize: 12, fontName: "SF Pro", fontWeight: 600, fontColor: "#000000FF", name: "T" });
+    expect(String(bad.content)).toContain("Semi Bold");
+    expect(String(bad.content)).toContain("list-fonts");
+    expect(text["remove"]).toHaveBeenCalledTimes(1);
+  });
+
+  it("setTextStyle loads every font in the node before editing, changes only what is given", async () => {
+    const figma: MockFigma = getFigma();
+    const text = textStub({
+      characters: "Hi there",
+      getRangeAllFontNames: vi.fn(() => [{ family: "Inter", style: "Regular" }, { family: "Inter", style: "Bold" }]),
+    });
+    figma.getNodeByIdAsync.mockResolvedValue(text);
+    const res = await setTextStyle({ id: "3:1", lineHeight: 24, fontStyle: "Medium" });
+    expect(res.isError).toBe(false);
+    expect(figma.loadFontAsync).toHaveBeenCalledWith({ family: "Inter", style: "Bold" });
+    expect(figma.loadFontAsync).toHaveBeenCalledWith({ family: "Inter", style: "Medium" });
+    expect(text).toMatchObject({ fontName: { family: "Inter", style: "Medium" }, fontSize: 14, lineHeight: { value: 24, unit: "PIXELS" } });
+    expect(text["textAutoResize"]).toBeUndefined();
+
+    figma.getNodeByIdAsync.mockResolvedValue({ id: "1:1", name: "R", type: "RECTANGLE" });
+    expect((await setTextStyle({ id: "1:1", fontSize: 10 })).content).toBe("Node is not a text node");
+
+    figma.getNodeByIdAsync.mockResolvedValue(textStub());
+    figma.loadFontAsync.mockImplementation(async (f: FontName) => {
+      if (f.family === "Netflix Sans") throw new Error("font not found");
+    });
+    const bad = await setTextStyle({ id: "3:1", fontName: "Netflix Sans" });
+    expect(bad.isError).toBe(true);
+    expect(String(bad.content)).toContain("list-fonts");
+  });
+
+  it("listFonts: names only without filter, styles per family with a filter", async () => {
+    setupFigma({
+      listAvailableFontsAsync: vi.fn(async () => [
+        { fontName: { family: "Inter", style: "Regular" } },
+        { fontName: { family: "Inter", style: "Bold" } },
+        { fontName: { family: "SF Pro", style: "Semibold" } },
+      ]),
+    });
+    expect((await listFonts({})).content).toEqual({ count: 2, families: ["Inter", "SF Pro"] });
+    expect((await listFonts({ family: "sf" })).content).toEqual([{ family: "SF Pro", styles: ["Semibold"] }]);
+
+    const many = Array.from({ length: 31 }, (_, i) => ({ fontName: { family: `Font ${i}`, style: "Regular" } }));
+    setupFigma({ listAvailableFontsAsync: vi.fn(async () => many) });
+    const broad = (await listFonts({ family: "font" })).content as { count: number; hint?: string };
+    expect(broad.count).toBe(31);
+    expect(broad.hint).toContain("more specific");
   });
 
   describe("setParentId index + absolute", () => {

@@ -19,6 +19,7 @@ import {
   GetAllComponentsParamsSchema,
   GetNodeInfoParamsSchema,
   GetPagesParamsSchema,
+  ListFontsParamsSchema,
   MoveNodeParamsSchema,
   ResizeNodeParamsSchema,
   SetCornerRadiusParamsSchema,
@@ -30,6 +31,7 @@ import {
   SetNodeComponentPropertyReferencesParamsSchema,
   SetParentIdParamsSchema,
   SetStrokeColorParamsSchema,
+  SetTextStyleParamsSchema,
 } from "../shared/types/index";
 import { getSelection } from "./read/get-selection";
 import { createImage } from "./create/create-image";
@@ -64,7 +66,7 @@ export interface SimpleToolDef {
 export const SIMPLE_TOOL_DEFS: SimpleToolDef[] = [
   { name: "create-rectangle", description: "Create a rectangle.", shape: CreateRectangleParamsSchema.shape },
   { name: "create-frame", description: "Create a frame.", shape: CreateFrameParamsSchema.shape },
-  { name: "create-text", description: "Create a text.", shape: CreateTextParamsSchema.shape },
+  { name: "create-text", description: "Create a text node. Typography: `fontName` family + `fontWeight` (or exact `fontStyle` from list-fonts), `fontSize`, `lineHeight` px, `letterSpacing` %, `textAlign`. Layout: `width` = fixed width that wraps text; `maxLines` = ellipsis truncation.", shape: CreateTextParamsSchema.shape },
   { name: "create-instance", description: "Create a instance.", shape: CreateInstanceParamsSchema.shape },
   { name: "create-component", description: "Create a component.", shape: CreateComponentParamsSchema.shape },
   { name: "clone-node", description: "Clone a node.", shape: CloneNodeParamsSchema.shape },
@@ -73,11 +75,13 @@ export const SIMPLE_TOOL_DEFS: SimpleToolDef[] = [
   { name: "get-node-info", description: "Get layout, colors and content of a node (lean output). `depth`: 0 = this node only, N = N levels, -1 = FULL subtree to every leaf. Any node not fully expanded is marked `childrenTruncated: true` (re-request its id to cover it) so no element is ever dropped silently. `maxNodes` caps nodes per response (default 10000) and `maxChars` caps serialized size (default 35000, keeps the response inline); overflow becomes stubs marked `_truncated`, the parent gets `childrenTruncated: true`, and the root reports `_truncatedCount`. When `_truncatedCount` appears, re-request the flagged node ids to cover the rest. `fields` limits groups (geometry, layout, fills, strokes, effects, text, component, children).", shape: GetNodeInfoParamsSchema.shape },
   { name: "get-pages", description: "Get all pages in the current file.", shape: GetPagesParamsSchema.shape },
   { name: "get-all-components", description: "Get all components in the current file.", shape: GetAllComponentsParamsSchema.shape },
+  { name: "list-fonts", description: "List fonts available to Figma (fonts cannot be uploaded at runtime — install locally first). Without `family`: family names only; with `family` (substring): each match with its exact style names to pass as `fontStyle`.", shape: ListFontsParamsSchema.shape },
   { name: "move-node", description: "Move a node.", shape: MoveNodeParamsSchema.shape },
   { name: "resize-node", description: "Resize a node.", shape: ResizeNodeParamsSchema.shape },
   { name: "set-fill-color", description: "Set a solid fill color of a node (#RRGGBBAA; alpha 00 = transparent).", shape: SetFillColorParamsSchema.shape },
   { name: "set-fill-gradient", description: "Replace a node's fill with a LINEAR (default) or RADIAL gradient. `stops`: 2-16 { position 0..1, color #RRGGBBAA }. `angle` (LINEAR only, degrees): 0 = left-to-right, 90 = top-to-bottom.", shape: SetFillGradientParamsSchema.shape },
   { name: "set-stroke-color", description: "Set the stroke (border) of a node: color, plus optional `weight` (px) and `align` (INSIDE/OUTSIDE/CENTER; omit to keep current).", shape: SetStrokeColorParamsSchema.shape },
+  { name: "set-text-style", description: "Restyle an EXISTING text node without recreating it: fontName/fontWeight/fontStyle, fontSize, fontColor, lineHeight, letterSpacing, textAlign, width (wrap), maxLines. Omitted fields stay unchanged.", shape: SetTextStyleParamsSchema.shape },
   { name: "set-effects", description: "Replace ALL effects on a node (in order): DROP_SHADOW / INNER_SHADOW (`color` with alpha, `offset`, `radius`, `spread`) and LAYER_BLUR / BACKGROUND_BLUR (`radius`). Pass [] to clear.", shape: SetEffectsParamsSchema.shape },
   { name: "set-corner-radius", description: "Set the corner radius of a node.", shape: SetCornerRadiusParamsSchema.shape },
   { name: "set-layout", description: "Set the layout of a node. Turning auto-layout on (NONE -> HORIZONTAL/VERTICAL) keeps the frame FIXED at its current size on any axis whose layoutSizing* you omit; pass HUG/FILL explicitly to change that.", shape: SetLayoutParamsSchema.shape },
