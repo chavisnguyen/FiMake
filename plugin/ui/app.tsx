@@ -19,6 +19,9 @@ import {
   type TaskFilter,
 } from "./domain/tasks";
 
+/** Injected at build time by vite.config.mts `define`. */
+declare const __FIMAKE_BUILD__: string;
+
 function requestResize(type: UiResizeRequest["type"]): void {
   // ponytail: "*" is fine — Figma plugin iframes have no web origin to lock to.
   // Revisit only if this UI ever runs outside figma.showUI.
@@ -163,6 +166,7 @@ export function App(): JSX.Element {
               <span id="dot-status-dot" />
               <span id="dot-status-label">{label}</span>
             </span>
+            <span id="dot-version">{__FIMAKE_BUILD__}</span>
           </span>
           <span id="dot-chevron" aria-hidden="true">
             ›
@@ -227,6 +231,7 @@ export function App(): JSX.Element {
         </details>
         <footer id="console-footer">
           <span id="server-url">{serverUrl}</span>
+          <span id="build-version">{__FIMAKE_BUILD__}</span>
           <a href="https://github.com/chavisnguyen/fimake" target="_blank" rel="noreferrer">
             GitHub
           </a>

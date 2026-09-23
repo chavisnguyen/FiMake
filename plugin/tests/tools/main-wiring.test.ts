@@ -60,7 +60,7 @@ describe("main thread message wiring", () => {
     ui.onmessage!({ type: "expand" });
     expect(ui.resize).toHaveBeenCalledWith(600, 640);
     ui.onmessage!({ type: "collapse" });
-    expect(ui.resize).toHaveBeenCalledWith(300, 78);
+    expect(ui.resize).toHaveBeenCalledWith(300, 100);
 
     // The resize branch must not have eaten the task branch.
     ui.onmessage!(["START_TASK", { taskId: "t2", command: "get-pages", args: {} }]);

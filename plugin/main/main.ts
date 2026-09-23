@@ -4,7 +4,7 @@ import { dispatchTask } from './tools/dispatch';
 import { pluginDebug, pluginLog } from './debug';
 
 const PILL_WIDTH = 300;
-const PILL_HEIGHT = 78;
+const PILL_HEIGHT = 100;
 const CONSOLE_WIDTH = 600;
 const CONSOLE_HEIGHT = 640;
 

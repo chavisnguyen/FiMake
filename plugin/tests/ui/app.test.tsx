@@ -28,6 +28,12 @@ afterEach(() => {
 });
 
 describe("App", () => {
+  it("shows the build label under the pill status and in the console footer", () => {
+    render(<App />);
+    expect(document.getElementById("dot-version")?.textContent).toBe("v0.0.0-test");
+    expect(document.getElementById("build-version")?.textContent).toBe("v0.0.0-test");
+  });
+
   it("starts offline, then reflects connection status", () => {
     render(<App />);
     expect(screen.getByText("Not connected — click to open")).toBeDefined();

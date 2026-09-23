@@ -88,6 +88,14 @@
         flex-shrink: 0;
       }
       body[data-status="online"] #dot-status-dot { box-shadow: 0 0 6px var(--status); }
+      #dot-version {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 10px;
+        color: var(--figma-color-text-secondary, #6b7280);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
       #dot-chevron {
         font-size: 18px;
         font-weight: 600;
@@ -294,6 +302,10 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+      #build-version {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        white-space: nowrap;
       }
       #console-footer a { color: inherit; }
     </style>

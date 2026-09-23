@@ -10,6 +10,9 @@ export default defineConfig({
       "@shared": path.resolve(__dirname, "../mcp/src/shared"),
     },
   },
+  define: {
+    __FIMAKE_BUILD__: JSON.stringify("v0.0.0-test"),
+  },
   test: {
     include: ["tests/**/*.test.{ts,tsx}"],
   },
