@@ -17,7 +17,8 @@ describe("fimake doctor", () => {
       throw refused;
     }));
     expect(report.ok).toBe(true);
-    expect(report.checks).toHaveLength(2);
+    // version + port + plugin (added in P3 — best-effort, never affects `ok`).
+    expect(report.checks).toHaveLength(3);
     expect(formatDoctorReport(report)).toContain("[ok] port");
     expect(formatDoctorReport(report)).toContain("doctor: ready");
   });

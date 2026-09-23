@@ -35,6 +35,22 @@ Re-run `make build` after every `git pull` or any change under `mcp/src` / `plug
 
 Next launches: *Plugins > Development > Fimake* (no re-import needed unless you rebuilt the plugin).
 
+**Alternative: `fimake install-plugin`.** On macOS, this does steps 2–3 for you — download+verify a released plugin zip, or (with `--dir`) register your own local `plugin/` build in place without touching it:
+
+```bash
+fimake install-plugin --dir plugin   # contributor: register the local build you just made
+fimake install-plugin                # user: download the latest release's plugin instead
+```
+
+| Flag | Effect |
+|---|---|
+| `--dir <path>` | Where to install. Default `~/.fimake/plugin/<version>/`. If `<path>` already holds a valid FiMake build (e.g. `plugin/` after `make build`), it's registered in place — no download. |
+| `--no-register` | Download/verify (or reuse `--dir`) only; don't touch Figma or `settings.json`. Prints the manifest path for you to Import manually. |
+| `--version-tag <vX.Y.Z>` | Download a specific release tag instead of the version matching your installed `fimake` binary. |
+| `--yes` / `-y` | Skip the "quit Figma?" confirmation prompt (still a graceful `osascript` quit, never a force-kill) — for scripts/CI. |
+
+If Figma is running when you register, `install-plugin` asks to quit it for you first (Figma only writes `settings.json` on quit). Not on macOS? Use `--no-register` and the manual steps above.
+
 ## 4. Start the MCP server
 
 ```bash

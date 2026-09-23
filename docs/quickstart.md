@@ -8,12 +8,22 @@ Prerequisites: Figma Desktop, an MCP client (Opencode / Claude Code / Cursor / C
 
 Fimake ships as a **dev plugin** (sideload from manifest). There is no Figma Community listing — the plugin needs a local socket bridge (`localhost:10101`), which Figma does not allow for published listings.
 
-1. Download `fimake-plugin.zip` from [GitHub Releases](https://github.com/chavisnguyen/FiMake/releases) and unzip it.
-2. In Figma: *Plugins > Development > Import plugin from manifest*, select `manifest.json` from the unzipped folder.
-3. Run it via *Plugins > Development > Fimake*. Expected: **Not connected to MCP server**.
-4. **Keep the plugin window open.** It flips to **Connected** once the MCP server (step 2) is running.
+Install the `fimake` CLI, then run `install-plugin` (standalone binary works too — see step 2 below for other install options):
+
+```bash
+brew tap chavisnguyen/fimake
+brew install fimake
+fimake install-plugin
+```
+
+This downloads, verifies, and registers the plugin with Figma Desktop for you (macOS). If Figma is running, it asks to quit it for you first (needed once — Figma only writes its plugin registry on quit; use `--yes` to skip the prompt, `--no-register` to just download + unzip and import it yourself instead).
+
+1. Reopen Figma, then run it via *Plugins > Development > Fimake*. Expected: **Not connected to MCP server**.
+2. **Keep the plugin window open.** It flips to **Connected** once the MCP server (step 2 below) is running.
 
 > Compatibility: use the plugin zip and the binary from the **same release** (e.g. both `v1.0.x`). Default port is `10101` on both sides.
+>
+> Not on macOS, or `install-plugin` doesn't work for you? See [manual sideload](troubleshooting.md#install-the-plugin-manually).
 
 ## 2. Run the MCP server (client spawns it — you do nothing)
 

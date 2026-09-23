@@ -1,4 +1,7 @@
+import * as fs from "node:fs";
 import { SERVER_VERSION } from "./bridge/server";
+import { PLUGIN_MANIFEST_ID, getSettingsPath, readSettings } from "./install-plugin";
+import type { ManifestFileMetadata } from "./install-plugin";
 
 export interface DoctorCheck {
     name: string;
@@ -67,6 +70,7 @@ export async function runDoctor(port: number, fetchImpl: FetchImpl = fetch): Pro
                 ok: true,
                 detail: `port ${port} is free — safe to let your MCP client spawn the server (stdio).`,
             });
+            checks.push(checkPlugin());
             return { version: SERVER_VERSION, port, checks, ok: true };
         }
         checks.push({
@@ -74,6 +78,7 @@ export async function runDoctor(port: number, fetchImpl: FetchImpl = fetch): Pro
             ok: false,
             detail: `could not probe port ${port} (${describeFetchError(error)}). Something holds the port but doesn't answer — a hung server or a non-fimake app. Try: lsof -i :${port}`,
         });
+        checks.push(checkPlugin());
         return { version: SERVER_VERSION, port, checks, ok: false };
     }
 
@@ -86,6 +91,7 @@ export async function runDoctor(port: number, fetchImpl: FetchImpl = fetch): Pro
                 `If your client uses stdio, stop that server first (it spawns its own) — ` +
                 `or point your client at http://localhost:${port}/mcp (streamable-http) to reuse it.`,
         });
+        checks.push(checkPlugin());
         return { version: SERVER_VERSION, port, checks, ok: false };
     }
     checks.push({
@@ -93,7 +99,46 @@ export async function runDoctor(port: number, fetchImpl: FetchImpl = fetch): Pro
         ok: false,
         detail: `port ${port} answers but is not a fimake server (unexpected /health body). Pick another PORT or stop that process: lsof -i :${port}`,
     });
+    checks.push(checkPlugin());
     return { version: SERVER_VERSION, port, checks, ok: false };
+}
+
+/**
+ * Best-effort, macOS-only: is the FiMake dev plugin registered with Figma
+ * Desktop, and do its 3 manifestPath files still exist on disk? Never
+ * throws and never affects `report.ok` — port availability is the only
+ * thing that gates a fresh stdio spawn (see runDoctor callers above).
+ */
+function checkPlugin(): DoctorCheck {
+    try {
+        if (process.platform !== "darwin") {
+            return { name: "plugin", ok: true, detail: "skip: plugin check is macOS-only" };
+        }
+        const settingsPath = getSettingsPath(process.platform, process.env);
+        if (!fs.existsSync(settingsPath)) {
+            return { name: "plugin", ok: true, detail: "skip: Figma settings.json not found (open Figma Desktop once)" };
+        }
+        const settings = readSettings(settingsPath);
+        const list = settings.localFileExtensions ?? [];
+        const record = list.find(
+            (r): r is typeof r & { fileMetadata: ManifestFileMetadata } =>
+                r.fileMetadata.type === "manifest" && r.lastKnownPluginId === PLUGIN_MANIFEST_ID,
+        );
+        if (!record) {
+            return { name: "plugin", ok: false, detail: "not registered — run `fimake install-plugin`" };
+        }
+        const uiId = record.fileMetadata.uiFileIds[0];
+        const codeRecord = list.find((r) => r.id === record.fileMetadata.codeFileId);
+        const uiRecord = uiId === undefined ? undefined : list.find((r) => r.id === uiId);
+        const paths = [record.manifestPath, codeRecord?.manifestPath, uiRecord?.manifestPath];
+        const missing = paths.some((p) => p === undefined || !fs.existsSync(p));
+        if (missing) {
+            return { name: "plugin", ok: false, detail: "registered but plugin files missing on disk — run `fimake install-plugin`" };
+        }
+        return { name: "plugin", ok: true, detail: `registered at ${record.manifestPath}` };
+    } catch (error) {
+        return { name: "plugin", ok: true, detail: `skip: ${error instanceof Error ? error.message : String(error)}` };
+    }
 }
 
 /** Connection-refused means nothing listens there — the good case. */

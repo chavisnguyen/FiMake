@@ -22,6 +22,13 @@ if (args.includes("doctor")) {
     process.exit(report.ok ? 0 : 1);
 }
 
+// `fimake install-plugin`: sideload the Figma dev plugin without manual
+// download/unzip/Import-from-manifest (see docs/plans/p3-install-plugin.md).
+if (args.includes("install-plugin")) {
+    const { runInstallPluginCli } = await import("./install-plugin");
+    process.exit(await runInstallPluginCli(args));
+}
+
 try {
     if (config.TRANSPORT === "streamable-http") {
         await startStreamableHTTP();

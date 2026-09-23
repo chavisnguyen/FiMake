@@ -1,5 +1,16 @@
 # Fimake Troubleshooting
 
+## Install the plugin manually
+
+Use this when `fimake install-plugin` doesn't work for you: you're not on macOS, Figma's internal settings format changed, or you'd rather not let the CLI quit Figma for you. You can also run `fimake install-plugin --no-register` to have it download + unzip the plugin for you and stop there — then just do step 2 below.
+
+1. Download `fimake-plugin.zip` from [GitHub Releases](https://github.com/chavisnguyen/FiMake/releases) and unzip it.
+2. In Figma: *Plugins > Development > Import plugin from manifest*, select `manifest.json` from the unzipped folder.
+3. Run it via *Plugins > Development > Fimake*. Expected: **Not connected to MCP server**.
+4. **Keep the plugin window open.** It flips to **Connected** once the MCP server is running (see [quickstart](quickstart.md), step 2).
+
+> Compatibility: use the plugin zip and the binary from the **same release** (e.g. both `v1.0.x`). Default port is `10101` on both sides.
+
 ## Plugin shows "Not connected to MCP server"
 
 1. Is the server running? You should see `[fimake] Server listening on http://localhost:<PORT>` (streamable-http) or `Socket.IO server listening …` (stdio).
