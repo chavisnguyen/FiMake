@@ -74,7 +74,7 @@ export const SIMPLE_TOOL_DEFS: SimpleToolDef[] = [
   { name: "set-fill-color", description: "Set the fill color of a node.", shape: SetFillColorParamsSchema.shape },
   { name: "set-stroke-color", description: "Set the stroke color of a node.", shape: SetStrokeColorParamsSchema.shape },
   { name: "set-corner-radius", description: "Set the corner radius of a node.", shape: SetCornerRadiusParamsSchema.shape },
-  { name: "set-layout", description: "Set the layout of a node.", shape: SetLayoutParamsSchema.shape },
+  { name: "set-layout", description: "Set the layout of a node. Turning auto-layout on (NONE -> HORIZONTAL/VERTICAL) keeps the frame FIXED at its current size on any axis whose layoutSizing* you omit; pass HUG/FILL explicitly to change that.", shape: SetLayoutParamsSchema.shape },
   { name: "set-parent-id", description: "Set the parent id of a node.", shape: SetParentIdParamsSchema.shape },
   { name: "set-instance-properties", description: "Set the properties of an instance.", shape: SetInstancePropertiesParamsSchema.shape },
   { name: "edit-component-property", description: "Edit a component property.", shape: EditComponentPropertyParamsSchema.shape },

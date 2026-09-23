@@ -55,8 +55,9 @@ effects, and layering cannot be reproduced with current tools. Concrete evidence
 
 Root cause lives in `plugin/main/tools/update/set-layout.ts`: switching
 `layoutMode` from `NONE` to `HORIZONTAL`/`VERTICAL` lets Figma apply its default
-sizing (hug), shrinking a FIXED frame. (Observed in the clone sessions; exact
-Figma default is *verify in E2E* — the fix below is correct either way.)
+sizing (hug), shrinking a FIXED frame. **Verified on real Figma (2026-09-23):**
+`layoutSizingHorizontal` flips FIXED → HUG. **Status: done** (plugin fix + unit
+test; E2E re-checked 1440×80 navbar with a child stays FIXED).
 
 Fix (one place, all callers benefit):
 - Snapshot `width`/`height` before applying entries.
@@ -401,7 +402,7 @@ The agent finishes each item with `make check` green and writes a short handoff
 list in the final message:
 - tools added to `INTENTIONALLY_UNRECORDED` with TODO → record via
   `pnpm record:e2e` (see `mcp/tests/e2e/README.md`), then remove from the set;
-- *verify in E2E* items: P2.0 HUG default, P2.1 same-parent `insertChild` index,
+- *verify in E2E* items: P2.1 same-parent `insertChild` index,
   P2.2 gradient 90° direction, P2.5 50-op batch duration vs 20s timeout;
 - infra spike (§8) measurements — needs the heavy Draft file, human-run;
 - manual E2E checklist §10.

@@ -10,6 +10,8 @@ export async function setLayout(args: SetLayoutParams): Promise<ToolResult> {
     const loaded = await loadNode(args.id);
     if ("isError" in loaded) return loaded;
     const node = loaded as unknown as Record<string, unknown>;
+    const turningOnAutoLayout = node.layoutMode === "NONE" && (args.mode === "HORIZONTAL" || args.mode === "VERTICAL");
+    const { width, height } = node;
 
     const errors: string[] = [];
     const apply = (prop: string, value: unknown, transform?: (v: never) => unknown): void => {
@@ -43,6 +45,19 @@ export async function setLayout(args: SetLayoutParams): Promise<ToolResult> {
 
     if (errors.length > 0) {
         return { isError: true, content: errors.join("\n") + "\n" };
+    }
+
+    // Figma flips a frame to HUG when auto-layout turns on, shrinking a FIXED
+    // frame around its children. Keep the caller's size unless they chose sizing.
+    if (turningOnAutoLayout) {
+        const keepH = args.layoutSizingHorizontal === undefined && "layoutSizingHorizontal" in node;
+        const keepV = args.layoutSizingVertical === undefined && "layoutSizingVertical" in node;
+        if (keepH) node.layoutSizingHorizontal = "FIXED";
+        if (keepV) node.layoutSizingVertical = "FIXED";
+        // resize() forces both axes FIXED, so only restore size when the caller chose neither.
+        if (keepH && keepV && typeof node.resize === "function" && typeof width === "number" && typeof height === "number") {
+            (node.resize as (w: number, h: number) => void)(width, height);
+        }
     }
 
     return {

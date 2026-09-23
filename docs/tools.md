@@ -22,7 +22,7 @@ Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_
 | `set-fill-color` | plugin | Set the fill color of a node. |
 | `set-stroke-color` | plugin | Set the stroke color of a node. |
 | `set-corner-radius` | plugin | Set the corner radius of a node. |
-| `set-layout` | plugin | Set the layout of a node. |
+| `set-layout` | plugin | Set the layout of a node. Turning auto-layout on keeps a FIXED frame's size on any axis whose `layoutSizing*` is omitted (Figma would default to HUG). |
 | `set-parent-id` | plugin | Set the parent id of a node. |
 | `set-instance-properties` | plugin | Set the properties of an instance. |
 | `edit-component-property` | plugin | Edit a component property. |

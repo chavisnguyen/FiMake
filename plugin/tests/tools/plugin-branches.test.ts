@@ -99,6 +99,52 @@ describe("plugin branch coverage fill", () => {
     expect(node["layoutWrap"]).toBe("WRAP");
   });
 
+  it("setLayout keeps a FIXED frame's size when turning auto-layout on (Figma defaults to HUG)", async () => {
+    const figma: MockFigma = getFigma();
+    const makeFrame = (): SceneNodeStub => {
+      const node: SceneNodeStub = {
+        id: "1:1", name: "navbar", type: "FRAME", x: 0, y: 0, width: 1440, height: 80,
+        itemSpacing: 0, layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED",
+        resize: vi.fn((w: number, h: number) => { node["width"] = w; node["height"] = h; }),
+      };
+      let mode = "NONE";
+      // Mirror real Figma: enabling auto-layout switches both axes to HUG and shrinks to content.
+      Object.defineProperty(node, "layoutMode", {
+        enumerable: true,
+        get: () => mode,
+        set: (v: string) => {
+          if (mode === "NONE" && v !== "NONE") {
+            node["layoutSizingHorizontal"] = "HUG";
+            node["layoutSizingVertical"] = "HUG";
+            node["width"] = 100;
+            node["height"] = 20;
+          }
+          mode = v;
+        },
+      });
+      return node;
+    };
+
+    const kept = makeFrame();
+    figma.getNodeByIdAsync.mockResolvedValue(kept);
+    expect((await setLayout({ id: "1:1", mode: "HORIZONTAL", itemSpacing: 8 })).isError).toBe(false);
+    expect(kept).toMatchObject({ width: 1440, height: 80, layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" });
+
+    const hug = makeFrame();
+    figma.getNodeByIdAsync.mockResolvedValue(hug);
+    await setLayout({ id: "1:1", mode: "HORIZONTAL", layoutSizingHorizontal: "HUG" });
+    expect(hug).toMatchObject({ layoutSizingHorizontal: "HUG", layoutSizingVertical: "FIXED" });
+    expect(hug["resize"]).not.toHaveBeenCalled();
+
+    const already = makeFrame();
+    already["layoutMode"] = "VERTICAL";
+    (already["resize"] as ReturnType<typeof vi.fn>).mockClear();
+    figma.getNodeByIdAsync.mockResolvedValue(already);
+    await setLayout({ id: "1:1", mode: "VERTICAL", itemSpacing: 4 });
+    expect(already).toMatchObject({ layoutSizingHorizontal: "HUG", layoutSizingVertical: "HUG" });
+    expect(already["resize"]).not.toHaveBeenCalled();
+  });
+
   it("setFill/setStroke catch + parent-not-found", async () => {
     const figma: MockFigma = getFigma();
     const bad: SceneNodeStub = { id: "1:1", name: "N", type: "RECTANGLE" };
