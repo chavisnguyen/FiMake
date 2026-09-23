@@ -22,6 +22,8 @@ import {
   SetCornerRadiusParamsSchema,
   SetEffectsParamsSchema,
   SetFillColorParamsSchema,
+  SetFillGradientParamsSchema,
+  SetImageFillParamsSchema,
   SetInstancePropertiesParamsSchema,
   SetLayoutParamsSchema,
   SetNodeComponentPropertyReferencesParamsSchema,
@@ -48,6 +50,8 @@ import { exportAsset } from "./read/export-asset";
 import { moveNode } from "./update/move-node";
 import { resizeNode } from "./update/resize-node";
 import { setFillColor } from "./update/set-fill-color";
+import { setFillGradient } from "./update/set-fill-gradient";
+import { setImageFill } from "./update/set-image-fill";
 import { setStrokeColor } from "./update/set-stroke-color";
 import { setEffects } from "./update/set-effects";
 import { setCornerRadius } from "./update/set-corner-radius";
@@ -80,6 +84,8 @@ const PARAM_SCHEMAS: Record<string, z.ZodTypeAny> = {
   "move-node": MoveNodeParamsSchema,
   "resize-node": ResizeNodeParamsSchema,
   "set-fill-color": SetFillColorParamsSchema,
+  "set-fill-gradient": SetFillGradientParamsSchema,
+  "set-image-fill": SetImageFillParamsSchema,
   "set-stroke-color": SetStrokeColorParamsSchema,
   "set-effects": SetEffectsParamsSchema,
   "set-corner-radius": SetCornerRadiusParamsSchema,
@@ -133,6 +139,8 @@ export const TOOL_HANDLERS: Record<string, DispatchFn> = {
   "move-node": wrap("move-node", moveNode),
   "resize-node": wrap("resize-node", resizeNode),
   "set-fill-color": wrap("set-fill-color", setFillColor),
+  "set-fill-gradient": wrap("set-fill-gradient", setFillGradient),
+  "set-image-fill": wrap("set-image-fill", setImageFill),
   "set-stroke-color": wrap("set-stroke-color", setStrokeColor),
   "set-effects": wrap("set-effects", setEffects),
   "set-corner-radius": wrap("set-corner-radius", setCornerRadius),

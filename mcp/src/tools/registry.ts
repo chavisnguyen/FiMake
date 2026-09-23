@@ -24,6 +24,7 @@ import {
   SetCornerRadiusParamsSchema,
   SetEffectsParamsSchema,
   SetFillColorParamsSchema,
+  SetFillGradientParamsSchema,
   SetInstancePropertiesParamsSchema,
   SetLayoutParamsSchema,
   SetNodeComponentPropertyReferencesParamsSchema,
@@ -33,6 +34,7 @@ import {
 import { getSelection } from "./read/get-selection";
 import { createImage } from "./create/create-image";
 import { createSvg } from "./create/create-svg";
+import { setImageFill } from "./update/set-image-fill";
 import { exportAsset } from "./read/export-asset";
 import { exportFile } from "./read/export-file";
 import { listClients } from "./read/list-clients";
@@ -44,6 +46,7 @@ import { listClients } from "./read/list-clients";
  * - get-selection: wraps whole TaskResult (no schema)
  * - create-image: fetches URL in Node, forwards bytes to plugin
  * - create-svg: resolves inline/url/filePath SVG in Node, forwards markup to plugin
+ * - set-image-fill: fetches URL in Node, forwards bytes to plugin
  * - export-asset: optionally writes the asset to disk
  * - export-file: fans out over get-pages/get-node-info, writes JSON to disk
  * - list-clients: reads the bridge's connected plugin windows
@@ -51,7 +54,7 @@ import { listClients } from "./read/list-clients";
  * task command) and must have a matching TOOL_HANDLERS entry.
  */
 export const NODE_ONLY_TOOLS = ["export-file", "list-clients"] as const;
-export const NODE_WRAPPED_TOOLS = ["get-selection", "create-image", "create-svg", "export-asset", "export-file", "list-clients"] as const;
+export const NODE_WRAPPED_TOOLS = ["get-selection", "create-image", "create-svg", "set-image-fill", "export-asset", "export-file", "list-clients"] as const;
 export interface SimpleToolDef {
   name: string;
   description: string;
@@ -72,7 +75,8 @@ export const SIMPLE_TOOL_DEFS: SimpleToolDef[] = [
   { name: "get-all-components", description: "Get all components in the current file.", shape: GetAllComponentsParamsSchema.shape },
   { name: "move-node", description: "Move a node.", shape: MoveNodeParamsSchema.shape },
   { name: "resize-node", description: "Resize a node.", shape: ResizeNodeParamsSchema.shape },
-  { name: "set-fill-color", description: "Set the fill color of a node.", shape: SetFillColorParamsSchema.shape },
+  { name: "set-fill-color", description: "Set a solid fill color of a node (#RRGGBBAA; alpha 00 = transparent).", shape: SetFillColorParamsSchema.shape },
+  { name: "set-fill-gradient", description: "Replace a node's fill with a LINEAR (default) or RADIAL gradient. `stops`: 2-16 { position 0..1, color #RRGGBBAA }. `angle` (LINEAR only, degrees): 0 = left-to-right, 90 = top-to-bottom.", shape: SetFillGradientParamsSchema.shape },
   { name: "set-stroke-color", description: "Set the stroke (border) of a node: color, plus optional `weight` (px) and `align` (INSIDE/OUTSIDE/CENTER; omit to keep current).", shape: SetStrokeColorParamsSchema.shape },
   { name: "set-effects", description: "Replace ALL effects on a node (in order): DROP_SHADOW / INNER_SHADOW (`color` with alpha, `offset`, `radius`, `spread`) and LAYER_BLUR / BACKGROUND_BLUR (`radius`). Pass [] to clear.", shape: SetEffectsParamsSchema.shape },
   { name: "set-corner-radius", description: "Set the corner radius of a node.", shape: SetCornerRadiusParamsSchema.shape },
@@ -103,6 +107,7 @@ export function registerAllTools(server: McpServer, taskManager: TaskManager, so
   getSelection(server, taskManager);
   createImage(server, taskManager);
   createSvg(server, taskManager);
+  setImageFill(server, taskManager);
   exportAsset(server, taskManager);
   exportFile(server, taskManager);
   if (socketManager !== undefined) {

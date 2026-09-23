@@ -29,6 +29,8 @@ export * from './params/delete/delete-component-property';
 export * from './params/update/move-node';
 export * from './params/update/resize-node';
 export * from './params/update/set-fill-color';
+export * from './params/update/set-fill-gradient';
+export * from './params/update/set-image-fill';
 export * from './params/update/set-stroke-color';
 export * from './params/update/set-effects';
 export * from './params/update/set-corner-radius';

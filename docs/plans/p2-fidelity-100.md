@@ -116,6 +116,12 @@ NONE parent → isError, `absolute: false` → `"AUTO"`.
 
 ## 4. P2.2 Advanced fills (gradient, image-fill) + alpha bug
 
+**Status: done (2026-09-23)** — verified on real Figma via PNG export: 0° = left→right,
+90° = top→bottom (formula below is correct as-is), radial centered, `#RRGGBB00` fully
+transparent, `set-image-fill` paints a real photo. E2E caught one bug unit tests missed:
+the Node side dropped `url`, which the plugin's shared schema requires — fixed, plus a
+contract test asserting every Node-side tool's forwarded payload passes its plugin schema.
+
 Unlocks: Netflix reason-card gradients, Apple neon text, image backgrounds on
 existing frames.
 
@@ -407,6 +413,6 @@ The agent finishes each item with `make check` green and writes a short handoff
 list in the final message:
 - tools added to `INTENTIONALLY_UNRECORDED` with TODO → record via
   `pnpm record:e2e` (see `mcp/tests/e2e/README.md`), then remove from the set;
-- *verify in E2E* items: P2.2 gradient 90° direction, P2.5 50-op batch duration vs 20s timeout;
+- *verify in E2E* items: P2.5 50-op batch duration vs 20s timeout;
 - infra spike (§8) measurements — needs the heavy Draft file, human-run;
 - manual E2E checklist §10.

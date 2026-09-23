@@ -9,11 +9,13 @@ import type { TaskResult } from "../../src/bridge/task-manager";
 // Custom tools keep their own registration modules.
 import { createImage } from "../../src/tools/create/create-image";
 import { createSvg } from "../../src/tools/create/create-svg";
+import { setImageFill } from "../../src/tools/update/set-image-fill";
 import { getSelection } from "../../src/tools/read/get-selection";
 import { exportAsset } from "../../src/tools/read/export-asset";
 import { exportFile } from "../../src/tools/read/export-file";
 // Simple tools are driven by the registry table.
 import { SIMPLE_TOOL_DEFS, registerAllTools } from "../../src/tools/registry";
+import { CreateImageParamsSchema, CreateSvgParamsSchema, SetImageFillParamsSchema } from "../../src/shared/types/index";
 import { createBridge, createMcpServer } from "../../src/bridge/server";
 import {
   cast,
@@ -42,6 +44,7 @@ const SAMPLE_PARAMS: Record<string, Record<string, unknown>> = {
   "move-node": { id: "1:1", x: 1, y: 2 },
   "resize-node": { id: "1:1", width: 5, height: 5 },
   "set-fill-color": { id: "1:1", color: "#FF0000FF" },
+  "set-fill-gradient": { id: "1:1", stops: [{ position: 0, color: "#000000FF" }, { position: 1, color: "#FFFFFF00" }], angle: 90 },
   "set-stroke-color": { id: "1:1", color: "#FF0000FF", weight: 1, align: "INSIDE" },
   "set-effects": { id: "1:1", effects: [{ type: "DROP_SHADOW", color: "#00000040" }] },
   "set-corner-radius": { id: "1:1", cornerRadius: 4 },
@@ -90,11 +93,11 @@ describe("registry: every simple tool forwards its command + formats result", ()
     });
   }
 
-  it("registers the full set: simple tools + 5 custom ones (list-clients needs a bridge)", () => {
+  it("registers the full set: simple tools + 6 custom ones (list-clients needs a bridge)", () => {
     const { server, handlers } = mockServerBundle();
     registerAllTools(server, mockTaskManager());
-    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 5);
-    for (const name of ["get-selection", "create-image", "create-svg", "export-asset", "export-file"]) {
+    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 6);
+    for (const name of ["get-selection", "create-image", "create-svg", "set-image-fill", "export-asset", "export-file"]) {
       expect(handlers.has(name)).toBe(true);
     }
     expect(handlers.has("list-clients")).toBe(false);
@@ -105,7 +108,7 @@ describe("registry: every simple tool forwards its command + formats result", ()
     const fakeIo = { on: vi.fn() };
     const { socketManager } = createBridge(fakeIo as unknown as Server);
     registerAllTools(server, mockTaskManager(), socketManager);
-    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 6);
+    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 7);
     expect(handlers.has("list-clients")).toBe(true);
     const res: CallToolResult = await getHandler(handlers, "list-clients")({});
     expect(res.isError).toBe(false);
@@ -378,6 +381,61 @@ describe("create-svg resolves one source in Node, forwards only svg", () => {
     expect(toolText(await call({ svg: `<svg>${"a".repeat(5 * 1024 * 1024)}</svg>` }))).toContain("exceeds");
     expect(runTaskMock(tm)).not.toHaveBeenCalled();
   });
+});
+
+describe("set-image-fill fetches in Node, forwards bytes to the target node", () => {
+  const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  function res(contentType: string, bytes: number[], status = 200, location?: string): Response {
+    const headers = new Headers({ "content-type": contentType });
+    if (location !== undefined) headers.set("location", location);
+    return cast<Response>({ ok: status < 300, status, url: "https://x/y.png", headers, arrayBuffer: async (): Promise<ArrayBuffer> => new Uint8Array(bytes).buffer as ArrayBuffer });
+  }
+  function setup(): { call: (p: Record<string, unknown>) => Promise<CallToolResult>; tm: ReturnType<typeof mockTaskManager> } {
+    const { server, handlers } = mockServerBundle();
+    const tm = mockTaskManager({ isError: false, content: { id: "1:1" } });
+    setImageFill(server, tm);
+    return { call: (p) => getHandler(handlers, "set-image-fill")(p), tm };
+  }
+
+  it("forwards id/url/scaleMode/imageData to the plugin", async () => {
+    const { call, tm } = setup();
+    vi.stubGlobal("fetch", vi.fn(async () => res("image/png", PNG)));
+    const out = await call({ id: "1:1", url: "https://x/y.png", scaleMode: "FIT", targetFileKey: "k" });
+    expect(out.isError).toBe(false);
+    expect(runTaskMock(tm)).toHaveBeenCalledWith("set-image-fill", expect.objectContaining({ id: "1:1", url: "https://x/y.png", scaleMode: "FIT", imageData: PNG, targetFileKey: "k" }));
+  });
+
+  it("rejects non-Figma formats and SSRF redirects before the socket", async () => {
+    const { call, tm } = setup();
+    vi.stubGlobal("fetch", vi.fn(async () => res("image/webp", [0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50])));
+    expect(toolText(await call({ id: "1:1", url: "https://x/y.webp" }))).toContain("only JPG/PNG/GIF");
+    vi.stubGlobal("fetch", vi.fn(async () => res("text/plain", [], 302, "http://10.0.0.1/")));
+    expect(toolText(await call({ id: "1:1", url: "https://x/r" }))).toContain("blocked");
+    expect(runTaskMock(tm)).not.toHaveBeenCalled();
+  });
+});
+
+describe("Node-side tools forward payloads the plugin schema accepts", () => {
+  const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  const cases: Array<{ name: string; register: typeof createImage; schema: { safeParse: (v: unknown) => { success: boolean; error?: unknown } }; params: Record<string, unknown>; body: string | number[] }> = [
+    { name: "create-image", register: createImage, schema: CreateImageParamsSchema, params: { url: "https://x/y.png" }, body: PNG },
+    { name: "create-svg", register: createSvg, schema: CreateSvgParamsSchema, params: { url: "https://x/a.svg" }, body: "<svg xmlns=\"http://www.w3.org/2000/svg\"/>" },
+    { name: "set-image-fill", register: setImageFill, schema: SetImageFillParamsSchema, params: { id: "1:1", url: "https://x/y.png" }, body: PNG },
+  ];
+  for (const c of cases) {
+    it(`${c.name}: forwarded args pass the plugin's PARAM_SCHEMA`, async () => {
+      const { server, handlers } = mockServerBundle();
+      const tm = mockTaskManager({ isError: false, content: { id: "9:9" } });
+      c.register(server, tm);
+      const bytes = typeof c.body === "string" ? Array.from(new TextEncoder().encode(c.body)) : c.body;
+      vi.stubGlobal("fetch", vi.fn(async () => cast<Response>({ ok: true, status: 200, url: "https://x/y", arrayBuffer: async (): Promise<ArrayBuffer> => new Uint8Array(bytes).buffer as ArrayBuffer })));
+      const out = await getHandler(handlers, c.name)(c.params);
+      expect(out.isError).toBe(false);
+      const forwarded = runTaskMock(tm).mock.calls[0]?.[1];
+      const parsed = c.schema.safeParse(forwarded);
+      expect(parsed.success, JSON.stringify(parsed.error)).toBe(true);
+    });
+  }
 });
 
 describe("export-asset outputPath", () => {

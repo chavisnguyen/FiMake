@@ -21,6 +21,8 @@ import { ResizeNodeParamsSchema } from "../../src/shared/types/params/update/res
 import { SetFillColorParamsSchema } from "../../src/shared/types/params/update/set-fill-color";
 import { SetStrokeColorParamsSchema } from "../../src/shared/types/params/update/set-stroke-color";
 import { SetEffectsParamsSchema } from "../../src/shared/types/params/update/set-effects";
+import { SetFillGradientParamsSchema } from "../../src/shared/types/params/update/set-fill-gradient";
+import { SetImageFillParamsSchema } from "../../src/shared/types/params/update/set-image-fill";
 import { SetCornerRadiusParamsSchema } from "../../src/shared/types/params/update/set-corner-radius";
 import { SetLayoutParamsSchema } from "../../src/shared/types/params/update/set-layout";
 import { SetParentIdParamsSchema } from "../../src/shared/types/params/update/set-parent-id";
@@ -131,6 +133,15 @@ describe("delete/update schemas", () => {
     expect(() => SetEffectsParamsSchema.parse({ id: "1:1", effects: [{ type: "DROP_SHADOW" }] })).toThrow();
     expect(() => SetEffectsParamsSchema.parse({ id: "1:1", effects: [{ type: "LAYER_BLUR" }] })).toThrow();
     expect(() => SetEffectsParamsSchema.parse({ id: "1:1", effects: [{ type: "NOISE", radius: 1 }] })).toThrow();
+  });
+  it("gradient (LINEAR/0deg defaults, 2..16 stops, positions 0..1) + image-fill (FILL default, keeps imageData)", () => {
+    const stops = [{ position: 0, color: "#000000FF" }, { position: 1, color: "#FFFFFF00" }];
+    expect(SetFillGradientParamsSchema.parse({ id: "1:1", stops })).toMatchObject({ type: "LINEAR", angle: 0 });
+    expect(() => SetFillGradientParamsSchema.parse({ id: "1:1", stops: stops.slice(0, 1) })).toThrow();
+    expect(() => SetFillGradientParamsSchema.parse({ id: "1:1", stops: [{ position: 1.5, color: "#000000FF" }, stops[1]] })).toThrow();
+    expect(() => SetFillGradientParamsSchema.parse({ id: "1:1", stops, type: "ANGULAR" })).toThrow();
+    const img = SetImageFillParamsSchema.parse({ id: "1:1", url: "https://x/y.png", imageData: [1, 2] });
+    expect(img).toMatchObject({ scaleMode: "FILL", imageData: [1, 2] });
     expect(() => SetInstancePropertiesParamsSchema.parse({ instanceId: "1:1", properties: { a: 1 } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { characters: "prop" } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { bogus: "x" } })).toThrow();

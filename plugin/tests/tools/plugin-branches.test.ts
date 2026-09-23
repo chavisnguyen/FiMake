@@ -11,6 +11,8 @@ import { setFillColor } from "../../main/tools/update/set-fill-color";
 import { setStrokeColor } from "../../main/tools/update/set-stroke-color";
 import { setParentId } from "../../main/tools/update/set-parent-id";
 import { setEffects } from "../../main/tools/update/set-effects";
+import { gradientTransform, setFillGradient } from "../../main/tools/update/set-fill-gradient";
+import { setImageFill } from "../../main/tools/update/set-image-fill";
 
 describe("plugin branch coverage fill", () => {
   beforeEach(() => setupFigma());
@@ -196,6 +198,44 @@ describe("plugin branch coverage fill", () => {
     const bad = await setEffects({ id: "0:1", effects: [] });
     expect(bad.isError).toBe(true);
     expect(String(bad.content)).toContain("effects");
+  });
+
+  it("gradientTransform: 0deg = identity, 90deg maps node y onto gradient x", () => {
+    // `+ 0` folds -0 into 0 so toEqual compares values, not float signs.
+    const round = (row: readonly number[]): number[] => row.map((v) => Math.round(v * 1e6) / 1e6 + 0);
+    const [r0, r1] = gradientTransform(0);
+    expect(round(r0)).toEqual([1, 0, 0]);
+    expect(round(r1)).toEqual([0, 1, 0]);
+    const [a, b] = gradientTransform(90);
+    expect(round(a)).toEqual([0, 1, 0]);
+    expect(round(b)).toEqual([-1, 0, 1]);
+  });
+
+  it("setFillGradient builds sorted RGBA stops, LINEAR vs RADIAL, rejects nodes without fills", async () => {
+    const figma: MockFigma = getFigma();
+    const node: SceneNodeStub = { id: "1:1", name: "Card", type: "FRAME", fills: [] };
+    figma.getNodeByIdAsync.mockResolvedValue(node);
+    const stops = [{ position: 1, color: "#E5091400" }, { position: 0, color: "#6E00FFFF" }];
+    expect((await setFillGradient({ id: "1:1", type: "LINEAR", stops, angle: 90 })).isError).toBe(false);
+    const paint = (node["fills"] as GradientPaint[])[0];
+    expect(paint?.type).toBe("GRADIENT_LINEAR");
+    expect(paint?.gradientStops.map((st) => st.position)).toEqual([0, 1]);
+    expect(paint?.gradientStops[1]?.color.a).toBe(0);
+    await setFillGradient({ id: "1:1", type: "RADIAL", stops, angle: 45 });
+    expect((node["fills"] as GradientPaint[])[0]?.type).toBe("GRADIENT_RADIAL");
+
+    figma.getNodeByIdAsync.mockResolvedValue({ id: "0:1", name: "Page", type: "PAGE" });
+    expect((await setFillGradient({ id: "0:1", type: "LINEAR", stops, angle: 0 })).isError).toBe(true);
+  });
+
+  it("setImageFill sets an IMAGE paint on the existing node, requires bytes", async () => {
+    const figma: MockFigma = getFigma();
+    expect((await setImageFill({ id: "1:1", url: "https://x", scaleMode: "FILL" })).isError).toBe(true);
+    const node: SceneNodeStub = { id: "1:1", name: "Hero", type: "FRAME", fills: [] };
+    figma.getNodeByIdAsync.mockResolvedValue(node);
+    expect((await setImageFill({ id: "1:1", url: "https://x", scaleMode: "CROP", imageData: [1, 2, 3] })).isError).toBe(false);
+    expect(figma.createImage).toHaveBeenCalled();
+    expect((node["fills"] as ImagePaint[])[0]).toEqual({ type: "IMAGE", imageHash: "h1", scaleMode: "CROP" });
   });
 
   describe("setParentId index + absolute", () => {

@@ -76,6 +76,7 @@ import { SIMPLE_TOOL_DEFS, NODE_WRAPPED_TOOLS } from "../../src/tools/registry";
 /** Tool cố tình KHÔNG record: fetch URL ngoài, nhét ảnh lạ vào file + flaky mạng. */
 const INTENTIONALLY_UNRECORDED = new Set([
   "create-image", // needs live network fetch, never recorded by design
+  "set-image-fill", // same: live network fetch, never recorded by design
   "list-clients", // node-only: reads bridge state, no plugin round-trip to record
 ]);
 

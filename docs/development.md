@@ -82,7 +82,7 @@ cd mcp && pnpm test:typecheck      # tsc over tests
 cd plugin && pnpm tsc              # tsc over main + ui + tests
 ```
 
-Tool parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_ONLY_TOOLS` in `mcp/src/tools/registry.ts`: 24 tools forward to the plugin, 6 have Node-side logic (`get-selection`, `create-image`, `create-svg`, `export-asset`, `export-file`, `list-clients`).
+Tool parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_ONLY_TOOLS` in `mcp/src/tools/registry.ts`: 25 tools forward to the plugin, 7 have Node-side logic (`get-selection`, `create-image`, `create-svg`, `set-image-fill`, `export-asset`, `export-file`, `list-clients`).
 
 ## Release
 
