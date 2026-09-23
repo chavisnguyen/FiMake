@@ -1,19 +1,19 @@
 {
   "_meta": {
     "command": "add-prototype-link",
-    "recordedAt": "2026-09-21T10:41:22.345Z",
+    "recordedAt": "2026-09-23T07:27:03.856Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "add-prototype-link",
     "args": {
-      "nodeId": "2045:12714",
-      "destinationId": "2045:12715"
+      "nodeId": "2066:12780",
+      "destinationId": "2066:12783"
     }
   },
   "response": {
     "isError": true,
-    "content": "\"Reaction at index 0 was invalid (destination 2045:12715 was rejected — the destination node may not exist, the source may not be a valid prototype source, or the destination may not be reachable from this source; for NAVIGATE actions, destinations must be a different top-level frame on the same page)\""
+    "content": "\"Reaction at index 0 was invalid (destination 2066:12783 was rejected — the destination node may not exist, the source may not be a valid prototype source, or the destination may not be reachable from this source; for NAVIGATE actions, destinations must be a different top-level frame on the same page)\""
   }
 }

@@ -1,15 +1,15 @@
 {
   "_meta": {
     "command": "create-instance",
-    "recordedAt": "2026-09-21T10:41:22.081Z",
+    "recordedAt": "2026-09-23T07:27:03.511Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "create-instance",
     "args": {
-      "componentId": "2045:12716",
-      "parentId": "2045:12713",
+      "componentId": "2066:12784",
+      "parentId": "2066:12779",
       "x": 200,
       "y": 10
     }
@@ -17,7 +17,7 @@
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12717",
+      "id": "2066:12785",
       "name": "Instance",
       "x": 200,
       "y": 10,

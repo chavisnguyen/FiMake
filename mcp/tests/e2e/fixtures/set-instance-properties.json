@@ -1,14 +1,14 @@
 {
   "_meta": {
     "command": "set-instance-properties",
-    "recordedAt": "2026-09-21T10:41:22.205Z",
+    "recordedAt": "2026-09-23T07:27:03.616Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "set-instance-properties",
     "args": {
-      "instanceId": "2045:12717",
+      "instanceId": "2066:12785",
       "properties": {
         "Label": "hello"
       }
@@ -17,13 +17,13 @@
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12717",
+      "id": "2066:12785",
       "name": "Instance",
       "x": 200,
       "y": 10,
       "parentId": "87:7157",
       "properties": {
-        "Label#2045:3": {
+        "Label#2066:0": {
           "type": "TEXT",
           "value": "hello"
         }

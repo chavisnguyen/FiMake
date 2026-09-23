@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "get-pages",
-    "recordedAt": "2026-09-21T10:41:21.730Z",
+    "recordedAt": "2026-09-23T07:27:02.691Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
@@ -1828,46 +1828,127 @@
         "name": "Draft",
         "nodes": [
           {
-            "id": "850:10103",
-            "name": "3 - Login Page",
+            "id": "2054:12898",
+            "name": "Apple.com Clone - Desktop 1440",
             "type": "FRAME",
-            "x": 1770,
+            "x": 0,
             "y": 0,
-            "width": 447.99,
-            "height": 309,
+            "width": 1440,
+            "height": 4408,
+            "layoutMode": "VERTICAL",
+            "paddingLeft": 0,
+            "paddingRight": 0,
+            "paddingTop": 0,
+            "paddingBottom": 0,
+            "itemSpacing": 0,
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "CENTER",
             "layoutSizingHorizontal": "FIXED",
-            "layoutSizingVertical": "FIXED",
+            "layoutSizingVertical": "HUG",
+            "fills": [
+              {
+                "type": "SOLID",
+                "color": "#ffffffFF"
+              }
+            ],
             "children": [
               {
-                "id": "850:10104",
-                "name": "Container",
+                "id": "2054:12899",
+                "name": "Navbar",
+                "type": "FRAME"
+              },
+              {
+                "id": "2054:12900",
+                "name": "Edu Banner",
+                "type": "FRAME"
+              },
+              {
+                "id": "2054:12901",
+                "name": "Hero - iPhone 18 Pro",
+                "type": "FRAME"
+              },
+              {
+                "id": "2054:12902",
+                "name": "Hero - iPhone Duo",
+                "type": "FRAME"
+              },
+              {
+                "id": "2054:12903",
+                "name": "Hero - Watch S12",
+                "type": "FRAME"
+              },
+              {
+                "id": "2054:12904",
+                "name": "Grid Promos",
+                "type": "FRAME"
+              },
+              {
+                "id": "2054:12905",
+                "name": "Entertainment",
+                "type": "FRAME"
+              },
+              {
+                "id": "2054:12906",
+                "name": "Footer",
                 "type": "FRAME"
               }
             ],
             "childrenTruncated": true
           },
           {
-            "id": "2045:12711",
-            "name": "Instance",
+            "id": "2061:12678",
+            "name": "Netflix Clone - Desktop 1440",
             "type": "FRAME",
-            "x": 300,
-            "y": 10,
-            "width": 100,
-            "height": 100,
+            "x": 1600,
+            "y": 0,
+            "width": 1440,
+            "height": 2276,
+            "layoutMode": "VERTICAL",
+            "paddingLeft": 0,
+            "paddingRight": 0,
+            "paddingTop": 0,
+            "paddingBottom": 0,
+            "itemSpacing": 0,
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "CENTER",
             "layoutSizingHorizontal": "FIXED",
-            "layoutSizingVertical": "FIXED",
+            "layoutSizingVertical": "HUG",
             "fills": [
               {
                 "type": "SOLID",
-                "visible": false,
                 "color": "#ffffffFF"
               }
             ],
             "children": [
               {
-                "id": "2045:12712",
-                "name": "Text",
-                "type": "TEXT"
+                "id": "2061:12679",
+                "name": "Hero",
+                "type": "FRAME"
+              },
+              {
+                "id": "2061:12680",
+                "name": "Trending Now",
+                "type": "FRAME"
+              },
+              {
+                "id": "2061:12681",
+                "name": "More Reasons",
+                "type": "FRAME"
+              },
+              {
+                "id": "2061:12682",
+                "name": "FAQ",
+                "type": "FRAME"
+              },
+              {
+                "id": "2061:12683",
+                "name": "Bottom CTA",
+                "type": "FRAME"
+              },
+              {
+                "id": "2061:12684",
+                "name": "Footer",
+                "type": "FRAME"
               }
             ],
             "childrenTruncated": true

@@ -1,14 +1,14 @@
 {
   "_meta": {
     "command": "set-layout",
-    "recordedAt": "2026-09-21T10:41:22.302Z",
+    "recordedAt": "2026-09-23T07:27:03.776Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "set-layout",
     "args": {
-      "id": "2045:12713",
+      "id": "2066:12779",
       "mode": "HORIZONTAL",
       "itemSpacing": 8
     }
@@ -16,12 +16,12 @@
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12713",
+      "id": "2066:12779",
       "name": "fimake-e2e-sandbox",
       "type": "FRAME",
       "x": -5000,
       "y": -5000,
-      "width": 261,
+      "width": 293,
       "height": 600,
       "layoutMode": "HORIZONTAL",
       "paddingLeft": 0,
@@ -41,17 +41,22 @@
       ],
       "children": [
         {
-          "id": "2045:12714",
+          "id": "2066:12780",
           "name": "e2e-rect",
           "type": "RECTANGLE"
         },
         {
-          "id": "2045:12715",
+          "id": "2066:12781",
+          "name": "e2e-svg",
+          "type": "FRAME"
+        },
+        {
+          "id": "2066:12783",
           "name": "Text",
           "type": "TEXT"
         },
         {
-          "id": "2045:12716",
+          "id": "2066:12784",
           "name": "E2EComp",
           "type": "COMPONENT"
         }

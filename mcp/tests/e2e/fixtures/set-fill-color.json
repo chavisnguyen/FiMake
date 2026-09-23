@@ -1,21 +1,21 @@
 {
   "_meta": {
     "command": "set-fill-color",
-    "recordedAt": "2026-09-21T10:41:22.263Z",
+    "recordedAt": "2026-09-23T07:27:03.731Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "set-fill-color",
     "args": {
-      "id": "2045:12714",
+      "id": "2066:12780",
       "color": "#FF0000FF"
     }
   },
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12714",
+      "id": "2066:12780",
       "name": "e2e-rect",
       "type": "RECTANGLE",
       "x": 42,

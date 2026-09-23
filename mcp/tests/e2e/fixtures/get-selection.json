@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "get-selection",
-    "recordedAt": "2026-09-21T10:41:21.844Z",
+    "recordedAt": "2026-09-23T07:27:02.837Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
@@ -13,7 +13,66 @@
     "isError": false,
     "content": {
       "isError": false,
-      "content": []
+      "content": [
+        {
+          "id": "2061:12678",
+          "name": "Netflix Clone - Desktop 1440",
+          "type": "FRAME",
+          "x": 1600,
+          "y": 0,
+          "width": 1440,
+          "height": 2276,
+          "layoutMode": "VERTICAL",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "paddingBottom": 0,
+          "itemSpacing": 0,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "CENTER",
+          "layoutSizingHorizontal": "FIXED",
+          "layoutSizingVertical": "HUG",
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": "#ffffffFF"
+            }
+          ],
+          "children": [
+            {
+              "id": "2061:12679",
+              "name": "Hero",
+              "type": "FRAME"
+            },
+            {
+              "id": "2061:12680",
+              "name": "Trending Now",
+              "type": "FRAME"
+            },
+            {
+              "id": "2061:12681",
+              "name": "More Reasons",
+              "type": "FRAME"
+            },
+            {
+              "id": "2061:12682",
+              "name": "FAQ",
+              "type": "FRAME"
+            },
+            {
+              "id": "2061:12683",
+              "name": "Bottom CTA",
+              "type": "FRAME"
+            },
+            {
+              "id": "2061:12684",
+              "name": "Footer",
+              "type": "FRAME"
+            }
+          ],
+          "childrenTruncated": true
+        }
+      ]
     }
   }
 }

@@ -1,21 +1,21 @@
 {
   "_meta": {
     "command": "set-corner-radius",
-    "recordedAt": "2026-09-21T10:41:22.282Z",
+    "recordedAt": "2026-09-23T07:27:03.749Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "set-corner-radius",
     "args": {
-      "id": "2045:12714",
+      "id": "2066:12780",
       "cornerRadius": 8
     }
   },
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12714",
+      "id": "2066:12780",
       "name": "e2e-rect",
       "type": "RECTANGLE",
       "x": 42,

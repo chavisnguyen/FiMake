@@ -1,18 +1,18 @@
 {
   "_meta": {
     "command": "delete-node",
-    "recordedAt": "2026-09-21T10:41:22.449Z",
+    "recordedAt": "2026-09-23T07:27:03.983Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "delete-node",
     "args": {
-      "id": "2045:12718"
+      "id": "2066:12786"
     }
   },
   "response": {
     "isError": false,
-    "content": "Node \"e2e-rect\" (2045:12718) deleted successfully"
+    "content": "Node \"e2e-rect\" (2066:12786) deleted successfully"
   }
 }

@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "export-file",
-    "recordedAt": "2026-09-21T10:41:23.293Z",
+    "recordedAt": "2026-09-23T07:27:05.089Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
@@ -28,7 +28,8 @@
         "Design/System Admin-113_9244.json",
         "Design/Candidate Portal-166_6204.json",
         "Design/Applicant-1490_10118.json",
-        "Design/Job Management - Discrepancy Fixes-1510_8766.json"
+        "Design/Job Management - Discrepancy Fixes-1510_8766.json",
+        "Draft/Netflix Clone - Desktop 1440-2061_12678.json"
       ]
     }
   }

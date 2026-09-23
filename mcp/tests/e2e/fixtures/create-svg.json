@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "create-svg",
-    "recordedAt": "2026-09-23T07:21:17.503Z",
+    "recordedAt": "2026-09-23T07:27:03.067Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
@@ -12,19 +12,19 @@
       "name": "e2e-svg",
       "x": 300,
       "y": 300,
-      "parentId": "2066:12776"
+      "parentId": "2066:12779"
     }
   },
   "response": {
     "isError": false,
     "content": {
-      "id": "2066:12777",
+      "id": "2066:12781",
       "x": 300,
       "y": 300,
       "width": 24,
       "height": 24,
       "name": "e2e-svg",
-      "parentId": "2066:12776:FRAME"
+      "parentId": "2066:12779:FRAME"
     }
   }
 }

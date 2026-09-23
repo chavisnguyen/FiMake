@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "create-rectangle",
-    "recordedAt": "2026-09-21T10:41:21.911Z",
+    "recordedAt": "2026-09-23T07:27:02.974Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
@@ -13,19 +13,19 @@
       "width": 100,
       "height": 50,
       "name": "e2e-rect",
-      "parentId": "2045:12713"
+      "parentId": "2066:12779"
     }
   },
   "response": {
     "isError": false,
     "content": {
-      "id": "2045:12714",
+      "id": "2066:12780",
       "x": 10,
       "y": 10,
       "width": 100,
       "height": 50,
       "name": "e2e-rect",
-      "parentId": "2045:12713:FRAME"
+      "parentId": "2066:12779:FRAME"
     }
   }
 }
