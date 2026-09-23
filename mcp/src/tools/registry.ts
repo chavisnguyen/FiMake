@@ -31,6 +31,7 @@ import {
 } from "../shared/types/index";
 import { getSelection } from "./read/get-selection";
 import { createImage } from "./create/create-image";
+import { createSvg } from "./create/create-svg";
 import { exportAsset } from "./read/export-asset";
 import { exportFile } from "./read/export-file";
 import { listClients } from "./read/list-clients";
@@ -41,6 +42,7 @@ import { listClients } from "./read/list-clients";
  * plugin/main/tools/dispatch.ts:
  * - get-selection: wraps whole TaskResult (no schema)
  * - create-image: fetches URL in Node, forwards bytes to plugin
+ * - create-svg: resolves inline/url/filePath SVG in Node, forwards markup to plugin
  * - export-asset: optionally writes the asset to disk
  * - export-file: fans out over get-pages/get-node-info, writes JSON to disk
  * - list-clients: reads the bridge's connected plugin windows
@@ -48,7 +50,7 @@ import { listClients } from "./read/list-clients";
  * task command) and must have a matching TOOL_HANDLERS entry.
  */
 export const NODE_ONLY_TOOLS = ["export-file", "list-clients"] as const;
-export const NODE_WRAPPED_TOOLS = ["get-selection", "create-image", "export-asset", "export-file", "list-clients"] as const;
+export const NODE_WRAPPED_TOOLS = ["get-selection", "create-image", "create-svg", "export-asset", "export-file", "list-clients"] as const;
 export interface SimpleToolDef {
   name: string;
   description: string;
@@ -98,6 +100,7 @@ export function registerAllTools(server: McpServer, taskManager: TaskManager, so
   }
   getSelection(server, taskManager);
   createImage(server, taskManager);
+  createSvg(server, taskManager);
   exportAsset(server, taskManager);
   exportFile(server, taskManager);
   if (socketManager !== undefined) {

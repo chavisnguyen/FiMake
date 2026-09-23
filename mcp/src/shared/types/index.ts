@@ -10,6 +10,7 @@ export * from './params/create/create-instance';
 export * from './params/create/add-component-property';
 export * from './params/create/create-component';
 export * from './params/create/create-image';
+export * from './params/create/create-svg';
 export * from './params/create/add-prototype-link';
 
 // Read

@@ -5,6 +5,7 @@ import { CreateTextParamsSchema } from "../../src/shared/types/params/create/cre
 import { CreateInstanceParamsSchema } from "../../src/shared/types/params/create/create-instance";
 import { CreateComponentParamsSchema } from "../../src/shared/types/params/create/create-component";
 import { CreateImageParamsSchema } from "../../src/shared/types/params/create/create-image";
+import { CreateSvgParamsSchema } from "../../src/shared/types/params/create/create-svg";
 import { CloneNodeParamsSchema } from "../../src/shared/types/params/create/clone-node";
 import { AddComponentPropertyParamsSchema } from "../../src/shared/types/params/create/add-component-property";
 import { AddPrototypeLinkParamsSchema } from "../../src/shared/types/params/create/add-prototype-link";
@@ -51,6 +52,11 @@ describe("create schemas", () => {
     expect(() => CreateImageParamsSchema.parse({})).toThrow();
     expect(() => CloneNodeParamsSchema.parse({ id: "1:2" })).not.toThrow();
     expect(() => CloneNodeParamsSchema.parse({ id: "nope" })).toThrow();
+  });
+  it("svg: defaults placement, keeps svg (plugin strips unknown keys), rejects bad parent", () => {
+    const p = CreateSvgParamsSchema.parse({ svg: "<svg/>" });
+    expect(p).toMatchObject({ svg: "<svg/>", name: "SVG", x: 0, y: 0 });
+    expect(() => CreateSvgParamsSchema.parse({ svg: "<svg/>", parentId: "bad" })).toThrow();
   });
   it("add-component-property enum + prototype-link defaults", () => {
     expect(() => AddComponentPropertyParamsSchema.parse({ componentId: "1:1", name: "n", type: "BOOLEAN", defaultValue: "true" })).not.toThrow();

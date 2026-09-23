@@ -8,6 +8,7 @@ import type { TaskResult } from "../../src/bridge/task-manager";
 
 // Custom tools keep their own registration modules.
 import { createImage } from "../../src/tools/create/create-image";
+import { createSvg } from "../../src/tools/create/create-svg";
 import { getSelection } from "../../src/tools/read/get-selection";
 import { exportAsset } from "../../src/tools/read/export-asset";
 import { exportFile } from "../../src/tools/read/export-file";
@@ -88,11 +89,11 @@ describe("registry: every simple tool forwards its command + formats result", ()
     });
   }
 
-  it("registers the full set: simple tools + 4 custom ones (list-clients needs a bridge)", () => {
+  it("registers the full set: simple tools + 5 custom ones (list-clients needs a bridge)", () => {
     const { server, handlers } = mockServerBundle();
     registerAllTools(server, mockTaskManager());
-    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 4);
-    for (const name of ["get-selection", "create-image", "export-asset", "export-file"]) {
+    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 5);
+    for (const name of ["get-selection", "create-image", "create-svg", "export-asset", "export-file"]) {
       expect(handlers.has(name)).toBe(true);
     }
     expect(handlers.has("list-clients")).toBe(false);
@@ -103,7 +104,7 @@ describe("registry: every simple tool forwards its command + formats result", ()
     const fakeIo = { on: vi.fn() };
     const { socketManager } = createBridge(fakeIo as unknown as Server);
     registerAllTools(server, mockTaskManager(), socketManager);
-    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 5);
+    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 6);
     expect(handlers.has("list-clients")).toBe(true);
     const res: CallToolResult = await getHandler(handlers, "list-clients")({});
     expect(res.isError).toBe(false);
@@ -287,6 +288,94 @@ describe("create-image redirects + format guard", () => {
     expect(res.isError).toBe(true);
     expect(toolText(res)).toContain("credentials");
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("create-svg resolves one source in Node, forwards only svg", () => {
+  const SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4"/></svg>';
+
+  function setup(): { call: (p: Record<string, unknown>) => Promise<CallToolResult>; tm: ReturnType<typeof mockTaskManager> } {
+    const { server, handlers } = mockServerBundle();
+    const tm = mockTaskManager({ isError: false, content: { id: "9:9" } });
+    createSvg(server, tm);
+    return { call: (p) => getHandler(handlers, "create-svg")(p), tm };
+  }
+
+  function svgRes(body: string, contentType = "image/svg+xml", status = 200, location?: string): Response {
+    const headers = new Headers({ "content-type": contentType });
+    if (location !== undefined) headers.set("location", location);
+    return cast<Response>({
+      ok: status >= 200 && status < 300,
+      status,
+      url: "https://x/a.svg",
+      headers,
+      arrayBuffer: async (): Promise<ArrayBuffer> => new TextEncoder().encode(body).buffer as ArrayBuffer,
+    });
+  }
+
+  it("inline svg (with xml prolog + comment) forwards svg + placement, not the source fields", async () => {
+    const { call, tm } = setup();
+    const svg = `<?xml version="1.0"?>\n<!-- icon -->\n${SVG}`;
+    const res = await call({ svg, x: 5, y: 6, parentId: "1:2", targetFileKey: "k" });
+    expect(res.isError).toBe(false);
+    expect(runTaskMock(tm)).toHaveBeenCalledWith(
+      "create-svg",
+      expect.objectContaining({ svg, x: 5, y: 6, parentId: "1:2", targetFileKey: "k" }),
+    );
+    const forwarded = runTaskMock(tm).mock.calls[0]?.[1] as Record<string, unknown>;
+    expect(forwarded).not.toHaveProperty("url");
+    expect(forwarded).not.toHaveProperty("filePath");
+  });
+
+  it("url: fetches and forwards the decoded markup", async () => {
+    const { call, tm } = setup();
+    const fetchMock = vi.fn(async () => svgRes(SVG));
+    vi.stubGlobal("fetch", fetchMock);
+    const res = await call({ url: "https://x/a.svg" });
+    expect(res.isError).toBe(false);
+    expect(runTaskMock(tm)).toHaveBeenCalledWith("create-svg", expect.objectContaining({ svg: SVG }));
+    const init = (fetchMock.mock.calls[0] as unknown as [unknown, RequestInit & { headers: Record<string, string> }])[1];
+    expect(init.headers["Accept"]).toContain("image/svg+xml");
+  });
+
+  it("url: rejects html pages and SSRF redirects without calling the plugin", async () => {
+    const { call, tm } = setup();
+    vi.stubGlobal("fetch", vi.fn(async () => svgRes("<!doctype html><html></html>", "text/html")));
+    const html = await call({ url: "https://x/page" });
+    expect(html.isError).toBe(true);
+    expect(toolText(html)).toContain("Not an SVG");
+    vi.stubGlobal("fetch", vi.fn(async () => svgRes("", "text/plain", 302, "http://169.254.169.254/")));
+    const ssrf = await call({ url: "https://x/redirect" });
+    expect(ssrf.isError).toBe(true);
+    expect(toolText(ssrf)).toContain("blocked");
+    expect(runTaskMock(tm)).not.toHaveBeenCalled();
+  });
+
+  it("filePath: reads a local .svg, rejects other extensions", async () => {
+    const { call, tm } = setup();
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "fimake-svg-"));
+    const file = path.join(dir, "icon.svg");
+    fs.writeFileSync(file, SVG);
+    const ok = await call({ filePath: file });
+    expect(ok.isError).toBe(false);
+    expect(runTaskMock(tm)).toHaveBeenCalledWith("create-svg", expect.objectContaining({ svg: SVG }));
+    const txt = path.join(dir, "icon.txt");
+    fs.writeFileSync(txt, SVG);
+    const bad = await call({ filePath: txt });
+    expect(bad.isError).toBe(true);
+    expect(toolText(bad)).toContain(".svg");
+    const missing = await call({ filePath: path.join(dir, "nope.svg") });
+    expect(missing.isError).toBe(true);
+  });
+
+  it("rejects 0 or 2 sources, entities, non-svg and oversize before the socket", async () => {
+    const { call, tm } = setup();
+    expect(toolText(await call({}))).toContain("exactly one");
+    expect(toolText(await call({ svg: SVG, url: "https://x/a.svg" }))).toContain("exactly one");
+    expect(toolText(await call({ svg: `<!DOCTYPE svg [<!ENTITY a "b">]>${SVG}` }))).toContain("ENTITY");
+    expect(toolText(await call({ svg: "<div/>" }))).toContain("Not an SVG");
+    expect(toolText(await call({ svg: `<svg>${"a".repeat(5 * 1024 * 1024)}</svg>` }))).toContain("exceeds");
+    expect(runTaskMock(tm)).not.toHaveBeenCalled();
   });
 });
 

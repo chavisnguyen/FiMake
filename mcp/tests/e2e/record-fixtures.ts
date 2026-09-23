@@ -1,4 +1,4 @@
-// Record fixtures từ Figma THẬT — phủ full 27 tools.
+// Record fixtures từ Figma THẬT — phủ full 28 tools.
 //
 // Dùng khi: Figma Desktop đang mở + plugin Fimake (bản mới nhất) Connected.
 // Script gọi MCP server thật (nối plugin thật), dump response vào
@@ -135,6 +135,13 @@ async function main(): Promise<void> {
 
   const rect = await rec("create-rectangle", { x: 10, y: 10, width: 100, height: 50, name: "e2e-rect", parentId: sbId });
   const rectId = contentId(rect.content);
+  await rec("create-svg", {
+    svg: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10" fill="#0A84FF"/></svg>',
+    name: "e2e-svg",
+    x: 300,
+    y: 300,
+    parentId: sbId,
+  });
   const txt = await rec("create-text", { x: 10, y: 80, text: "e2e", parentId: sbId });
   const textId = contentId(txt.content);
   const comp = await rec("create-component", { name: "E2EComp", parentId: sbId });

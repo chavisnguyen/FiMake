@@ -14,6 +14,7 @@ import { createText } from "../../main/tools/create/create-text";
 import { createComponent } from "../../main/tools/create/create-component";
 import { createInstance } from "../../main/tools/create/create-instance";
 import { createImage } from "../../main/tools/create/create-image";
+import { createSvg } from "../../main/tools/create/create-svg";
 import { cloneNode } from "../../main/tools/create/clone-node";
 import { addComponentProperty } from "../../main/tools/create/add-component-property";
 import { addPrototypeLink } from "../../main/tools/create/add-prototype-link";
@@ -119,6 +120,35 @@ describe("plugin create tools", () => {
     const res = await createImage({ x: 0, y: 0, width: 10, height: 10, name: "Img", url: "https://x", imageData: [1, 2, 3], parentId: "0:1" });
     expect(res.isError).toBe(false);
     expect((rect["fills"] as Array<{ type: string; scaleMode: string }>)[0]).toMatchObject({ type: "IMAGE", scaleMode: "FILL" });
+  });
+
+  it("createSvg places the vector frame, re-parents, cleans up on bad parent, reports invalid SVG", async () => {
+    const figma: MockFigma = setupFigma();
+    const svgFrame: SceneNodeStub = { ...sceneNodeStub({ id: "5:1", type: "FRAME" }), remove: vi.fn() };
+    figma.createNodeFromSvg.mockReturnValue(svgFrame);
+    const ok = await createSvg({ svg: "<svg/>", name: "Icon", x: 3, y: 4 });
+    expect(ok.isError).toBe(false);
+    expect(figma.createNodeFromSvg).toHaveBeenCalledWith("<svg/>");
+    expect(svgFrame).toMatchObject({ name: "Icon", x: 3, y: 4 });
+    expect(figma.currentPage.appendChild).toHaveBeenCalledWith(svgFrame);
+
+    const parent = { appendChild: vi.fn() };
+    figma.getNodeByIdAsync.mockResolvedValue(parent);
+    expect((await createSvg({ svg: "<svg/>", name: "Icon", x: 0, y: 0, parentId: "0:1" })).isError).toBe(false);
+    expect(parent.appendChild).toHaveBeenCalledWith(svgFrame);
+
+    figma.getNodeByIdAsync.mockResolvedValue(null);
+    const noParent = await createSvg({ svg: "<svg/>", name: "Icon", x: 0, y: 0, parentId: "9:9" });
+    expect(noParent).toMatchObject({ isError: true, content: "Parent node not found" });
+    expect(svgFrame["remove"]).toHaveBeenCalled();
+
+    figma.createNodeFromSvg.mockImplementation(() => {
+      throw new Error("parse error");
+    });
+    const bad = await createSvg({ svg: "<svg", name: "Icon", x: 0, y: 0 });
+    expect(bad.isError).toBe(true);
+    expect(String(bad.content)).toContain("Invalid SVG");
+    expect((await createSvg({ name: "Icon", x: 0, y: 0 })).isError).toBe(true);
   });
 
   it("addPrototypeLink validates nodes + builds reaction", async () => {

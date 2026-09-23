@@ -1,6 +1,6 @@
-# Tools (28)
+# Tools (29)
 
-23 tools forward directly to the plugin (`name` = task command), 5 have extra Node-side logic.
+23 tools forward directly to the plugin (`name` = task command), 6 have extra Node-side logic.
 
 Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_ONLY_TOOLS` in `mcp/src/tools/registry.ts`.
 
@@ -31,6 +31,7 @@ Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_
 | `delete-component-property` | plugin | Delete a component property. |
 | `get-selection` | node+plugin | Get the current selection in Figma. No params; returns whole TaskResult. |
 | `create-image` | node+plugin | Fetches `url` in Node (no CORS), forwards `imageData` bytes to plugin. |
+| `create-svg` | node+plugin | Editable vector from SVG: exactly one of `svg` (inline), `url` (fetched in Node, same SSRF guards as `create-image`), `filePath` (local `.svg`). Keeps intrinsic size; `x`/`y`/`parentId` place it. Max 5MB, rejects `<!ENTITY`. |
 | `export-asset` | node+plugin | Rendered asset with real path data (`SVG` markup or `PNG`/`JPG` base64, `scale` max 4). With `outputPath`, writes to disk and returns `{path, bytes}` (max 20MB). |
 | `export-file` | node-only | Fans out over `get-pages` + `get-node-info` and writes one JSON per top-level frame + `manifest.json`. Params: `outputDir` (default `<cwd>/exports/export-<ts>`), `maxNodes` (default 5000), `maxChars` (default 35000). Guarded: max 500 frames, all writes confined to `outputDir`. No plugin handler by design. |
 | `list-clients` | node-only | List open Figma files with the plugin connected (one entry per window: `fileName`, `fileKey`, `connectedAt`). No plugin handler by design. |

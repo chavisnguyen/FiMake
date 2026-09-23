@@ -8,6 +8,7 @@ import {
   CreateImageParamsSchema,
   CreateInstanceParamsSchema,
   CreateRectangleParamsSchema,
+  CreateSvgParamsSchema,
   CreateTextParamsSchema,
   DeleteComponentPropertyParamsSchema,
   DeleteNodeParamsSchema,
@@ -34,6 +35,7 @@ import { createText } from "./create/create-text";
 import { createComponent } from "./create/create-component";
 import { createInstance } from "./create/create-instance";
 import { createImage } from "./create/create-image";
+import { createSvg } from "./create/create-svg";
 import { cloneNode } from "./create/clone-node";
 import { addComponentProperty } from "./create/add-component-property";
 import { addPrototypeLink } from "./create/add-prototype-link";
@@ -65,6 +67,7 @@ const PARAM_SCHEMAS: Record<string, z.ZodTypeAny> = {
   "create-instance": CreateInstanceParamsSchema,
   "create-component": CreateComponentParamsSchema,
   "create-image": CreateImageParamsSchema,
+  "create-svg": CreateSvgParamsSchema,
   "clone-node": CloneNodeParamsSchema,
   "add-component-property": AddComponentPropertyParamsSchema,
   "add-prototype-link": AddPrototypeLinkParamsSchema,
@@ -115,6 +118,7 @@ export const TOOL_HANDLERS: Record<string, DispatchFn> = {
   "create-component": wrap("create-component", createComponent),
   "create-instance": wrap("create-instance", createInstance),
   "create-image": wrap("create-image", createImage),
+  "create-svg": wrap("create-svg", createSvg),
   "clone-node": wrap("clone-node", cloneNode),
   "add-component-property": wrap("add-component-property", addComponentProperty),
   "add-prototype-link": wrap("add-prototype-link", addPrototypeLink),

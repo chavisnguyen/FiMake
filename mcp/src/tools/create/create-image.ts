@@ -56,7 +56,7 @@ function unsupportedFormatMessage(buf: Uint8Array, contentType: string): string 
         return "Image format (bmp) is not supported by Figma — only JPG/PNG/GIF. Use a .jpg/.png URL";
     }
     if (looksLikeSvgOrHtml(buf) || contentType.includes("svg")) {
-        return `Not a decodable image (content-type: ${contentType || "unknown"}). SVG/HTML cannot be used with create-image — use a direct .jpg/.png/.gif URL`;
+        return `Not a decodable image (content-type: ${contentType || "unknown"}). SVG/HTML cannot be used with create-image — use create-svg for SVG, or a direct .jpg/.png/.gif URL`;
     }
     return `Unsupported image format (content-type: ${contentType || "unknown"}) — Figma only decodes JPG/PNG/GIF`;
 }

@@ -32,6 +32,7 @@ export interface MockFigma {
   createText: Mock;
   createComponent: Mock;
   createImage: Mock;
+  createNodeFromSvg: Mock;
   base64Encode: Mock;
   [key: string]: unknown;
 }
@@ -53,6 +54,7 @@ export function setupFigma(overrides: Partial<MockFigma> = {}): MockFigma {
     createText: vi.fn(),
     createComponent: vi.fn(),
     createImage: vi.fn(() => ({ hash: "h1" })),
+    createNodeFromSvg: vi.fn(),
     base64Encode: vi.fn(() => "base64data"),
     ...overrides,
   };
