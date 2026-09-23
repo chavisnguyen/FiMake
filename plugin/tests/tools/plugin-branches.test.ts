@@ -10,6 +10,7 @@ import { setLayout } from "../../main/tools/update/set-layout";
 import { setFillColor } from "../../main/tools/update/set-fill-color";
 import { setStrokeColor } from "../../main/tools/update/set-stroke-color";
 import { setParentId } from "../../main/tools/update/set-parent-id";
+import { setEffects } from "../../main/tools/update/set-effects";
 
 describe("plugin branch coverage fill", () => {
   beforeEach(() => setupFigma());
@@ -157,6 +158,44 @@ describe("plugin branch coverage fill", () => {
     expect((await setStrokeColor({ id: "1:1", color: "#FF0000FF" })).isError).toBe(true);
     figma.getNodeByIdAsync.mockImplementation(async (id: string) => (id === "1:1" ? { id } : null));
     expect((await setParentId({ id: "1:1", parentId: "9:9" })).content).toBe("Parent node not found");
+  });
+
+  it("setStrokeColor applies weight/align only when given", async () => {
+    const figma: MockFigma = getFigma();
+    const node: SceneNodeStub = { id: "1:1", name: "Email", type: "FRAME", strokes: [], strokeWeight: 3, strokeAlign: "CENTER" };
+    figma.getNodeByIdAsync.mockResolvedValue(node);
+    await setStrokeColor({ id: "1:1", color: "#80808080" });
+    expect(node).toMatchObject({ strokeWeight: 3, strokeAlign: "CENTER" });
+    await setStrokeColor({ id: "1:1", color: "#80808080", weight: 1, align: "INSIDE" });
+    expect(node).toMatchObject({ strokeWeight: 1, strokeAlign: "INSIDE" });
+    expect((node["strokes"] as Array<{ opacity: number }>)[0]?.opacity).toBeCloseTo(128 / 255);
+  });
+
+  it("setEffects replaces all effects with Figma structs, [] clears, rejects nodes without effects", async () => {
+    const figma: MockFigma = getFigma();
+    const node: SceneNodeStub = { id: "1:1", name: "Button", type: "FRAME", effects: [{ type: "LAYER_BLUR", radius: 1, visible: true }] };
+    figma.getNodeByIdAsync.mockResolvedValue(node);
+    const res = await setEffects({
+      id: "1:1",
+      effects: [
+        { type: "DROP_SHADOW", color: "#00000040", offset: { x: 0, y: 2 }, radius: 6, spread: 1 },
+        { type: "BACKGROUND_BLUR", radius: 12 },
+      ],
+    });
+    expect(res.isError).toBe(false);
+    const fx = node["effects"] as Array<Record<string, unknown>>;
+    expect(fx).toHaveLength(2);
+    expect(fx[0]).toMatchObject({ type: "DROP_SHADOW", offset: { x: 0, y: 2 }, radius: 6, spread: 1, visible: true, blendMode: "NORMAL" });
+    expect((fx[0]?.["color"] as { a: number }).a).toBeCloseTo(64 / 255);
+    expect(fx[1]).toEqual({ type: "BACKGROUND_BLUR", radius: 12, visible: true, blurType: "NORMAL" });
+
+    await setEffects({ id: "1:1", effects: [] });
+    expect(node["effects"]).toEqual([]);
+
+    figma.getNodeByIdAsync.mockResolvedValue({ id: "0:1", name: "Page", type: "PAGE" });
+    const bad = await setEffects({ id: "0:1", effects: [] });
+    expect(bad.isError).toBe(true);
+    expect(String(bad.content)).toContain("effects");
   });
 
   describe("setParentId index + absolute", () => {

@@ -11,7 +11,10 @@ export async function setStrokeColor(args: SetStrokeColorParams): Promise<ToolRe
     const node = loaded;
     try {
         if ("strokes" in node) {
-            (node as unknown as { strokes: Paint[] }).strokes = [getSolidHEXColorPaint(args.color)];
+            const n = node as unknown as { strokes: Paint[]; strokeWeight: number; strokeAlign: string };
+            n.strokes = [getSolidHEXColorPaint(args.color)];
+            if (args.weight !== undefined) n.strokeWeight = args.weight;
+            if (args.align !== undefined) n.strokeAlign = args.align;
         }
         else {
             return { isError: true, content: "Node does not have a strokes property" };

@@ -179,6 +179,9 @@ File changes: 2 shared schemas → registry (`set-fill-gradient` in
 
 ## 5. P2.3 Stroke weight/align + effects
 
+**Status: done (2026-09-23)** — verified on real Figma (1px INSIDE border, drop/inner
+shadow, layer/background blur with `blurType: "NORMAL"`, `[]` clears).
+
 Unlocks: email-field borders, button shadows, card elevation.
 
 Stroke — extend existing `SetStrokeColorParamsSchema` (no new tool):

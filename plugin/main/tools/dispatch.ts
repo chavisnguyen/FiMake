@@ -20,6 +20,7 @@ import {
   MoveNodeParamsSchema,
   ResizeNodeParamsSchema,
   SetCornerRadiusParamsSchema,
+  SetEffectsParamsSchema,
   SetFillColorParamsSchema,
   SetInstancePropertiesParamsSchema,
   SetLayoutParamsSchema,
@@ -48,6 +49,7 @@ import { moveNode } from "./update/move-node";
 import { resizeNode } from "./update/resize-node";
 import { setFillColor } from "./update/set-fill-color";
 import { setStrokeColor } from "./update/set-stroke-color";
+import { setEffects } from "./update/set-effects";
 import { setCornerRadius } from "./update/set-corner-radius";
 import { setLayout } from "./update/set-layout";
 import { setParentId } from "./update/set-parent-id";
@@ -79,6 +81,7 @@ const PARAM_SCHEMAS: Record<string, z.ZodTypeAny> = {
   "resize-node": ResizeNodeParamsSchema,
   "set-fill-color": SetFillColorParamsSchema,
   "set-stroke-color": SetStrokeColorParamsSchema,
+  "set-effects": SetEffectsParamsSchema,
   "set-corner-radius": SetCornerRadiusParamsSchema,
   "set-layout": SetLayoutParamsSchema,
   "set-parent-id": SetParentIdParamsSchema,
@@ -131,6 +134,7 @@ export const TOOL_HANDLERS: Record<string, DispatchFn> = {
   "resize-node": wrap("resize-node", resizeNode),
   "set-fill-color": wrap("set-fill-color", setFillColor),
   "set-stroke-color": wrap("set-stroke-color", setStrokeColor),
+  "set-effects": wrap("set-effects", setEffects),
   "set-corner-radius": wrap("set-corner-radius", setCornerRadius),
   "set-layout": wrap("set-layout", setLayout),
   "set-parent-id": wrap("set-parent-id", setParentId),

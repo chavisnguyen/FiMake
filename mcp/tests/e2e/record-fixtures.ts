@@ -1,4 +1,4 @@
-// Record fixtures từ Figma THẬT — phủ full 28 tools.
+// Record fixtures từ Figma THẬT — phủ full 29 tools.
 //
 // Dùng khi: Figma Desktop đang mở + plugin Fimake (bản mới nhất) Connected.
 // Script gọi MCP server thật (nối plugin thật), dump response vào
@@ -182,7 +182,14 @@ async function main(): Promise<void> {
     await rec("move-node", { id: rectId, x: 42, y: 77 });
     await rec("resize-node", { id: rectId, width: 120, height: 60 });
     await rec("set-fill-color", { id: rectId, color: "#FF0000FF" });
-    await rec("set-stroke-color", { id: rectId, color: "#00FF00FF" });
+    await rec("set-stroke-color", { id: rectId, color: "#00FF00FF", weight: 2, align: "INSIDE" });
+    await rec("set-effects", {
+      id: rectId,
+      effects: [
+        { type: "DROP_SHADOW", color: "#00000040", offset: { x: 0, y: 2 }, radius: 6, spread: 0 },
+        { type: "LAYER_BLUR", radius: 1 },
+      ],
+    });
     await rec("set-corner-radius", { id: rectId, cornerRadius: 8 });
     await rec("set-layout", { id: sbId, mode: "HORIZONTAL", itemSpacing: 8 });
     await rec("get-node-info", { id: rectId });

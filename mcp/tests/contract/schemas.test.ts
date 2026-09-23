@@ -20,6 +20,7 @@ import { MoveNodeParamsSchema } from "../../src/shared/types/params/update/move-
 import { ResizeNodeParamsSchema } from "../../src/shared/types/params/update/resize-node";
 import { SetFillColorParamsSchema } from "../../src/shared/types/params/update/set-fill-color";
 import { SetStrokeColorParamsSchema } from "../../src/shared/types/params/update/set-stroke-color";
+import { SetEffectsParamsSchema } from "../../src/shared/types/params/update/set-effects";
 import { SetCornerRadiusParamsSchema } from "../../src/shared/types/params/update/set-corner-radius";
 import { SetLayoutParamsSchema } from "../../src/shared/types/params/update/set-layout";
 import { SetParentIdParamsSchema } from "../../src/shared/types/params/update/set-parent-id";
@@ -119,6 +120,17 @@ describe("delete/update schemas", () => {
     expect(SetParentIdParamsSchema.parse({ id: "1:1", parentId: "2:2", index: 0, absolute: false })).toMatchObject({ index: 0, absolute: false });
     expect(() => SetParentIdParamsSchema.parse({ id: "1:1", parentId: "2:2", index: -1 })).toThrow();
     expect(() => SetParentIdParamsSchema.parse({ id: "1:1", parentId: "2:2", index: 1.5 })).toThrow();
+  });
+  it("stroke weight/align + effects union (shadow defaults, blur needs radius)", () => {
+    expect(SetStrokeColorParamsSchema.parse({ id: "1:1", color: "#000000FF", weight: 1, align: "INSIDE" })).toMatchObject({ weight: 1, align: "INSIDE" });
+    expect(() => SetStrokeColorParamsSchema.parse({ id: "1:1", color: "#000000FF", align: "MIDDLE" })).toThrow();
+    const fx = SetEffectsParamsSchema.parse({ id: "1:1", effects: [{ type: "DROP_SHADOW", color: "#00000040" }, { type: "LAYER_BLUR", radius: 8 }] });
+    expect(fx.effects[0]).toEqual({ type: "DROP_SHADOW", color: "#00000040", offset: { x: 0, y: 4 }, radius: 4, spread: 0 });
+    expect(fx.effects[1]).toEqual({ type: "LAYER_BLUR", radius: 8 });
+    expect(SetEffectsParamsSchema.parse({ id: "1:1", effects: [] }).effects).toEqual([]);
+    expect(() => SetEffectsParamsSchema.parse({ id: "1:1", effects: [{ type: "DROP_SHADOW" }] })).toThrow();
+    expect(() => SetEffectsParamsSchema.parse({ id: "1:1", effects: [{ type: "LAYER_BLUR" }] })).toThrow();
+    expect(() => SetEffectsParamsSchema.parse({ id: "1:1", effects: [{ type: "NOISE", radius: 1 }] })).toThrow();
     expect(() => SetInstancePropertiesParamsSchema.parse({ instanceId: "1:1", properties: { a: 1 } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { characters: "prop" } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { bogus: "x" } })).toThrow();

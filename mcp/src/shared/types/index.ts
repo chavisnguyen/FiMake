@@ -30,6 +30,7 @@ export * from './params/update/move-node';
 export * from './params/update/resize-node';
 export * from './params/update/set-fill-color';
 export * from './params/update/set-stroke-color';
+export * from './params/update/set-effects';
 export * from './params/update/set-corner-radius';
 export * from './params/update/set-layout';
 export * from './params/update/edit-component-property';

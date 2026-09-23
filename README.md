@@ -130,14 +130,14 @@ Full client configs, env table, and custom `PORT` checklist live in [docs/usage.
 |---|---|
 | [Quickstart](docs/quickstart.md) | 5-minute install (plugin + server + client config) |
 | [docs/usage.md](docs/usage.md) | Full setup, HTTP + `stdio` configs, env table, custom `PORT` |
-| [docs/tools.md](docs/tools.md) | All 29 tools reference |
+| [docs/tools.md](docs/tools.md) | All 30 tools reference |
 | [docs/architecture.md](docs/architecture.md) | Bridge, task map, diagrams, security |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | `Not connected`, port in use, timeouts, logs |
 | [docs/development.md](docs/development.md) | Contributor guide: `make` targets, watch mode, tests, architecture |
 
 ## Tools
 
-29 tools: 23 forward directly to the plugin (`name` = task command), 6 have extra Node-side logic.
+30 tools: 24 forward directly to the plugin (`name` = task command), 6 have extra Node-side logic.
 
 Every tool accepts `targetFileKey` / `targetFileName` to pin a task to one open Figma file — call `list-clients` first, omit both to broadcast (see [docs/tools.md](docs/tools.md#multi-window-targeting)).
 
@@ -157,7 +157,8 @@ Every tool accepts `targetFileKey` / `targetFileName` to pin a task to one open 
 | `move-node` | plugin | Move a node. |
 | `resize-node` | plugin | Resize a node. |
 | `set-fill-color` | plugin | Set the fill color of a node. |
-| `set-stroke-color` | plugin | Set the stroke color of a node. |
+| `set-stroke-color` | plugin | Set the stroke (border): `color`, optional `weight` (px) and `align` (`INSIDE`/`OUTSIDE`/`CENTER`). |
+| `set-effects` | plugin | Replace all effects: `DROP_SHADOW`/`INNER_SHADOW` (`color` with alpha, `offset`, `radius`, `spread`) and `LAYER_BLUR`/`BACKGROUND_BLUR` (`radius`). `[]` clears. |
 | `set-corner-radius` | plugin | Set the corner radius of a node. |
 | `set-layout` | plugin | Set the layout of a node. Turning auto-layout on keeps a FIXED frame's size on any axis whose `layoutSizing*` is omitted (Figma would default to HUG). |
 | `set-parent-id` | plugin | Move a node into a parent or reorder it. `index` = position among children (0 = bottom of z-order, omit = append); `absolute` = ABSOLUTE positioning inside an auto-layout parent (overlays). |

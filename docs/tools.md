@@ -1,6 +1,6 @@
-# Tools (29)
+# Tools (30)
 
-23 tools forward directly to the plugin (`name` = task command), 6 have extra Node-side logic.
+24 tools forward directly to the plugin (`name` = task command), 6 have extra Node-side logic.
 
 Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_ONLY_TOOLS` in `mcp/src/tools/registry.ts`.
 
@@ -20,7 +20,8 @@ Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_
 | `move-node` | plugin | Move a node. |
 | `resize-node` | plugin | Resize a node. |
 | `set-fill-color` | plugin | Set the fill color of a node. |
-| `set-stroke-color` | plugin | Set the stroke color of a node. |
+| `set-stroke-color` | plugin | Set the stroke (border): `color`, optional `weight` (px) and `align` (`INSIDE`/`OUTSIDE`/`CENTER`). |
+| `set-effects` | plugin | Replace all effects: `DROP_SHADOW`/`INNER_SHADOW` (`color` with alpha, `offset`, `radius`, `spread`) and `LAYER_BLUR`/`BACKGROUND_BLUR` (`radius`). `[]` clears. |
 | `set-corner-radius` | plugin | Set the corner radius of a node. |
 | `set-layout` | plugin | Set the layout of a node. Turning auto-layout on keeps a FIXED frame's size on any axis whose `layoutSizing*` is omitted (Figma would default to HUG). |
 | `set-parent-id` | plugin | Move a node into a parent or reorder it. `index` = position among children (0 = bottom of z-order, omit = append); `absolute` = ABSOLUTE positioning inside an auto-layout parent (overlays). |

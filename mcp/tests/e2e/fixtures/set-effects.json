@@ -1,0 +1,74 @@
+{
+  "_meta": {
+    "command": "set-effects",
+    "recordedAt": "2026-09-23T10:50:26.287Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "set-effects",
+    "args": {
+      "id": "2071:12810",
+      "effects": [
+        {
+          "type": "DROP_SHADOW",
+          "color": "#00000040",
+          "offset": {
+            "x": 0,
+            "y": 2
+          },
+          "radius": 6,
+          "spread": 0
+        },
+        {
+          "type": "LAYER_BLUR",
+          "radius": 1
+        }
+      ]
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": {
+      "id": "2071:12810",
+      "name": "e2e-rect",
+      "type": "RECTANGLE",
+      "x": 10,
+      "y": 10,
+      "width": 100,
+      "height": 50,
+      "layoutSizingHorizontal": "FIXED",
+      "layoutSizingVertical": "FIXED",
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": "#d9d9d9FF"
+        }
+      ],
+      "strokes": [
+        {
+          "type": "SOLID",
+          "color": "#00ff00FF"
+        }
+      ],
+      "strokeWeight": 2,
+      "strokeAlign": "INSIDE",
+      "effects": [
+        {
+          "type": "DROP_SHADOW",
+          "color": "#00000040",
+          "offset": {
+            "x": 0,
+            "y": 2
+          },
+          "radius": 6,
+          "spread": 0
+        },
+        {
+          "type": "LAYER_BLUR",
+          "radius": 1
+        }
+      ]
+    }
+  }
+}
