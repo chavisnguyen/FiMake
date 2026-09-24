@@ -10,6 +10,8 @@ Chatting in Figma Make and then moving the result back to Figma to continue is i
 
 **Fimake lets AI agents work directly in your Figma documents** — create, edit, organize, and read.
 
+📖 **Docs:** [chavisnguyen.github.io/FiMake](https://chavisnguyen.github.io/FiMake) — same guides with search + sidebar.
+
 ## Install (5 minutes)
 
 Prerequisites: Figma Desktop + an MCP client (Claude Code / Cursor / Claude Desktop / Opencode). No Node needed.
