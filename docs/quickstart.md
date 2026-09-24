@@ -1,4 +1,4 @@
-# Quickstart (5 minutes)
+# Quickstart
 
 You need: Figma Desktop + an MCP client (Claude Code / Cursor / Claude Desktop / Opencode). No Node, no repo clone.
 

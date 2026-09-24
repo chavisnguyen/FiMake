@@ -78,7 +78,7 @@ export default defineConfig({
         text: "Start here",
         items: [
           { text: "Introduction", link: "/" },
-          { text: "Quickstart (5 min)", link: "/quickstart" },
+          { text: "Quickstart", link: "/quickstart" },
           { text: "Usage", link: "/usage" },
           { text: "Troubleshooting", link: "/troubleshooting" },
         ],

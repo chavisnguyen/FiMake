@@ -7,7 +7,7 @@ hero:
   tagline: The official Figma MCP server is read-only. Fimake lets agents create, edit, organize, and read — directly in the file you have open.
   actions:
     - theme: brand
-      text: Get started (5 min)
+      text: Get started
       link: /quickstart
     - theme: alt
       text: Tools reference
