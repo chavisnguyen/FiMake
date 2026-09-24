@@ -15,7 +15,7 @@ Use this when `fimake install-plugin` doesn't work for you: you're not on macOS,
 
 1. Is the server running? You should see `[fimake] Server listening on http://localhost:<PORT>` (streamable-http) or `Socket.IO server listening …` (stdio).
 2. Is the plugin window open? Figma suspends closed plugins — keep it open.
-3. Wrong port? Check `PORT` in `mcp/.env` vs the URL the plugin uses (`ws://localhost:<PORT>`, shown in the plugin footer). If you changed `PORT`, follow [usage → custom PORT](usage.md#7-custom-port) (manifest + rebuild + re-import).
+3. Wrong port? Check `PORT` in your client config vs the URL the plugin uses (`ws://localhost:<PORT>`, shown in the plugin footer). If you changed `PORT`, follow [usage → custom PORT](usage.md#custom-port) (manifest + rebuild + re-import).
 4. Still stuck? Restart in order: server first, then *Plugins > Development > Fimake*.
 
 ## `curl /health` fails / port already in use
@@ -25,7 +25,7 @@ curl http://localhost:10101/health   # expect {"ok":true}
 lsof -i :10101                       # find the process holding the port
 ```
 
-Either stop the other process or set a new `PORT` in `mcp/.env` (then follow the custom-PORT checklist — the plugin manifest hardcodes the port).
+Either stop the other process or set a new `PORT` in your client config (then follow the custom-PORT checklist in [usage](usage.md#custom-port) — the plugin manifest hardcodes the port).
 
 ## Client (Claude/Cursor) does not see tools
 
@@ -47,16 +47,16 @@ Fix (pick one):
 
 ## Task times out (`isError:true`, "Task timed out")
 
-- The plugin has `TASK_TIMEOUT_MS` (default 20000ms) to reply. Large `get-node-info` calls on huge files are the usual cause — retry with smaller `depth` / `maxNodes` / `maxChars`, or raise `TASK_TIMEOUT_MS` in `mcp/.env`.
+- The plugin has `TASK_TIMEOUT_MS` (default 20000ms) to reply. Large `get-node-info` calls on huge files are the usual cause — retry with smaller `depth` / `maxNodes` / `maxChars`, or raise `TASK_TIMEOUT_MS` (client config `env`, or `mcp/.env` when running from source).
 - Check the plugin is on the right document/page and Figma is not showing a modal dialog (plugin code cannot run while a native dialog is open).
 - Watch both consoles: server `[fimake] task added/completed/failed/timed out` lines tell you which hop swallowed the task; plugin `[fimake]` lines appear in *Plugins > Development > Open Console*.
 
-## Changed code but nothing changed in Figma
+## Changed code but nothing changed in Figma (contributors)
 
 - You edited `mcp/src`: restart `pnpm start` (or run `pnpm dev` for watch mode).
 - You edited `plugin/{main,ui,shared}` or `plugin/manifest.json`: run `make build`, then **re-import** the plugin (*Import plugin from manifest* again) and re-run it. Figma caches the old bundle otherwise.
 
-## Noisy / missing logs
+## Noisy / missing logs (contributors)
 
 - Server wire payloads: `DEBUG=1 cd mcp && pnpm start`.
 - Plugin verbose: `PLUGIN_DEBUG` in `plugin/main/debug.ts` (Figma developer console).
@@ -64,4 +64,4 @@ Fix (pick one):
 
 ## Networked (non-localhost) use
 
-Set `CORS_ORIGIN` explicitly in `mcp/.env`, review `networkAccess.allowedDomains` in `plugin/manifest.json`, and treat it as untrusted-network exposure done at your own risk. `export-file`/`export-asset` writes stay confined to the requested output dir (no `../` escape, frame count + byte caps).
+Set `CORS_ORIGIN` explicitly (client config `env`, or `mcp/.env` from source), review `networkAccess.allowedDomains` in `plugin/manifest.json`, and treat it as untrusted-network exposure done at your own risk. `export-file`/`export-asset` writes stay confined to the requested output dir (no `../` escape, frame count + byte caps).

@@ -1,50 +1,51 @@
-# Quickstart (5 minutes, no repo clone)
+# Quickstart (5 minutes)
 
-Prerequisites: Figma Desktop, an MCP client (Opencode / Claude Code / Cursor / Claude Desktop).
+You need: Figma Desktop + an MCP client (Claude Code / Cursor / Claude Desktop / Opencode). No Node, no repo clone.
 
-> Pick **one** way to run the server: either your client spawns it (`stdio`, recommended below) **or** you run it by hand (`streamable-http`, advanced). Never both — two servers fight over port `10101` and the second one crashes. When in doubt, run `fimake doctor`.
-
-## 1. Install the Figma plugin (sideload, once)
-
-Fimake ships as a **dev plugin** (sideload from manifest). There is no Figma Community listing — the plugin needs a local socket bridge (`localhost:10101`), which Figma does not allow for published listings.
-
-Install the `fimake` CLI, then run `install-plugin` (standalone binary works too — see step 2 below for other install options):
+## Step 1 — Install the CLI
 
 ```bash
 brew tap chavisnguyen/fimake
 brew install fimake
+fimake --version
+fimake doctor   # expect "[ok] port ... is free"
+```
+
+No Homebrew? Download `fimake-<your-os>` from [GitHub Releases](https://github.com/chavisnguyen/FiMake/releases), `chmod +x` it, and use its full path wherever you see `fimake` below. Update later with `brew upgrade fimake`.
+
+## Step 2 — Install the Figma plugin (once)
+
+```bash
 fimake install-plugin
 ```
 
-This downloads, verifies, and registers the plugin with Figma Desktop for you (macOS). If Figma is running, it asks to quit it for you first (needed once — Figma only writes its plugin registry on quit; use `--yes` to skip the prompt, `--no-register` to just download + unzip and import it yourself instead).
+This downloads the plugin matching your CLI version and registers it with Figma Desktop (macOS). If Figma is running, it asks to quit it once — Figma only saves its plugin registry on quit. Flags: `--yes` skips the prompt, `--no-register` downloads only (you import manually).
 
-1. Reopen Figma, then run it via *Plugins > Development > Fimake*. Expected: **Not connected to MCP server**.
-2. **Keep the plugin window open.** It flips to **Connected** once the MCP server (step 2 below) is running.
+Then:
 
-> Compatibility: use the plugin zip and the binary from the **same release** (e.g. both `v1.0.x`). Default port is `10101` on both sides.
->
-> Not on macOS, or `install-plugin` doesn't work for you? See [manual sideload](troubleshooting.md#install-the-plugin-manually).
+1. Reopen Figma → *Plugins > Development > Fimake*. Expected: **Not connected to MCP server**.
+2. **Keep this window open.** It flips to **Connected** once your client spawns the server (step 3).
 
-## 2. Run the MCP server (client spawns it — you do nothing)
+> Plugin zip and CLI must come from the **same release**. Not on macOS? See [manual sideload](troubleshooting.md#install-the-plugin-manually).
 
-With `stdio` (below) your client starts the server itself. **Do NOT run the server by hand** (`pnpm start`, `node dist/index.js`, `./fimake-...`) — a hand-started server holds port `10101` and your client's own server crashes into it.
+## Step 3 — Connect your client
 
-**A. Homebrew (macOS / Linux, recommended).** No Node needed — tap is auto-bumped on every release (`homebrew-fimake:Formula/fimake.rb:1`):
+Your client spawns the server itself — **run nothing by hand**. Pick your client, paste, restart it if it requires:
 
-```bash
-brew tap chavisnguyen/fimake
-brew install fimake
-fimake --version   # should match the plugin zip version
-fimake doctor      # expect "[ok] port ... is free"
+**Claude Code / Cursor (`~/.cursor/mcp.json`) / Claude Desktop** — same shape:
+
+```json
+{
+  "mcpServers": {
+    "fimake": {
+      "command": "fimake",
+      "env": { "TRANSPORT": "stdio", "PORT": "10101" }
+    }
+  }
+}
 ```
 
-Update with `brew upgrade fimake`.
-
-**B. Standalone binary (no Node needed).** Download `fimake-<your-os>` from [GitHub Releases](https://github.com/chavisnguyen/FiMake/releases) (`fimake-macos-arm64`, `fimake-macos-x64`, `fimake-linux-x64`), make it executable (`chmod +x fimake-*` on macOS/Linux).
-
-Point your client at it (replace the `command` with your binary path for option B):
-
-**Opencode** (`~/.config/opencode/opencode.json`):
+**Opencode** (`~/.config/opencode/opencode.json`) — different shape, same idea:
 
 ```json
 {
@@ -59,44 +60,13 @@ Point your client at it (replace the `command` with your binary path for option 
 }
 ```
 
-**Cursor** (`~/.cursor/mcp.json` or project `.cursor/mcp.json`), **Claude Code / generic clients:**
+Using a standalone binary instead of brew? Replace `"command": "fimake"` with the absolute binary path.
 
-```json
-{
-  "mcpServers": {
-    "fimake": {
-      "command": "fimake",
-      "env": { "TRANSPORT": "stdio", "PORT": "10101" }
-    }
-  }
-}
-```
+## Verify it works
 
-**Claude Desktop** (`claude_desktop_config.json`): same `mcpServers` block as above.
+Ask: *"list the pages in this Figma file"*. The plugin window should show `Task started: get-pages ...` → `Task finished: ...`.
 
-Then restart the client if it requires it and ask something like *"list the pages in this Figma file"*. The plugin window should show the task appear and settle (`Task started: get-pages ...` → `Task finished: ...`).
-
-> Contributors run from source instead: `git clone https://github.com/chavisnguyen/FiMake.git && cd FiMake && make install && make build`, then point the client at `node /absolute/path/to/FiMake/mcp/dist/index.js` (needs `Node.js >= 22`). Full workflow in [development](./development.md).
-
-## 3. Next steps
-
-- [Full usage guide](./usage.md) — HTTP + `stdio` configs, env table, custom `PORT`.
-- [Troubleshooting](./troubleshooting.md) — `Not connected`, port in use, timeouts, logs.
-- [Tools](./tools.md) — what each of the 35 tools does.
-
-## Alternative: `streamable-http` (advanced)
-
-Use this only if your client requires an HTTP endpoint (or you want the Inspector over HTTP). You run the server yourself and point the client at a URL:
-
-```bash
-TRANSPORT=streamable-http ./fimake-macos-arm64
-# serves http://localhost:10101/mcp
-```
-
-```json
-{
-  "mcpServers": {
-    "fimake": { "url": "http://localhost:10101/mcp" }
-  }
-}
-```
+- Port conflict / second server crashing? Run `fimake doctor` — it tells you which process holds port `10101`.
+- Still stuck? See [Troubleshooting](./troubleshooting.md).
+- Need env vars, a custom `PORT`, or HTTP mode? See [Usage](./usage.md).
+- Building from source? See [Development](./development.md).

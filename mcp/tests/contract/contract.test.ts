@@ -32,19 +32,23 @@ describe("shared zod schemas (MCP <-> plugin contract)", () => {
   });
 });
 
-describe("README tool count stays in sync", () => {
-  it("headline counts match registry + every tool has a table row", () => {
+describe("tool docs stay in sync", () => {
+  it("README headline counts match registry, docs/tools.md lists every tool", () => {
     const readme = fs.readFileSync(new URL("../../../README.md", import.meta.url), "utf-8");
+    // Full per-tool table lives in docs/tools.md (README stays a 3-step
+    // install guide) — headline counts are asserted in both places.
+    const toolsDoc = fs.readFileSync(new URL("../../../docs/tools.md", import.meta.url), "utf-8");
     const total = SIMPLE_TOOL_DEFS.length + NODE_WRAPPED_TOOLS.length;
     const simple = SIMPLE_TOOL_DEFS.length;
     const wrapped = NODE_WRAPPED_TOOLS.length;
     expect(readme).toContain(`${total} tools: ${simple} forward directly`);
     expect(readme).toContain(`${wrapped} have extra Node-side logic`);
+    expect(toolsDoc).toContain(`# Tools (${total})`);
     for (const def of SIMPLE_TOOL_DEFS) {
-      expect(readme).toContain(`| \`${def.name}\``);
+      expect(toolsDoc).toContain(`| \`${def.name}\``);
     }
     for (const name of NODE_WRAPPED_TOOLS) {
-      expect(readme).toContain(`| \`${name}\``);
+      expect(toolsDoc).toContain(`| \`${name}\``);
     }
   });
 });

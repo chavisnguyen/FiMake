@@ -185,6 +185,29 @@ jobs:
           s = re.sub(r'(fimake-macos-arm64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{arm}", s)
           s = re.sub(r'(fimake-macos-x64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{intel}", s)
           s = re.sub(r'(fimake-linux-x64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{linux}", s)
+          # NOTE: no `postinstall` that auto-runs `install-plugin` on purpose.
+          # postinstall runs sandboxed + non-interactive: it can't quit Figma
+          # (osascript GUI), and patching settings.json while Figma runs gets
+          # overwritten on quit. Brew also discourages touching $HOME there.
+          # The `caveats` block below is the supported pattern — brew prints it
+          # after every install/upgrade, and `fimake doctor` re-checks plugin
+          # registration on demand.
+          caveats_lines = [
+              "  def caveats",
+              "    <<~EOS",
+              "      Next step - register the Figma plugin (one-time, macOS):",
+              "        fimake install-plugin",
+              "      Then open Figma > Plugins > Development > Fimake",
+              "      and keep the plugin window open.",
+              "      Run `fimake doctor` if anything looks off.",
+              "    EOS",
+              "  end",
+              "",
+              "",
+          ]
+          caveats = "\n".join(caveats_lines)
+          if "def caveats" not in s:
+              s = s.replace("  test do", caveats + "  test do", 1)
           open(p, "w").write(s)
           EOF
           git diff --stat

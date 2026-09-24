@@ -75,20 +75,19 @@ export default defineConfig({
 
     sidebar: [
       {
-        text: "Getting started",
+        text: "Start here",
         items: [
           { text: "Introduction", link: "/" },
           { text: "Quickstart (5 min)", link: "/quickstart" },
-          { text: "Full usage guide", link: "/usage" },
+          { text: "Usage", link: "/usage" },
           { text: "Troubleshooting", link: "/troubleshooting" },
         ],
       },
       {
         text: "Reference",
         items: [
-          { text: "Tools (27)", link: "/tools" },
+          { text: "Tools (35)", link: "/tools" },
           { text: "Architecture", link: "/architecture" },
-          { text: "Security", link: "/architecture#security" },
         ],
       },
       {
