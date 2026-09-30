@@ -13,7 +13,7 @@ export interface DoctorReport {
     version: string;
     port: number;
     checks: DoctorCheck[];
-    /** True only when a fresh `stdio` spawn will work (port free). */
+    /** True when the shared streamable-http server is up. */
     ok: boolean;
 }
 
@@ -44,70 +44,73 @@ function clientNames(clients: unknown): string {
 }
 
 /**
- * Preflight for setup: answers "can my MCP client spawn a server here?"
- * without starting anything. Exit 0 = port free, exit 1 = conflict.
+ * "Is my setup ready?" without starting anything. Default setup is one
+ * shared streamable-http server (`brew services start fimake`) that every
+ * client reaches at /mcp. Exit 0 = that server is up, 1 = action needed.
  *
- * - Port free (connection refused) → ok: let the client spawn via stdio.
- * - A healthy fimake answers /health → conflict: kill it or reuse it over
- *   streamable-http. Never silently succeed — a hidden server is exactly
- *   how users end up with two servers fighting over one port.
+ * - fimake (streamable-http) answers /health → ok.
+ * - Port free (connection refused) → not running yet: start the service.
+ * - fimake (stdio) answers → a client spawned its own server and blocks
+ *   the shared one: switch that client to the URL.
  * - Anything else holds the port → conflict with details.
  */
 export async function runDoctor(port: number, fetchImpl: FetchImpl = fetch): Promise<DoctorReport> {
     const checks: DoctorCheck[] = [
         { name: "version", ok: true, detail: `fimake ${SERVER_VERSION}` },
     ];
-    const url = `http://localhost:${port}/health`;
+    const mcpUrl = `http://localhost:${port}/mcp`;
+    const done = (portCheck: DoctorCheck): DoctorReport => {
+        checks.push(portCheck, checkPlugin());
+        return { version: SERVER_VERSION, port, checks, ok: portCheck.ok };
+    };
     let body: unknown = null;
     try {
-        const res = await fetchImpl(url, { signal: AbortSignal.timeout(3000) });
+        const res = await fetchImpl(`http://localhost:${port}/health`, { signal: AbortSignal.timeout(3000) });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         body = await res.json();
     } catch (error) {
         if (isRefused(error)) {
-            checks.push({
-                name: "port",
-                ok: true,
-                detail: `port ${port} is free — safe to let your MCP client spawn the server (stdio).`,
+            return done({
+                name: "server",
+                ok: false,
+                detail: `nothing on port ${port} — start the server: \`brew services start fimake\` (stdio setup? then this is expected, your client starts it).`,
             });
-            checks.push(checkPlugin());
-            return { version: SERVER_VERSION, port, checks, ok: true };
         }
-        checks.push({
-            name: "port",
+        return done({
+            name: "server",
             ok: false,
             detail: `could not probe port ${port} (${describeFetchError(error)}). Something holds the port but doesn't answer — a hung server or a non-fimake app. Try: lsof -i :${port}`,
         });
-        checks.push(checkPlugin());
-        return { version: SERVER_VERSION, port, checks, ok: false };
     }
 
     if (isHealthBody(body) && body.ok === true) {
-        checks.push({
-            name: "port",
-            ok: false,
-            detail:
-                `port ${port} is already used by a fimake server (${clientNames(body.clients)}). ` +
-                `If your client uses stdio, stop that server first (it spawns its own) — ` +
-                `or point your client at http://localhost:${port}/mcp (streamable-http) to reuse it.`,
+        if (body.transport === "stdio") {
+            return done({
+                name: "server",
+                ok: false,
+                detail:
+                    `port ${port} is held by a fimake server an MCP client spawned via stdio (${clientNames(body.clients)}). ` +
+                    `Change that client's config to ${mcpUrl} and restart it, then \`brew services restart fimake\`.`,
+            });
+        }
+        return done({
+            name: "server",
+            ok: true,
+            detail: `fimake running on ${mcpUrl} (${clientNames(body.clients)}).`,
         });
-        checks.push(checkPlugin());
-        return { version: SERVER_VERSION, port, checks, ok: false };
     }
-    checks.push({
-        name: "port",
+    return done({
+        name: "server",
         ok: false,
-        detail: `port ${port} answers but is not a fimake server (unexpected /health body). Pick another PORT or stop that process: lsof -i :${port}`,
+        detail: `port ${port} answers but is not a fimake server (unexpected /health body). Stop that process: lsof -i :${port}`,
     });
-    checks.push(checkPlugin());
-    return { version: SERVER_VERSION, port, checks, ok: false };
 }
 
 /**
  * Best-effort, macOS-only: is the FiMake dev plugin registered with Figma
  * Desktop, and do its 3 manifestPath files still exist on disk? Never
- * throws and never affects `report.ok` — port availability is the only
- * thing that gates a fresh stdio spawn (see runDoctor callers above).
+ * throws and never affects `report.ok` — only the server check gates it
+ * (see runDoctor above).
  */
 function checkPlugin(): DoctorCheck {
     try {

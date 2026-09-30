@@ -13,8 +13,8 @@ if (args.includes("--version") || args.includes("-V")) {
     process.exit(0);
 }
 
-// Preflight without starting anything: `fimake doctor` answers "can my MCP
-// client spawn a server here?" Exit 0 = port free, 1 = conflict (see doctor.ts).
+// Preflight without starting anything: `fimake doctor` answers "is the shared
+// server up and reachable?" Exit 0 = ready, 1 = action needed (see doctor.ts).
 if (args.includes("doctor")) {
     const { formatDoctorReport, runDoctor } = await import("./doctor");
     const report = await runDoctor(config.PORT);

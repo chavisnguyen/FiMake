@@ -8,56 +8,50 @@ function fetchOf(impl: (url: string) => Promise<unknown>): FetchImpl {
   return cast<FetchImpl>(impl);
 }
 
+function healthOf(body: unknown): FetchImpl {
+  return fetchOf(async () => ({ ok: true, status: 200, json: async () => body }));
+}
+
 describe("fimake doctor", () => {
-  it("port free (refused) → ok, exit-0 report", async () => {
+  it("shared http server up → ready, lists windows", async () => {
+    const report = await runDoctor(10101, healthOf({
+      ok: true,
+      transport: "streamable-http",
+      pluginConnected: true,
+      clients: [{ fileName: "Landing page", fileKey: "k1", connectedAt: 1 }],
+    }));
+    expect(report.ok).toBe(true);
+    // version + server + plugin (plugin is best-effort, never affects `ok`).
+    expect(report.checks).toHaveLength(3);
+    const text = formatDoctorReport(report);
+    expect(text).toContain("[ok] server");
+    expect(text).toContain("http://localhost:10101/mcp");
+    expect(text).toContain("Landing page");
+    expect(text).toContain("doctor: ready");
+  });
+
+  it("port free (refused) → not running, says how to start it", async () => {
     const refused = Object.assign(new TypeError("fetch failed"), {
       cause: { code: "ECONNREFUSED" },
     });
     const report = await runDoctor(10101, fetchOf(async () => {
       throw refused;
     }));
-    expect(report.ok).toBe(true);
-    // version + port + plugin (added in P3 — best-effort, never affects `ok`).
-    expect(report.checks).toHaveLength(3);
-    expect(formatDoctorReport(report)).toContain("[ok] port");
-    expect(formatDoctorReport(report)).toContain("doctor: ready");
+    expect(report.ok).toBe(false);
+    expect(formatDoctorReport(report)).toContain("brew services start fimake");
   });
 
-  it("healthy fimake on port → conflict with window names", async () => {
-    const report = await runDoctor(10101, fetchOf(async () => ({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        ok: true,
-        transport: "streamable-http",
-        pluginConnected: true,
-        clients: [{ fileName: "Landing page", fileKey: "k1", connectedAt: 1 }],
-      }),
-    })));
+  it("stdio-spawned fimake holds the port → conflict, switch client to URL", async () => {
+    const report = await runDoctor(10101, healthOf({ ok: true, transport: "stdio", clients: [] }));
     expect(report.ok).toBe(false);
     const text = formatDoctorReport(report);
-    expect(text).toContain("[!!] port");
-    expect(text).toContain("Landing page");
-    expect(text).toContain("stop that server first");
+    expect(text).toContain("spawned via stdio");
+    expect(text).toContain("no plugin windows");
     expect(text).toContain("doctor: action needed");
   });
 
-  it("no windows connected → still conflict, says so", async () => {
-    const report = await runDoctor(10101, fetchOf(async () => ({
-      ok: true,
-      status: 200,
-      json: async () => ({ ok: true, clients: [] }),
-    })));
-    expect(report.ok).toBe(false);
-    expect(formatDoctorReport(report)).toContain("no plugin windows");
-  });
-
   it("foreign service on port → conflict, not mistaken for fimake", async () => {
-    const report = await runDoctor(10101, fetchOf(async () => ({
-      ok: true,
-      status: 200,
-      json: async () => ({ hello: "not fimake" }),
-    })));
+    const report = await runDoctor(10101, healthOf({ hello: "not fimake" }));
     expect(report.ok).toBe(false);
     expect(formatDoctorReport(report)).toContain("not a fimake server");
   });
@@ -77,7 +71,25 @@ describe("listen helper", () => {
     expect(isAddrInUse(Object.assign(new Error("listen"), { code: "EADDRINUSE" }))).toBe(true);
     expect(isAddrInUse(new Error("nope"))).toBe(false);
     expect(isAddrInUse(null)).toBe(false);
-    expect(friendlyPortMessage(10101)).toContain("Do NOT start the server by hand");
+    expect(friendlyPortMessage(10101)).toContain("brew services start fimake");
     expect(friendlyPortMessage(10101)).toContain("fimake doctor");
+  });
+
+  it("accepts loopback only", async () => {
+    const { isLoopback } = await import("../../src/transport/listen");
+    for (const a of ["127.0.0.1", "::1", "::ffff:127.0.0.1"]) expect(isLoopback(a)).toBe(true);
+    for (const a of ["192.168.1.5", "::ffff:10.0.0.2", "fe80::1", undefined]) expect(isLoopback(a)).toBe(false);
+  });
+});
+
+describe("/mcp origin guard", () => {
+  it("allows CLI (no Origin) and local pages, blocks other sites", async () => {
+    const { isAllowedOrigin } = await import("../../src/transport/streamable-http");
+    expect(isAllowedOrigin(undefined, "*")).toBe(true);
+    expect(isAllowedOrigin("http://localhost:6274", "*")).toBe(true);
+    expect(isAllowedOrigin("http://127.0.0.1:3000", "*")).toBe(true);
+    expect(isAllowedOrigin("https://evil.example", "*")).toBe(false);
+    expect(isAllowedOrigin("null", "*")).toBe(false);
+    expect(isAllowedOrigin("https://app.example", "https://app.example")).toBe(true);
   });
 });

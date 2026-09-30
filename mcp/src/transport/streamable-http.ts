@@ -9,6 +9,21 @@ import { createSocketServer } from "./socket-server";
 import { listenWithFriendlyError } from "./listen";
 import { McpSessionStore } from "./mcp-sessions";
 
+/**
+ * DNS-rebinding / drive-by guard for /mcp (MCP spec: servers MUST validate
+ * Origin). CLI clients send no Origin; browsers always do. Allow only local
+ * pages, plus CORS_ORIGIN when it is set to a real origin (not "*").
+ */
+export function isAllowedOrigin(origin: string | undefined, corsOrigin: string = config.CORS_ORIGIN): boolean {
+    if (!origin) return true;
+    if (corsOrigin !== "*" && origin === corsOrigin) return true;
+    try {
+        return ["localhost", "127.0.0.1", "[::1]"].includes(new URL(origin).hostname);
+    } catch {
+        return false;
+    }
+}
+
 export async function startStreamableHTTP() {
     const app = new Hono();
 
@@ -45,6 +60,10 @@ export async function startStreamableHTTP() {
     const honoListener = getRequestListener((req, env) => app.fetch(req, env));
     const httpServer: HttpServer = createServer((req, res) => {
         if (req.url?.split("?")[0] === "/mcp" && sessionsPlaceholder.store) {
+            if (!isAllowedOrigin(req.headers.origin)) {
+                res.writeHead(403, { "Content-Type": "application/json" }).end(JSON.stringify({ error: "Origin not allowed" }));
+                return;
+            }
             void sessionsPlaceholder.store.handle(req, res);
             return;
         }

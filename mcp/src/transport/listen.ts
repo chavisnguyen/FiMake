@@ -1,4 +1,5 @@
 import type { Server as HttpServer } from "node:http";
+import { config } from "../config/config";
 import { infoLog } from "../shared/log";
 
 /**
@@ -23,10 +24,16 @@ export function isAddrInUse(error: unknown): boolean {
 export function friendlyPortMessage(port: number): string {
     return (
         `[fimake] Port ${port} is already in use — another Fimake server is probably running.\n` +
-        `[fimake] Do NOT start the server by hand when your MCP client uses stdio: the client spawns its own server and the two fight over this port.\n` +
-        `[fimake] Fix (pick one): stop the other server, then restart your client — or point your client at the running one via http://localhost:${port}/mcp (streamable-http).\n` +
+        `[fimake] Two servers can't share this port: e.g. \`brew services\` is running AND a client still spawns \`fimake\` (stdio), or two stdio clients at once.\n` +
+        `[fimake] Fix: run one shared server (\`brew services start fimake\`) and point every client at http://localhost:${port}/mcp.\n` +
         `[fimake] Run \`fimake doctor\` to see who holds the port.`
     );
+}
+
+/** Loopback only: 127.0.0.1, ::1 and IPv4-mapped ::ffff:127.x. */
+export function isLoopback(address: string | undefined): boolean {
+    if (!address) return false;
+    return address === "::1" || address.startsWith("127.") || address.startsWith("::ffff:127.");
 }
 
 /** Drop-in replacement for `httpServer.listen(port, cb)` with the guard above. */
@@ -39,6 +46,17 @@ export function listenWithFriendlyError(httpServer: HttpServer, port: number, la
         }
         process.exit(1);
     });
+    // Tools edit the open Figma file, so never serve the LAN — unless the
+    // user opted into networked use by setting CORS_ORIGIN (docs: security).
+    // Filter per connection instead of binding one host: Figma resolves
+    // `localhost` to ::1, other clients to 127.0.0.1 — both must work.
+    // ponytail: port still shows as open on the LAN (connections are dropped
+    // immediately); bind two loopback listeners if that ever matters.
+    if (config.CORS_ORIGIN === "*") {
+        httpServer.on("connection", (socket) => {
+            if (!isLoopback(socket.remoteAddress)) socket.destroy();
+        });
+    }
     httpServer.listen(port, () => {
         infoLog(`${label} listening on http://localhost:${port}`);
     });

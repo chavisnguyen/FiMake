@@ -192,22 +192,35 @@ jobs:
           # The `caveats` block below is the supported pattern — brew prints it
           # after every install/upgrade, and `fimake doctor` re-checks plugin
           # registration on demand.
-          caveats_lines = [
+          # `brew services start fimake` = the one shared streamable-http
+          # server every MCP client connects to (docs/quickstart.md).
+          # Blocks are stripped and re-inserted every release so edits here
+          # always reach the tap.
+          blocks_lines = [
+              "  service do",
+              "    run [opt_bin/\"fimake\"]",
+              "    environment_variables TRANSPORT: \"streamable-http\"",
+              "    keep_alive true",
+              "    log_path var/\"log/fimake.log\"",
+              "    error_log_path var/\"log/fimake.log\"",
+              "  end",
+              "",
               "  def caveats",
               "    <<~EOS",
-              "      Next step - register the Figma plugin (one-time, macOS):",
-              "        fimake install-plugin",
-              "      Then open Figma > Plugins > Development > Fimake",
-              "      and keep the plugin window open.",
+              "      Next steps (one-time):",
+              "        fimake install-plugin        # register the Figma plugin (macOS)",
+              "        brew services start fimake   # run the shared server in the background",
+              "      Then add http://localhost:10101/mcp to your MCP client.",
               "      Run `fimake doctor` if anything looks off.",
               "    EOS",
               "  end",
               "",
               "",
           ]
-          caveats = "\n".join(caveats_lines)
-          if "def caveats" not in s:
-              s = s.replace("  test do", caveats + "  test do", 1)
+          blocks = "\n".join(blocks_lines)
+          s = re.sub(r"  service do\n.*?\n  end\n\n", "", s, flags=re.S)
+          s = re.sub(r"  def caveats\n.*?\n  end\n\n", "", s, flags=re.S)
+          s = s.replace("  test do", blocks + "  test do", 1)
           open(p, "w").write(s)
           EOF
           git diff --stat
