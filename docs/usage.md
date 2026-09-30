@@ -1,22 +1,40 @@
 # Fimake Usage
 
-Default setup is **`TRANSPORT=stdio`**: your MCP client spawns the server, you run nothing by hand. Follow [Quickstart](./quickstart.md) first — this page covers what comes after.
+Default setup: **one shared server** (`brew services start fimake`, `TRANSPORT=streamable-http`) that every MCP client reaches at `http://localhost:10101/mcp`. Follow [Quickstart](./quickstart.md) first — this page covers what comes after.
 
-## Never run two servers
+## One server per machine
 
-Pick **one**: client spawns the server (`stdio`, default) **or** you run it yourself (`streamable-http`, [advanced](#streamable-http-advanced)). Never both — two servers fight over port `10101` and the second one crashes. When in doubt: `fimake doctor`.
+Only one Fimake server can own port `10101` (the Figma plugin connects there). With the shared server running, every client must use the URL — a client config with `"command": "fimake"` spawns a second server that crashes on the port. When in doubt: `fimake doctor`.
+
+```bash
+brew services start fimake     # start (and on every login)
+brew services restart fimake   # after brew upgrade / env changes
+brew services stop fimake      # stop
+tail -f "$(brew --prefix)/var/log/fimake.log"   # server logs
+```
 
 ## Environment
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `TRANSPORT` | `stdio` | `stdio` (client spawns it) or `streamable-http` (you run it, client connects over HTTP). |
-| `PORT` | `10101` | One port serves the MCP endpoint (`/mcp`, HTTP mode) **and** the plugin Socket.IO bridge. |
+| `TRANSPORT` | `stdio` (binary) · `streamable-http` (`brew services`) | `streamable-http`: one server, clients connect to `/mcp`. `stdio`: each client spawns its own server ([below](#stdio-single-client)). |
+| `PORT` | `10101` | One port serves the MCP endpoint (`/mcp`) **and** the plugin Socket.IO bridge. |
 | `TASK_TIMEOUT_MS` | `20000` | Tool call → plugin round-trip budget. Raise for huge `get-node-info` calls. |
 | `TASK_ACK_TIMEOUT_MS` | `5000` | Socket ack budget; unacked sends are queued for retry on reconnect. |
-| `CORS_ORIGIN` | `*` | Local dev only. Set explicitly for any networked use. |
+| `CORS_ORIGIN` | `*` | `*` = localhost only (other machines and web pages are refused). Set a real origin only for [networked use](./troubleshooting.md#networked-non-localhost-use). |
 | `JSON_BODY_LIMIT` | `1mb` | Max JSON body on `/mcp`. |
 | `DEBUG=1` | off | Verbose wire logging. Task lifecycle lines always log as `[fimake]`. |
+
+## Without Homebrew
+
+Download `fimake-<your-os>` from [GitHub Releases](https://github.com/chavisnguyen/FiMake/releases), `chmod +x` it, and run it yourself (keep the terminal open):
+
+```bash
+TRANSPORT=streamable-http ./fimake-macos-arm64
+curl http://localhost:10101/health   # -> {"ok":true,...}
+```
+
+Clients connect exactly as in [Quickstart step 3](./quickstart.md).
 
 ## Custom `PORT`
 
@@ -24,32 +42,27 @@ Pick **one**: client spawns the server (`stdio`, default) **or** you run it your
 2. Update every `localhost:10101` entry in `plugin/manifest.json` (`networkAccess.allowedDomains` + `devAllowedDomains`) to the new port.
 3. Rebuild and **re-import** the plugin: `make build`, then *Plugins > Development > Import plugin from manifest* again.
 
-## `streamable-http` (advanced)
+## `stdio` (single client)
 
-Use this only if your client requires an HTTP endpoint (or you want the Inspector over HTTP). You run the server yourself and point the client at a URL:
-
-```bash
-TRANSPORT=streamable-http fimake
-# serves http://localhost:10101/mcp
-curl http://localhost:10101/health   # -> {"ok":true}
-```
+Only if you use **one** client and don't want a background server: stop the service (`brew services stop fimake`) and let the client spawn Fimake itself:
 
 ```json
 {
   "mcpServers": {
-    "fimake": { "url": "http://localhost:10101/mcp" }
+    "fimake": { "command": "fimake", "env": { "TRANSPORT": "stdio" } }
   }
 }
 ```
 
-Leave that terminal running, and keep the Figma plugin window open — order doesn't matter as long as both end up running.
+A second stdio client at the same time crashes on port `10101` — switch back to the shared server for that.
 
 ## Re-installing / updating
 
 ```bash
 brew upgrade fimake
-fimake install-plugin   # re-registers the matching plugin version
-fimake doctor           # confirms port + plugin registration
+fimake install-plugin          # re-registers the matching plugin version
+brew services restart fimake
+fimake doctor                  # confirms server + plugin registration
 ```
 
 The plugin zip and the CLI must always come from the **same release**.

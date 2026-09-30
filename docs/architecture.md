@@ -56,7 +56,7 @@ For contributors changing code, see [Development](./development.md). Quick map:
 
 The plugin gives AI agents access to your open Figma document, similar to the official Figma MCP server. It runs on your local machine and does not send data anywhere else by itself — exposure depends on which AI client you connect.
 
-- Local use is the default. For any networked use, set `CORS_ORIGIN` explicitly, review `networkAccess.allowedDomains` in `plugin/manifest.json`, and proceed at your own risk.
+- Local use is the default: with `CORS_ORIGIN=*` the server drops non-loopback connections, and `/mcp` rejects requests whose `Origin` is not a localhost page (DNS-rebinding / drive-by guard). For any networked use, set `CORS_ORIGIN` explicitly (this lifts the loopback-only filter), review `networkAccess.allowedDomains` in `plugin/manifest.json`, and proceed at your own risk.
 - `export-file`/`export-asset` writes are confined to the requested output dir (no `../` escape, no filesystem-root writes, frame count + byte caps).
 
 Found a security issue? Please report it via GitHub issue.

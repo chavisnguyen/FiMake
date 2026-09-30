@@ -19,39 +19,30 @@ features:
     details: 35 tools — create frames, text, components, colors, layout, and more. The official MCP server can't change anything; Fimake can.
   - icon: "🔌"
     title: 3 steps to running
-    details: brew install fimake, fimake install-plugin, paste one MCP config block. Your client spawns the server — you run nothing by hand.
+    details: brew install fimake, brew services start fimake, add one URL to your client. One background server for all your clients.
   - icon: "🛡️"
     title: Local by default
-    details: One port (10101) bridges the MCP server and the Figma plugin on your own machine. Nothing leaves except through the AI client you choose.
+    details: One port (10101) on localhost bridges the MCP server and the Figma plugin — other machines and web pages can't reach it. Nothing leaves except through the AI client you choose.
 ---
 
 ## How it works
 
-1. **`brew install fimake`** — the CLI (no Node needed).
-2. **`fimake install-plugin`** — registers the Figma dev plugin; keep its window open in Figma.
-3. **Paste one MCP config block** — your client spawns the server; ask *“list the pages in this Figma file”*.
+1. **`brew install fimake && fimake install-plugin`** — the CLI (no Node needed) + the Figma dev plugin; keep its window open in Figma.
+2. **`brew services start fimake`** — one shared server in the background.
+3. **Add `http://localhost:10101/mcp` to your client** — then ask *“list the pages in this Figma file”*.
 
 ```bash
 brew tap chavisnguyen/fimake && brew install fimake
 fimake install-plugin
-```
-
-```json
-{
-  "mcpServers": {
-    "fimake": {
-      "command": "fimake",
-      "env": { "TRANSPORT": "stdio", "PORT": "10101" }
-    }
-  }
-}
+brew services start fimake
+claude mcp add --transport http --scope user fimake http://localhost:10101/mcp   # Claude Code
 ```
 
 > New here? Follow [Quickstart](/quickstart). Stuck? Run `fimake doctor`, then see [Troubleshooting](/troubleshooting).
 
 ## Go deeper
 
-- [Usage](/usage) — env vars, custom `PORT`, HTTP mode.
+- [Usage](/usage) — env vars, custom `PORT`, stdio mode.
 - [Tools](/tools) — all 35 tools and multi-window targeting.
 - [Architecture](/architecture) — bridge, diagrams, security.
 - [Development](/development) — contributors: `make` targets, watch mode, tests.

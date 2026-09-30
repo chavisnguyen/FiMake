@@ -14,27 +14,23 @@ You need: Figma Desktop + an MCP client. No Node, no repo clone.
 ```bash
 brew tap chavisnguyen/fimake
 brew install fimake
-fimake install-plugin   # downloads + registers the Figma plugin (macOS)
+fimake install-plugin        # downloads + registers the Figma plugin (macOS)
+brew services start fimake   # one shared server in the background
 ```
 
-Then reopen Figma → *Plugins > Development > Fimake* and **keep the window open**. It flips to **Connected** once your client spawns the server below.
+Open Figma → *Plugins > Development > Fimake* and **keep the window open** (it shows **Connected**).
 
-Add this to your MCP config and restart the client:
+Point your MCP client at `http://localhost:10101/mcp` and restart it. Claude Code:
 
-```json
-{
-  "mcpServers": {
-    "fimake": {
-      "command": "fimake",
-      "env": { "TRANSPORT": "stdio", "PORT": "10101" }
-    }
-  }
-}
+```bash
+claude mcp add --transport http --scope user fimake http://localhost:10101/mcp
 ```
+
+Cursor / Opencode / Claude Desktop: see [Quickstart](docs/quickstart.md). Several clients can use the same server at once.
 
 Then ask *"list the pages in this Figma file"*. Stuck? Run `fimake doctor` — see [Troubleshooting](docs/troubleshooting.md).
 
-No Homebrew / not on macOS / another client? See [Quickstart](docs/quickstart.md). Building from source? See [Development](docs/development.md).
+No Homebrew? See [Usage](docs/usage.md#without-homebrew). Building from source? See [Development](docs/development.md).
 
 ## Tools
 

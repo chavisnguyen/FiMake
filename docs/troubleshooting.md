@@ -7,43 +7,43 @@ Use this when `fimake install-plugin` doesn't work for you: you're not on macOS,
 1. Download `fimake-plugin.zip` from [GitHub Releases](https://github.com/chavisnguyen/FiMake/releases) and unzip it.
 2. In Figma: *Plugins > Development > Import plugin from manifest*, select `manifest.json` from the unzipped folder.
 3. Run it via *Plugins > Development > Fimake*. Expected: **Not connected to MCP server**.
-4. **Keep the plugin window open.** It flips to **Connected** once the MCP server is running (see [quickstart](quickstart.md), step 2).
+4. **Keep the plugin window open.** It flips to **Connected** once the server is running (`brew services start fimake`, see [quickstart](quickstart.md) step 2).
 
 > Compatibility: use the plugin zip and the binary from the **same release** (e.g. both `v1.0.x`). Default port is `10101` on both sides.
 
+## Start here: `fimake doctor`
+
+It checks the server and the plugin without starting anything, and prints what to do:
+
+| Doctor says | Meaning | Fix |
+|---|---|---|
+| `[ok] server: fimake running on …/mcp` | All good on the server side. | — |
+| `nothing on port 10101` | Server isn't running. | `brew services start fimake` |
+| `held by a fimake server an MCP client spawned via stdio` | A client still has `"command": "fimake"` and spawned its own server, blocking the shared one. | Change that client to `http://localhost:10101/mcp` ([quickstart](quickstart.md) step 3), restart it, then `brew services restart fimake`. |
+| `not a fimake server` / `could not probe` | Another app holds port `10101`. | `lsof -i :10101`, stop it. |
+| `plugin: not registered` | Figma doesn't know the plugin. | `fimake install-plugin` |
+
 ## Plugin shows "Not connected to MCP server"
 
-1. Is the server running? You should see `[fimake] Server listening on http://localhost:<PORT>` (streamable-http) or `Socket.IO server listening …` (stdio).
+1. Run `fimake doctor` — the server must show `[ok]`.
 2. Is the plugin window open? Figma suspends closed plugins — keep it open.
-3. Wrong port? Check `PORT` in your client config vs the URL the plugin uses (`ws://localhost:<PORT>`, shown in the plugin footer). If you changed `PORT`, follow [usage → custom PORT](usage.md#custom-port) (manifest + rebuild + re-import).
-4. Still stuck? Restart in order: server first, then *Plugins > Development > Fimake*.
+3. Custom `PORT`? The plugin only knows `ws://localhost:10101` (shown in its footer) — follow [usage → custom PORT](usage.md#custom-port) (manifest + rebuild + re-import).
+4. Still stuck? `brew services restart fimake`, then re-run *Plugins > Development > Fimake*.
 
-## `curl /health` fails / port already in use
+## Client (Claude/Cursor/Opencode) does not see tools
 
-```bash
-curl http://localhost:10101/health   # expect {"ok":true}
-lsof -i :10101                       # find the process holding the port
-```
-
-Either stop the other process or set a new `PORT` in your client config (then follow the custom-PORT checklist in [usage](usage.md#custom-port) — the plugin manifest hardcodes the port).
-
-## Client (Claude/Cursor) does not see tools
-
-- Confirm the client config points at `http://localhost:<PORT>/mcp` (streamable-http mode) and the server was started with `TRANSPORT=streamable-http`.
+- `fimake doctor` shows `[ok] server`?
+- The client config points at `http://localhost:10101/mcp` — the shape differs per client, copy it from [quickstart](quickstart.md) step 3.
 - Restart the client after editing its MCP config — most clients only read it at launch.
-- Try the Inspector first to isolate client vs server: `cd mcp && pnpm inspector`, connect to `http://127.0.0.1:<PORT>/mcp`.
+- Server logs: `tail -f "$(brew --prefix)/var/log/fimake.log"`.
+- Isolate client vs server with the Inspector: `cd mcp && pnpm inspector`, connect to `http://127.0.0.1:10101/mcp`.
 - Disable tools you do not need; some clients cap the tool count.
 
-## MCP client fails to start the server (stdio) / "port already in use" on launch
+## "Port 10101 is already in use"
 
-Classic double-server: with `TRANSPORT=stdio` your client spawns its own server, so a hand-started one (`pnpm start`, `node dist/index.js`, `./fimake-...`) already holding port `10101` makes the spawned server crash. The server now says so explicitly — look for `[fimake] Port 10101 is already in use` in the client logs.
+Two servers can't share the port. Usual causes: the shared server (`brew services`) is running **and** a client still spawns `fimake` via stdio; two stdio clients at once; or a hand-started `pnpm start` / `./fimake-…`. `fimake doctor` tells you which.
 
-Fix (pick one):
-
-1. Stop the hand-started server, restart the client (recommended for local use).
-2. Keep the hand-started server and point the client at `http://localhost:<PORT>/mcp` (streamable-http) instead of spawning.
-
-`fimake doctor` diagnoses this without starting anything: port free, fimake already running (with its open windows), or a foreign process — plus what to do in each case.
+Fix: keep exactly one server — the shared one — and point every client at `http://localhost:10101/mcp`.
 
 ## Task times out (`isError:true`, "Task timed out")
 
@@ -64,4 +64,4 @@ Fix (pick one):
 
 ## Networked (non-localhost) use
 
-Set `CORS_ORIGIN` explicitly (client config `env`, or `mcp/.env` from source), review `networkAccess.allowedDomains` in `plugin/manifest.json`, and treat it as untrusted-network exposure done at your own risk. `export-file`/`export-asset` writes stay confined to the requested output dir (no `../` escape, frame count + byte caps).
+By default the server only accepts connections from this machine, and `/mcp` refuses requests from web pages on other sites. Setting `CORS_ORIGIN` to a real origin lifts the localhost-only restriction — set it explicitly (client config `env`, or `mcp/.env` from source), review `networkAccess.allowedDomains` in `plugin/manifest.json`, and treat it as untrusted-network exposure done at your own risk. `export-file`/`export-asset` writes stay confined to the requested output dir (no `../` escape, frame count + byte caps).

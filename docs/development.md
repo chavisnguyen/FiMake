@@ -39,7 +39,7 @@ cd FiMake && make install && make build
 }
 ```
 
-Same rule as binaries: with `stdio` the client spawns the server — do NOT also run `make dev-mcp` / `pnpm start` on the same `PORT`, or the spawned server crashes into yours (see [troubleshooting](./troubleshooting.md#mcp-client-fails-to-start-the-server-stdio--port-already-in-use-on-launch)). Use `fimake doctor` when in doubt.
+Only one server can own `PORT`: stop the shared one first (`brew services stop fimake`), and don't also run `make dev-mcp` / `pnpm start` — or the spawned server crashes into it (see [troubleshooting](./troubleshooting.md#port-10101-is-already-in-use)). Use `fimake doctor` when in doubt.
 
 ## Layout
 

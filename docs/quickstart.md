@@ -1,72 +1,72 @@
 # Quickstart
 
-You need: Figma Desktop + an MCP client (Claude Code / Cursor / Claude Desktop / Opencode). No Node, no repo clone.
+You need: Figma Desktop + an MCP client (Claude Code / Cursor / Opencode / Claude Desktop). No Node, no repo clone.
 
-## Step 1 — Install the CLI
+## Step 1 — Install
 
 ```bash
 brew tap chavisnguyen/fimake
 brew install fimake
-fimake --version
-fimake doctor   # expect "[ok] port ... is free"
-```
-
-No Homebrew? Download `fimake-<your-os>` from [GitHub Releases](https://github.com/chavisnguyen/FiMake/releases), `chmod +x` it, and use its full path wherever you see `fimake` below. Update later with `brew upgrade fimake`.
-
-## Step 2 — Install the Figma plugin (once)
-
-```bash
 fimake install-plugin
 ```
 
-This downloads the plugin matching your CLI version and registers it with Figma Desktop (macOS). If Figma is running, it asks to quit it once — Figma only saves its plugin registry on quit. Flags: `--yes` skips the prompt, `--no-register` downloads only (you import manually).
+`install-plugin` downloads the plugin matching your CLI and registers it with Figma Desktop (macOS). If Figma is running, it asks to quit it once — Figma only saves its plugin registry on quit.
 
-Then:
+No Homebrew? See [Usage → Without Homebrew](usage.md#without-homebrew). Not on macOS? [Install the plugin manually](troubleshooting.md#install-the-plugin-manually).
 
-1. Reopen Figma → *Plugins > Development > Fimake*. Expected: **Not connected to MCP server**.
-2. **Keep this window open.** It flips to **Connected** once your client spawns the server (step 3).
+## Step 2 — Start the server
 
-> Plugin zip and CLI must come from the **same release**. Not on macOS? See [manual sideload](troubleshooting.md#install-the-plugin-manually).
+```bash
+brew services start fimake
+fimake doctor   # expect "[ok] server: fimake running on http://localhost:10101/mcp"
+```
+
+It runs in the background and starts again after a reboot. One server serves **all** your clients at once — Claude Code and Opencode side by side is fine.
+
+Then in Figma: *Plugins > Development > Fimake* and **keep the window open**. It shows **Connected**.
 
 ## Step 3 — Connect your client
 
-Your client spawns the server itself — **run nothing by hand**. Pick your client, paste, restart it if it requires:
+Every client uses the same URL: `http://localhost:10101/mcp`. Pick yours, then restart the client.
 
-**Claude Code / Cursor (`~/.cursor/mcp.json`) / Claude Desktop** — same shape:
+**Claude Code** — one command:
 
-```json
-{
-  "mcpServers": {
-    "fimake": {
-      "command": "fimake",
-      "env": { "TRANSPORT": "stdio", "PORT": "10101" }
-    }
-  }
-}
+```bash
+claude mcp add --transport http --scope user fimake http://localhost:10101/mcp
 ```
 
-**Opencode** (`~/.config/opencode/opencode.json`) — different shape, same idea:
+**Cursor** (`~/.cursor/mcp.json`):
 
 ```json
-{
-  "mcp": {
-    "fimake": {
-      "type": "local",
-      "command": ["fimake"],
-      "enabled": true,
-      "environment": { "TRANSPORT": "stdio", "PORT": "10101" }
-    }
-  }
-}
+{ "mcpServers": { "fimake": { "url": "http://localhost:10101/mcp" } } }
 ```
 
-Using a standalone binary instead of brew? Replace `"command": "fimake"` with the absolute binary path.
+**Opencode** (`~/.config/opencode/opencode.json`):
 
-## Verify it works
+```json
+{ "mcp": { "fimake": { "type": "remote", "url": "http://localhost:10101/mcp", "enabled": true } } }
+```
 
-Ask: *"list the pages in this Figma file"*. The plugin window should show `Task started: get-pages ...` → `Task finished: ...`.
+**Claude Desktop** (`claude_desktop_config.json`) — needs Node, it has no URL field:
 
-- Port conflict / second server crashing? Run `fimake doctor` — it tells you which process holds port `10101`.
-- Still stuck? See [Troubleshooting](./troubleshooting.md).
-- Need env vars, a custom `PORT`, or HTTP mode? See [Usage](./usage.md).
-- Building from source? See [Development](./development.md).
+```json
+{ "mcpServers": { "fimake": { "command": "npx", "args": ["-y", "mcp-remote", "http://localhost:10101/mcp"] } } }
+```
+
+> Already had `"command": "fimake"` in a client config from an older guide? Replace it with the URL above — a client that still spawns `fimake` fights the shared server for port `10101`.
+
+## Verify
+
+Ask: *"list the pages in this Figma file"*. The plugin window shows `Task started: get-pages ...` → `Task finished: ...`.
+
+Something off? Run `fimake doctor` — it says what's wrong and what to do. More in [Troubleshooting](./troubleshooting.md).
+
+## Update
+
+```bash
+brew upgrade fimake
+fimake install-plugin
+brew services restart fimake
+```
+
+The plugin and the CLI must come from the **same release** — `install-plugin` takes care of that.
