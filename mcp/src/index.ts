@@ -13,6 +13,15 @@ if (args.includes("--version") || args.includes("-V")) {
     process.exit(0);
 }
 
+// `fimake --help` / `-h` / `help`: usage without starting any transport.
+// Checked before doctor/install-plugin so `fimake install-plugin --help`
+// also lands here instead of running the install.
+if (args.includes("--help") || args.includes("-h") || args.includes("help")) {
+    const { getHelpText } = await import("./help");
+    console.log(getHelpText(SERVER_VERSION));
+    process.exit(0);
+}
+
 // Preflight without starting anything: `fimake doctor` answers "is the shared
 // server up and reachable?" Exit 0 = ready, 1 = action needed (see doctor.ts).
 if (args.includes("doctor")) {
@@ -20,6 +29,16 @@ if (args.includes("doctor")) {
     const report = await runDoctor(config.PORT);
     console.log(formatDoctorReport(report));
     process.exit(report.ok ? 0 : 1);
+}
+
+// `fimake stop`: stop the shared background server without starting anything.
+// Only stops the brew-managed service; a stdio instance owned by an MCP
+// client keeps its port (see stop.ts) — the hint tells the user how to tell.
+if (args.includes("stop")) {
+    const { stopSharedServer } = await import("./stop");
+    const result = await stopSharedServer();
+    console.log(result.message);
+    process.exit(result.ok ? 0 : 1);
 }
 
 // `fimake install-plugin`: sideload the Figma dev plugin without manual

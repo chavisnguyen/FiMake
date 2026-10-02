@@ -9,7 +9,7 @@ Only one Fimake server can own port `10101` (the Figma plugin connects there). W
 ```bash
 brew services start fimake     # start (and on every login)
 brew services restart fimake   # after brew upgrade / env changes
-brew services stop fimake      # stop
+brew services stop fimake      # stop (or: fimake stop)
 tail -f "$(brew --prefix)/var/log/fimake.log"   # server logs
 ```
 

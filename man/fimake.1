@@ -1,0 +1,156 @@
+.TH FIMAKE 1 "October 2, 2026" "FiMake" "FiMake Manual"
+.SH NAME
+fimake \- MCP server that lets AI agents read and edit Figma documents
+.SH SYNOPSIS
+.B fimake
+.RB [ \-\-version | \-V ]
+.br
+.B fimake
+.RB [ \-\-help | \-h | help ]
+.br
+.B fimake doctor
+.br
+.B fimake stop
+.br
+.B fimake install-plugin
+.RB [ \-\-dir
+.IR path ]
+.RB [ \-\-version-tag
+.IR tag ]
+.RB [ \-\-no-register ]
+.RB [ \-\-yes | \-y ]
+.br
+.B fimake
+.RS
+Start the MCP server (transport taken from
+.BR TRANSPORT ).
+.RE
+.SH DESCRIPTION
+The official Figma MCP server is read-only.
+.B fimake
+lets AI agents work directly in Figma documents \- create, edit,
+organize, and read \-
+through a local bridge between this server and the Fimake Figma plugin.
+.PP
+Default setup is
+.B one shared server
+.RB ( brew\ services\ start\ fimake ,
+.B TRANSPORT=streamable-http
+) that every MCP client reaches at
+.BR http://localhost:10101/mcp .
+Only one server can own the port the Figma plugin connects to.
+When in doubt, run
+.BR "fimake doctor" .
+.SH COMMANDS
+.TP
+.B doctor
+Check the shared server is up and the Figma plugin is registered.
+Exit 0 = ready, 1 = action needed.
+.TP
+.B stop
+Stop the shared background server (brew services).
+A stdio instance spawned and owned by an MCP client is left alone;
+if the port stays held after stopping, point that client at the
+shared URL instead.
+.TP
+.B install-plugin
+Download the Figma dev plugin, unzip it, and register it with
+Figma Desktop (macOS only).
+.SH OPTIONS
+.TP
+.BR \-\-version ", " \-V
+Print version and exit.
+.TP
+.BR \-\-help ", " \-h
+Show help and exit.
+.SH INSTALL-PLUGIN FLAGS
+.TP
+.BR \-\-dir " " \fIpath\fR
+Use an existing plugin directory instead of downloading the release zip.
+.TP
+.BR \-\-version-tag " " \fItag\fR
+Download this release tag (default: the running server version).
+.TP
+.BR \-\-no-register
+Only download and unzip; skip Figma settings.json registration.
+.TP
+.BR \-\-yes ", " \-y
+Quit Figma Desktop without asking when it blocks registration.
+.SH ENVIRONMENT
+.TP
+.B TRANSPORT=stdio | streamable-http
+Default:
+.BR stdio .
+.B brew services
+runs
+.BR streamable-http :
+one server, clients connect to
+.BR /mcp .
+.TP
+.B PORT
+Default:
+.BR 10101 .
+Serves the MCP endpoint
+.B (/mcp)
+and the plugin Socket.IO bridge.
+.TP
+.B TASK_TIMEOUT_MS
+Default:
+.BR 20000 .
+Tool call round-trip budget.
+.TP
+.B TASK_ACK_TIMEOUT_MS
+Default:
+.BR 5000 .
+Socket ack budget before a send is queued for retry.
+.TP
+.B CORS_ORIGIN
+Default:
+.BR * .
+Set a real origin for networked use.
+.TP
+.B JSON_BODY_LIMIT
+Default:
+.BR 1mb .
+Max JSON body on
+.BR /mcp .
+.TP
+.B DEBUG=1
+Verbose wire logging.
+.SH EXAMPLES
+Start the shared server in the background:
+.PP
+.RS
+.nf
+brew services start fimake
+.fi
+.RE
+.PP
+Check the server and plugin are ready:
+.PP
+.RS
+.nf
+fimake doctor
+.fi
+.RE
+.PP
+Register the Figma plugin (macOS):
+.PP
+.RS
+.nf
+fimake install-plugin
+.fi
+.RE
+.PP
+Stop the shared server:
+.PP
+.RS
+.nf
+fimake stop
+.fi
+.RE
+.SH SEE ALSO
+Full docs: https://chavisnguyen.github.io/FiMake
+.SH AUTHORS
+Maintained by chavisnguyen. See
+https://github.com/chavisnguyen/FiMake for source and releases.

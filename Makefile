@@ -1,6 +1,6 @@
 # Unified entrypoint for the mcp server and the Figma plugin.
 # Usage: `make <target>` — every target runs in both packages.
-.PHONY: help install test typecheck lint build check dev-mcp dev-plugin docs-dev docs-build docs-preview package-plugin release clean
+.PHONY: help install test typecheck lint build check dev-mcp dev-plugin docs-dev docs-build docs-preview package-plugin release clean man
 
 help:
 	@echo "install    Install dependencies (mcp + plugin + docs)"
@@ -16,6 +16,7 @@ help:
 	@echo "docs-build Static build of the docs site (docs/.vitepress/dist)"
 	@echo "docs-preview Serve the built docs site locally"
 	@echo "package-plugin Zip the sideload plugin (manifest.json + dist/) for GitHub Releases"
+	@echo "man         Preview the fimake manpage (needs mandoc)"
 	@echo "clean      Remove build outputs and coverage"
 
 install:
@@ -78,6 +79,10 @@ release:
 	@PREV_TAG=$$(git describe --tags --abbrev=0 2>/dev/null || echo ""); \
 	if [ -n "$$PREV_TAG" ]; then NOTES=$$(git log "$$PREV_TAG..HEAD" --pretty=format:'- %s'); else NOTES="Release v$(V)."; fi; \
 	gh release create "v$(V)" --target master --title "v$(V)" --notes "$$NOTES"
+
+# Preview the manpage exactly as `man fimake` will render it after install.
+man:
+	mandoc -T ascii man/fimake.1 | $${PAGER:-less}
 
 clean:
 	rm -rf mcp/dist mcp/coverage plugin/dist plugin/coverage docs/.vitepress/dist docs/.vitepress/cache

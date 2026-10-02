@@ -66,6 +66,22 @@ jobs:
           name: plugin-zip
           path: fimake-plugin.zip
 
+  manpage:
+    needs: gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Guard - manpage renders without warnings
+        run: |
+          sudo apt-get install -y mandoc
+          mandoc -T lint man/fimake.1
+      - name: Stage flat asset (merge-multiple flattens dirs)
+        run: cp man/fimake.1 fimake.1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manpage
+          path: fimake.1
+
   binary:
     needs: gate
     strategy:
@@ -122,7 +138,7 @@ jobs:
           if-no-files-found: error
 
   attach:
-    needs: [gate, plugin-zip, binary]
+    needs: [gate, plugin-zip, manpage, binary]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -130,14 +146,15 @@ jobs:
           path: assets
           merge-multiple: true
       - run: ls -la assets
-      - name: Guard - all 4 assets present
-        # Never attach an incomplete release: 3 binaries + plugin zip.
+      - name: Guard - all 5 assets present
+        # Never attach an incomplete release: 3 binaries + plugin zip + manpage.
         # (A warn-only upload would otherwise ship a broken tap update.)
         run: |
           test -f assets/fimake-macos-arm64
           test -f assets/fimake-macos-x64
           test -f assets/fimake-linux-x64
           test -f assets/fimake-plugin.zip
+          test -f assets/fimake.1
       - name: Attach assets to Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -163,17 +180,19 @@ jobs:
           gh release download "$TAG" --repo chavisnguyen/FiMake \
             --pattern 'fimake-macos-arm64' \
             --pattern 'fimake-macos-x64' \
-            --pattern 'fimake-linux-x64'
-          test -f fimake-macos-arm64 && test -f fimake-macos-x64 && test -f fimake-linux-x64
+            --pattern 'fimake-linux-x64' \
+            --pattern 'fimake.1'
+          test -f fimake-macos-arm64 && test -f fimake-macos-x64 && test -f fimake-linux-x64 && test -f fimake.1
           SHA_ARM=$(sha256sum fimake-macos-arm64 | cut -d' ' -f1)
           SHA_INTEL=$(sha256sum fimake-macos-x64 | cut -d' ' -f1)
           SHA_LINUX=$(sha256sum fimake-linux-x64 | cut -d' ' -f1)
+          SHA_MAN=$(sha256sum fimake.1 | cut -d' ' -f1)
           git clone "https://${GH_TOKEN}@github.com/chavisnguyen/homebrew-fimake" tap --depth 1
           cd tap
           git checkout master
-          python3 - "$TAG" "$SHA_ARM" "$SHA_INTEL" "$SHA_LINUX" <<'EOF'
+          python3 - "$TAG" "$SHA_ARM" "$SHA_INTEL" "$SHA_LINUX" "$SHA_MAN" <<'EOF'
           import re, sys
-          tag, arm, intel, linux = sys.argv[1:5]
+          tag, arm, intel, linux, man = sys.argv[1:6]
           p = "Formula/fimake.rb"
           s = open(p).read()
           s = re.sub(r"https://github\.com/chavisnguyen/FiMake/releases/download/[^/\"']+/fimake-macos-arm64",
@@ -196,6 +215,36 @@ jobs:
           # server every MCP client connects to (docs/quickstart.md).
           # Blocks are stripped and re-inserted every release so edits here
           # always reach the tap.
+          # The manpage ships as a release asset (man/fimake.1 in this repo)
+          # and installs via a `resource` stanza: the formula's `url` is a
+          # single-file binary, so the manpage needs its own download with
+          # its own sha256. Same strip + re-insert treatment as service/caveats.
+          man_block_lines = [
+              '  resource "manpage" do',
+              f'    url "https://github.com/chavisnguyen/FiMake/releases/download/{tag}/fimake.1"',
+              f'    sha256 "{man}"',
+              "  end",
+              "",
+              "",
+          ]
+          man_block = "\n".join(man_block_lines)
+          s = re.sub(r'  resource "manpage" do\n.*?\n  end\n\n?', "", s, flags=re.S)
+          s = s.replace("  def install", man_block + "  def install", 1)
+          # Wire the staged resource into `def install` (idempotent).
+          s = re.sub(r'    resource\("manpage"\)\.stage \{ man1\.install "fimake\.1" \}\n', "", s)
+          s = s.replace(
+              '    bin.install asset => "fimake"\n',
+              '    bin.install asset => "fimake"\n    resource("manpage").stage { man1.install "fimake.1" }\n',
+              1,
+          )
+          # Assert the manpage in `brew test` so a broken resource fails CI,
+          # not users (idempotent: no-op once present).
+          if 'man1/"fimake.1"' not in s:
+              s = s.replace(
+                  'assert_match version.to_s, shell_output("#{bin}/fimake --version")',
+                  'assert_match version.to_s, shell_output("#{bin}/fimake --version")\n    assert_predicate man1/"fimake.1", :exist?',
+                  1,
+              )
           blocks_lines = [
               "  service do",
               "    run [opt_bin/\"fimake\"]",

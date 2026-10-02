@@ -1,0 +1,53 @@
+/**
+ * Single source for `fimake --help` output and `man/fimake.1`.
+ * Pure function (version passed in) so unit tests don't drag in the
+ * MCP/socket.io dependency graph via bridge/server.
+ */
+export function getHelpText(version: string): string {
+    return [
+        `fimake ${version} — MCP server that lets AI agents read and edit Figma documents.`,
+        ``,
+        `Usage:`,
+        `  fimake [--version | -V]`,
+        `  fimake [--help | -h | help]`,
+        `  fimake doctor`,
+        `  fimake stop`,
+        `  fimake install-plugin [--dir <path>] [--version-tag <tag>] [--no-register] [--yes | -y]`,
+        `  fimake                          Start the MCP server (transport from TRANSPORT)`,
+        ``,
+        `Commands:`,
+        `  doctor            Check the shared server is up and the Figma plugin is`,
+        `                    registered. Exit 0 = ready, 1 = action needed.`,
+        `  stop              Stop the shared background server (brew services).`,
+        `                    A stdio instance owned by an MCP client is left alone.`,
+        `  install-plugin    Download the Figma dev plugin, unzip it, and register`,
+        `                    it with Figma Desktop (macOS only).`,
+        ``,
+        `Options:`,
+        `  --version, -V     Print version and exit.`,
+        `  --help, -h        Show this help and exit.`,
+        ``,
+        `install-plugin flags:`,
+        `  --dir <path>        Use an existing plugin dir instead of downloading the release zip.`,
+        `  --version-tag <tag> Download this release tag (default: v${version}).`,
+        `  --no-register       Only download/unzip; skip Figma settings.json registration.`,
+        `  --yes, -y           Quit Figma Desktop without asking when it blocks registration.`,
+        ``,
+        `Environment:`,
+        `  TRANSPORT=stdio | streamable-http   Default: stdio. brew services runs streamable-http.`,
+        `  PORT                                Default: 10101. Serves /mcp and the plugin socket bridge.`,
+        `  TASK_TIMEOUT_MS                     Default: 20000. Tool call round-trip budget.`,
+        `  TASK_ACK_TIMEOUT_MS                 Default: 5000. Socket ack budget before retry.`,
+        `  CORS_ORIGIN                         Default: *. Set a real origin for networked use.`,
+        `  JSON_BODY_LIMIT                     Default: 1mb. Max JSON body on /mcp.`,
+        `  DEBUG=1                             Verbose wire logging.`,
+        ``,
+        `Examples:`,
+        `  brew services start fimake     # one shared server in the background`,
+        `  fimake doctor                  # is the server + plugin ready?`,
+        `  fimake install-plugin          # register the Figma plugin (macOS)`,
+        ``,
+        `Docs: https://chavisnguyen.github.io/FiMake`,
+        ``,
+    ].join("\n");
+}
