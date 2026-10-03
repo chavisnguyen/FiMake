@@ -80,6 +80,30 @@ describe("plugin create tools", () => {
     expect(text["remove"]).toHaveBeenCalledTimes(2);
   });
 
+  it("createText segments: one node, several styles; mismatch fails", async () => {
+    const figma: MockFigma = setupFigma();
+    const text: SceneNodeStub = {
+      id: "2:2", name: "T", type: "TEXT", remove: vi.fn(),
+      setRangeFontName: vi.fn(), setRangeFontSize: vi.fn(), setRangeFills: vi.fn(),
+    };
+    figma.createText.mockReturnValue(text);
+    const base = { x: 0, y: 0, text: "Hi There", fontName: "Inter", fontWeight: 400, fontColor: "#000000FF", fontSize: 14, name: "T" };
+    const ok = await createText({
+      ...base,
+      segments: [
+        { text: "Hi ", fontWeight: 700 },
+        { text: "There", fontColor: "#888888FF", fontSize: 12 },
+      ],
+    });
+    expect(ok.isError).toBe(false);
+    expect(text["setRangeFontName"]).toHaveBeenCalledWith(0, 3, { family: "Inter", style: "Bold" });
+    expect(text["setRangeFontSize"]).toHaveBeenCalledWith(3, 8, 12);
+    // Segments must concatenate exactly to text.
+    const bad = await createText({ ...base, segments: [{ text: "Hi" }] });
+    expect(bad.isError).toBe(true);
+    expect(String(bad.content)).toContain("concatenate");
+  });
+
   it("createComponent + cloneNode not-found paths", async () => {
     const figma: MockFigma = setupFigma();
     figma.createComponent.mockReturnValue({ id: "3:1", name: "C", key: "k", componentPropertyDefinitions: {} });

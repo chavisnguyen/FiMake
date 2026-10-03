@@ -12,6 +12,15 @@ export const CreateTextParamsSchema = z.object({
     fontColor: ColorHexSchema.optional().default("#000000FF").describe("Font color"),
     name: z.string().optional().default("Text").describe("Name"),
     parentId: z.string().regex(/^\d*:\d*$/).optional().describe("Parent node id (page:node)"),
+    segments: z.array(z.object({
+        text: z.string().describe("Run text (segments must concatenate exactly to `text`)"),
+        fontName: z.string().optional().describe("Family override for this run"),
+        fontWeight: z.number().optional().describe("Weight override for this run"),
+        fontStyle: z.string().min(1).optional().describe("Exact style override for this run"),
+        fontSize: z.number().positive().optional().describe("Size override for this run"),
+        fontColor: ColorHexSchema.optional().describe("Color override for this run"),
+    })).min(1).optional()
+        .describe("Rich text: one node, several styles (e.g. bold title + gray venue) — cheaper than 3 nodes and keeps one text box. Omit for uniform text."),
     ...TextStyleFields,
 });
 

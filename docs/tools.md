@@ -8,13 +8,13 @@ Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_
 |---|---|---|
 | `create-rectangle` | plugin | Create a rectangle. |
 | `create-frame` | plugin | Create a frame (default white fill — `set-fill-color #00000000` for a transparent container). |
-| `create-text` | plugin | Create a text node. Typography: `fontName` + `fontWeight` or exact `fontStyle`, `fontSize`, `lineHeight` (px), `letterSpacing` (%), `textAlign`. Layout: `width` wraps text, `maxLines` truncates with an ellipsis. |
+| `create-text` | plugin | Create a text node. Typography: `fontName` + `fontWeight` or exact `fontStyle`, `fontSize`, `lineHeight` (px), `letterSpacing` (%), `textAlign`. Layout: `width` wraps text, `maxLines` truncates with an ellipsis. `segments`: rich text in ONE node (each run overrides family/weight/style/size/color; runs must concatenate exactly to `text`). |
 | `create-instance` | plugin | Create an instance. |
 | `create-component` | plugin | Create a component. |
 | `clone-node` | plugin | Clone a node. |
 | `add-component-property` | plugin | Add a component property. |
 | `add-prototype-link` | plugin | Add a prototype interaction (click to navigate) between two nodes. |
-| `batch-create` | plugin | Build a subtree in ONE call, in order: up to 50 `{ op, ref?, params }` (ops = create-frame/rectangle/text, set-layout, set-fill-color, set-fill-gradient, set-stroke-color, set-effects, set-corner-radius, set-text-style, set-parent-id). Later ops use `"$ref"` as `id`/`parentId`. Stops at the first failure with `{ failedIndex, reason, created }` (no rollback). |
+| `batch-create` | plugin | Build a subtree in ONE call, in order: up to 50 `{ op, ref?, params }` (ops = create-frame/rectangle/text, set-layout, set-fill-color, set-fill-gradient, set-stroke-color, set-effects, set-corner-radius, set-text-style, set-parent-id). Later ops use `"$ref"` as `id`/`parentId` (also `componentId`/`instanceId`/`nodeId`/`destinationId`). Stops at the first failure with `{ failedIndex, op, reason, hint?, created }`. `atomic: true` removes created nodes on failure instead of keeping partial work. |
 | `get-node-info` | plugin | Lean layout/colors/content. `depth`: 0 = node only, N = N levels, -1 = full subtree. `maxNodes` (default 10000) + `maxChars` (default 35000) cap size; overflow becomes `_truncated` stubs with `childrenTruncated: true` and root `_truncatedCount` — re-request flagged ids. `fields` limits groups. |
 | `get-pages` | plugin | Get all pages in the current file. |
 | `get-all-components` | plugin | Get all components in the current file. |

@@ -42,7 +42,10 @@ const OperationSchema = z.discriminatedUnion("op", [
 export const BatchCreateParamsSchema = z.object({
     operations: z.array(OperationSchema).min(1).max(MAX_BATCH_OPERATIONS)
         .describe("Run in order in ONE plugin task. Each op is { op: <tool name>, ref?, params: <that tool's params> }"),
+    atomic: z.boolean().optional().default(false)
+        .describe("When true, a failing op removes the nodes earlier ops created (best-effort rollback) instead of leaving a half-built subtree. Default false = keep partial work + report {failedIndex, created}."),
 });
 
 export type BatchCreateParams = z.infer<typeof BatchCreateParamsSchema>;
+export type BatchCreateInput = z.input<typeof BatchCreateParamsSchema>;
 export type BatchOperation = BatchCreateParams["operations"][number];
