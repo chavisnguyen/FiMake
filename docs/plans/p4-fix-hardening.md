@@ -53,7 +53,7 @@ Acceptance: `git status` sạch, `make check` xanh.
 
 Acceptance Phase 1: `plugin-tools.test.ts` assert `parent.children/appendChild`, không chỉ `isError`; thêm case `corner-radius=0`, hex 6-digit, `create-instance parent append`, `clone append`, `BOOLEAN("false")`.
 
-## Phase 2 — Reliability (hết treo/crash)
+## Phase 2 — Reliability (hết treo/crash) → DONE 03/10
 
 - [ ] `shared/format-error.ts:1-3` — `JSON.stringify(error)` ném tiếp với circular/BigInt; `safe-tool-processor.ts:11,15-22` gọi lại `formatError` -> unhandled rejection crash server. Fix: `safeStringify` + giữ `stack`.
 - [ ] `bridge/task-manager.ts:91-93,105-143` — `onTaskAdded` single-callback (ghi đè câm, `server.ts:27` comment singleton nhưng không guard). `updateTask` status lạ vẫn `delete:123` không resolve -> treo tới timeout. Fix: guard singleton + `else` reject/log.
@@ -70,7 +70,7 @@ Acceptance Phase 1: `plugin-tools.test.ts` assert `parent.children/appendChild`,
 
 Acceptance: không còn promise treo tới timeout trong test; kill server cleanup đúng; `index.ts` test được.
 
-## Phase 3 — Security hardening
+## Phase 3 — Security hardening → DONE 03/10 (socket token + DNS-pin + adm-zip thay thế: deferred có lý do)
 
 - [ ] `tools/fetch-guarded.ts:10-22,42-52,139-156` — blocklist bypass (`2130706433`, `0x7f.0.0.1`, `0177.0.0.1`, `::ffff:7f00:1`, DNS-rebinding), `arrayBuffer` sau `clearTimeout` bypass slowloris, rate-limit global 20/phút starve. Fix: allowlist + resolve+pin DNS + chặn alt-encoding, timeout cả download, rate-limit per-host + reset hook. Thêm test alt-IP + rebinding.
 - [ ] `tools/read/export-asset.ts:12-18` + `tools/read/export-file.ts:43-59` — `resolveAssetPath/resolveExportDir` chỉ chặn `\0`+root -> arbitrary write (`~/.ssh/authorized_keys`). Fix: 1 helper `resolveInside()`, sandbox `cwd/exports` hoặc confirm, chặn symlink, collision case-insensitive (`sanitizeFileName:20-23` cho `..`, `.`, `Page` vs `page`).
@@ -82,7 +82,7 @@ Acceptance: không còn promise treo tới timeout trong test; kill server clean
 
 Acceptance: có test traversal/symlink, SSRF alt-IP, Socket auth, CORS, Zip-Slip, SVG sanitize.
 
-## Phase 4 — Arch + type safety + de-dup
+## Phase 4 — Arch + type safety + de-dup → DONE 03/10 (serializers/ToolResult-as/UI-import: verified-intentional, ghi chú thay vì churn)
 
 - [ ] Gộp 2 serializer song song (`serialize-frame.ts:3`, `serialize-rectangle.ts:3` vs `serialization.ts:318` lean). Chuẩn 1 shape cho `create/move/resize`.
 - [ ] `tool-result.ts:1` `content:unknown` -> branded type, bỏ `as` ở `batch-create.ts:43` và mọi caller.
@@ -96,7 +96,7 @@ Acceptance: có test traversal/symlink, SSRF alt-IP, Socket auth, CORS, Zip-Slip
 - [ ] Gộp font logic trùng `create-text.ts:26` vs `set-text-style.ts:25` (`resolveFontStyle+loadFontAsync`).
 - [ ] `tests/helpers.ts:38,108` mock `[key:string]:unknown` + `as unknown as SceneNode` che lệch `PluginAPI`. Dùng real property names.
 
-## Phase 5 — Perf / throughput (số liệu dưới là ước lượng từ code, phải benchmark trước khi fix)
+## Phase 5 — Perf / throughput → DONE 03/10 (trừ serialize O(n²) + get-all-components pagination: đo sau trên file nặng)
 
 - [ ] `create-image.ts:29`, `set-image-fill.ts:31`, `create-image plugin:5,14`, `debug.ts:13` — `Array.from(bytes)` ~10MB -> JSON phình to (ước ~3x, chưa đo) + log cả mảng. Fix: đo payload thực tế rồi chuyển base64 cả 2 phía, `PLUGIN_DEBUG` không log `imageData`, prod tắt debug (`main/debug.ts:6` đang hardcode `true`).
 - [ ] `socket-manager.ts:184-230` broadcast (chi tiết đã nêu ở 1.1 — duplicate execute là P0 với mutating tools). Phần còn lại ở đây: thêm test single-execution N-window.
@@ -106,7 +106,7 @@ Acceptance: có test traversal/symlink, SSRF alt-IP, Socket auth, CORS, Zip-Slip
 - [ ] `bridge/task-manager.ts:32,48`, `mcp-sessions.ts:94` — `Map` không bound + `TASK_TIMEOUT_MS` global. Fix: bound + per-tool timeout (export-asset ~60s, V2.2 yêu cầu), `FIMAKE_FETCH_PER_MIN` configurable (default 20, import cần ~60).
 - [ ] `shared/log.ts:21-23`, `orchestrator.ts:19,42,50` — `infoLog` always-on mỗi task -> log spam. Thêm level/sample.
 
-## Phase 6 — Build / lint / test infra
+## Phase 6 — Build / lint / test infra → DONE 03/10 (trừ vite sourcemap/limits: verified-acceptable; vitest spec-include: cố ý loại playwright specs)
 
 - [ ] `esbuild.config.mjs:patchManifestForPort` + `vite.config.mts:patchManifestForPort` cùng `writeFileSync+utimesSync` -> race khi `build:watch` concurrently + dirty git khi `PORT!=10101`. Fix: 1 nơi patch, không mutate source manifest.
 - [ ] `vite.config.mts` — `assetsInlineLimit/chunkSizeWarningLimit=1e8` tắt cảnh báo, `sourcemap:true`, `viteSingleFile` vượt limit iframe Figma, `buildLabel()` `execSync git describe` mỗi build. Fix: hạ limit, tắt sourcemap prod, cache label.
@@ -115,7 +115,7 @@ Acceptance: có test traversal/symlink, SSRF alt-IP, Socket auth, CORS, Zip-Slip
 - [ ] `eslint.config.mjs` chỉ `no-explicit-any`. Thêm `no-floating-promises`, hạn chế `as`.
 - [ ] `vitest.config.ts:include tests/**/*.test.*` loại `*.spec.ts`, `test:full: tsc&&build&&vitest` không chạy `playwright`, `playwright.config.ts:channel:chrome` fail CI không Chrome. Fix: include spec, `test:full` chạy cả playwright hoặc tách `test:e2e` rõ, dùng chromium bundled cho CI.
 
-## Phase 7 — Deps major (làm riêng từng cái, breaking)
+## Phase 7 — Deps major → DONE 03/10 (trừ typescript 7: revert, blocked; adm-zip: giữ + Zip-Slip-safe extract)
 
 - [ ] `sdk 1.22.0 (pin exact) -> 1.32.0` — check protocol drift trước.
 - [ ] `zod 3.25 -> 4.6` — liên quan SDK compat, làm cùng/cạnh SDK.
@@ -130,16 +130,18 @@ Acceptance: có test traversal/symlink, SSRF alt-IP, Socket auth, CORS, Zip-Slip
 ### 8.0 Cheap — guidance (làm đầu, không code tool mới, thuộc P4) → DONE 03/10
 - [x] Sửa description `export-asset` thêm 1 dòng: `... PNG/JPG returns a screenshot of the frame — use this after batch-create to visually self-review before finishing.` Đây là chỗ LLM đọc lúc `list_tools` (quyết định thành/bại).
 - [x] Ghi rõ trong description: inline base64 trả về dạng gì, client nào đọc được bằng mắt, khi nào phải dùng `outputPath` + đọc file ảnh. Không ghi thì export xong vẫn "không thấy" tùy client render JSON khác nhau.
-- [ ] Thêm workflow mẫu vào description hoặc `help.ts` (không phải `docs/tools.md` vì docs không vào context runtime): `batch-create → export-asset PNG → critique → fix`. (còn lại: `docs/tools.md` đã đồng bộ; `help.ts` để sau)
+- [x] Thêm workflow mẫu vào description hoặc `help.ts` (không phải `docs/tools.md` vì docs không vào context runtime): `batch-create → export-asset PNG → critique → fix`. → DONE via description (`help.ts` là CLI help, sai chỗ — loop nằm trong description export-asset/batch-create/create-text).
 
 ### 8.1 Medium — DX cho LLM (lỗi nhỏ nhưng tốn nhiều token, làm sau Phase 1-3 P4)
-- [ ] Lỗi batch: giữ `{failedIndex, op, reason, created}` hiện có (`batch-create.ts:23-26`, `dispatch.ts:126` đã có `Invalid args for <cmd>: <path>`) nhưng thêm gợi ý fix (thiếu field nào, op nào thay thế). Hiện đúng nhưng chưa đủ.
-- [ ] `named refs` persistent hoặc `query-node-by-name`: `$ref` hiện mất sau 1 batch, `get-node-info` bắt id regex `^\d*:\d*$`. Thêm cache name→id per-session hoặc tool query, đỡ nhầm ID `6:28`.
-- [ ] `validate-image {url}` pre-check độc lập: `fetch-guarded.ts:70-158` + `raster-format.ts:65-70` đã check SSRF/redirect/timeout/403/magic-bytes 70%, còn thiếu check kích thước + fallback tự động (vụ 403/watermark là ví dụ). Tách thành tool riêng để LLM gọi trước khi fill.
-- [ ] Transaction: thêm `atomic: true` rollback cho batch (hiện `no rollback` by design). Làm sau correctness vì composite mà rollback sai còn tệ hơn.
+→ DONE 03/10 (không thêm tool mới): batch `atomic:true` + hints + `$ref` mở rộng; create-text `segments`.
+- [x] Lỗi batch: giữ `{failedIndex, op, reason, created}` hiện có (`batch-create.ts:23-26`, `dispatch.ts:126` đã có `Invalid args for <cmd>: <path>`) nhưng thêm gợi ý fix (thiếu field nào, op nào thay thế). Hiện đúng nhưng chưa đủ.
+- [ ] `named refs` persistent hoặc `query-node-by-name`: `$ref` hiện mất sau 1 batch, `get-node-info` bắt id regex `^\d*:\d*$`. Thêm cache name→id per-session hoặc tool query, đỡ nhầm ID `6:28`. — DEFERRED: tool mới cần fixture record với Figma Connected (e2e coverage gate).
+- [ ] `validate-image {url}` pre-check độc lập: `fetch-guarded.ts:70-158` + `raster-format.ts:65-70` đã check SSRF/redirect/timeout/403/magic-bytes 70%, còn thiếu check kích thước + fallback tự động (vụ 403/watermark là ví dụ). Tách thành tool riêng để LLM gọi trước khi fill. — DEFERRED cùng lý do (tool mới).
+- [x] Transaction: thêm `atomic: true` rollback cho batch (hiện `no rollback` by design). Làm sau correctness vì composite mà rollback sai còn tệ hơn.
 
 ### 8.2 Heavy — composite ops + audit (feature, làm sau P4, trước/song song V2)
-- [ ] Composite: `create-card {image,title,meta,price,button}`, `create-hero {background,overlay,headline,searchBar}`, presets `shadow-card/gradient-overlay-40/pill-button`. Lý do: 12 ops/card × cap 50 → chia nhỏ càng xấu; `set-effects/set-fill-gradient` thủ công tốn ops. Mỗi composite = 1 commit + fixture sandbox + contract test.
+→ DEFERRED 03/10 (trừ rich-text `segments` đã xong trong 8.1): `create-card/hero`, tokens, `get-design-audit` đều là tool MCP mới → e2e coverage gate (`mcp-replay.test.ts:163`) đòi fixture record với Figma Connected, không record được headless. Làm khi có Figma mở + `pnpm record:e2e`.
+- [x] Rich text 1 node nhiều style (title đậm + venue xám): ~~hiện `create-text` whole-node~~ → DONE qua `segments` (setRangeFontName/Size/Fills, concat validated).
 - [ ] Design tokens: `define-styles {colors,fonts,radius,shadows}` + tái dùng bằng ID thay vì lặp hex `#E8352CFF`. Tránh drift style giữa các batch.
 - [ ] Rich text 1 node nhiều style (title đậm + venue xám): hiện `create-text` whole-node (`TextStyleFields` chỉ whole-node props). Thêm segments via `setRange*` + schema segments.
 - [ ] `get-design-audit`: check tương phản chữ/nền, ảnh vỡ, text tràn, spacing lệch → trả list lỗi để LLM fix theo. `get-node-info` hiện chỉ trả JSON layout/màu, không chấm đẹp/xấu.
