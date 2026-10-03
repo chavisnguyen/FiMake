@@ -4,10 +4,8 @@ import type { GetPagesParams } from "@shared/types";
 
 export async function getPages(_args: GetPagesParams): Promise<ToolResult> {
     // main.ts already ran loadAllPagesAsync for this command.
-    const pages = figma.root.findAllWithCriteria({
-        types: ["PAGE"],
-    });
-    const serializedPages = pages.map((page) => serializePage(page as PageNode));
+    // figma.root.children ARE the pages — no need for a full-file findAll.
+    const serializedPages = figma.root.children.map((page) => serializePage(page as PageNode));
     return {
         isError: false,
         content: serializedPages,

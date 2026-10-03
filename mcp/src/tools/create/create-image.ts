@@ -16,10 +16,11 @@ export function createImage(server: McpServer, taskManager: TaskManager) {
             const fetched = await fetchRaster(params.url);
             if (!fetched.ok) return errorResult(fetched.message);
 
-            // Send imageData to plugin instead of URL
+            // Send imageData to plugin instead of URL (base64, not a number
+            // array: JSON arrays bloat the socket message ~3-4x).
             const pluginParams = {
                 ...params,
-                imageData: Array.from(fetched.bytes),
+                imageData: Buffer.from(fetched.bytes).toString("base64"),
             };
 
             return await safeToolProcessor(

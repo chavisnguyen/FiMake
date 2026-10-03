@@ -9,15 +9,22 @@ function isDebugEnabled(): boolean {
   return v === "1" || v?.toLowerCase() === "true";
 }
 
+function isQuiet(): boolean {
+  const v = process.env.FIMAKE_QUIET;
+  return v === "1" || v?.toLowerCase() === "true";
+}
+
 // Toggleable server logging.
 //
 // All server logs go to STDERR, never stdout: in `stdio` transport mode
 // stdout is reserved for JSON-RPC frames — a single stray line there
 // corrupts the MCP stream and disconnects the client.
 export function debugLog(...args: unknown[]): void {
+  if (isQuiet()) return;
   if (isDebugEnabled()) console.error("[fimake:debug]", ...args);
 }
 
 export function infoLog(...args: unknown[]): void {
+  if (isQuiet()) return;
   console.error("[fimake]", ...args);
 }

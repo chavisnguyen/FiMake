@@ -341,7 +341,7 @@ export function tryVerifyPluginDir(dir: string): PluginPaths | undefined {
     }
 }
 
-async function downloadAndExtract(versionTag: string, version: string, installDir: string): Promise<PluginPaths> {
+async function downloadAndExtract(versionTag: string, installDir: string): Promise<PluginPaths> {
     const zipUrl = `https://github.com/chavisnguyen/FiMake/releases/download/${versionTag}/fimake-plugin.zip`;
     // Unpredictable temp dir (not tmp/fimake-plugin-<version>.zip): a fixed
     // name is symlink-attackable by another local user.
@@ -410,7 +410,7 @@ export async function installPlugin(opts: InstallPluginOptions): Promise<Install
     // version), register it in place instead of downloading a release zip
     // on top of it — --dir exists precisely so contributors can point this
     // at their local build without it being overwritten.
-    const paths = tryVerifyPluginDir(installDir) ?? (await downloadAndExtract(versionTag, version, installDir));
+    const paths = tryVerifyPluginDir(installDir) ?? (await downloadAndExtract(versionTag, installDir));
 
     if (opts.noRegister) {
         return { manifestPath: paths.manifest, registered: false };

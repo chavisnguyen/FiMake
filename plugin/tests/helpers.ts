@@ -13,6 +13,7 @@ export interface MockFigmaCurrentPage {
 
 export interface MockFigmaRoot {
   findAllWithCriteria: Mock;
+  children: unknown[];
 }
 
 /**
@@ -45,7 +46,7 @@ export function setupFigma(overrides: Partial<MockFigma> = {}): MockFigma {
   const base: MockFigma = {
     mixed: Symbol("figma.mixed"),
     currentPage: { appendChild: vi.fn(), selection: [] },
-    root: { findAllWithCriteria: vi.fn(() => []) },
+    root: { findAllWithCriteria: vi.fn(() => []), children: [] },
     loadAllPagesAsync: vi.fn(async () => {}),
     loadFontAsync: vi.fn(async () => {}),
     getNodeByIdAsync: vi.fn(async () => null),

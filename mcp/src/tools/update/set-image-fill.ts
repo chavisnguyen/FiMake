@@ -21,7 +21,7 @@ export function setImageFill(server: McpServer, taskManager: TaskManager) {
                     id,
                     url,
                     scaleMode,
-                    imageData: Array.from(fetched.bytes),
+                    imageData: Buffer.from(fetched.bytes).toString("base64"),
                     targetFileKey,
                     targetFileName,
                 })

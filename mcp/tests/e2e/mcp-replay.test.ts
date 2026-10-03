@@ -191,9 +191,9 @@ describe("e2e replay (real MCP + mock plugin, real-data fixtures)", () => {
       expect(isError, `${name}: isError`).toBe(fixture.isError);
       const parsed = JSON.parse(text) as unknown;
       if (name === "get-selection") {
-        // get-selection bọc NGUYÊN TaskResult vào text (xem registry +
-        // contract test) nên replay ra double-envelope: so inner content.
-        expect(parsed).toEqual({ isError: false, content: fixture.content });
+        // get-selection dùng chung safeToolProcessor như mọi tool: text là
+        // content trực tiếp (không còn double-envelope TaskResult như trước).
+        expect(parsed).toEqual(fixture.content);
         continue;
       }
       // Gọi đúng args đã record + mock echo cùng args -> content phải deep-equal.

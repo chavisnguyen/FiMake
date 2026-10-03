@@ -1,17 +1,23 @@
 import { CreateImageParams } from "@shared/types";
 import { ToolResult } from "../tool-result";
 import { serializeRectangle } from "serialization/serialize-rectangle";
+import { decodeBase64 } from "utils/base64";
 
 export interface CreateImagePluginParams extends CreateImageParams {
-    imageData: number[];
+    imageData: string;
 }
 
 export async function createImage(args: CreateImagePluginParams): Promise<ToolResult> {
     if (!args.imageData || args.imageData.length === 0) {
-        return { isError: true, content: "Missing imageData: MCP must fetch the URL in Node and forward bytes (shared schema must keep imageData, zod strips unknown keys)" };
+        return { isError: true, content: "Missing imageData: MCP must fetch the URL in Node and forward base64 bytes (shared schema must keep imageData, zod strips unknown keys)" };
     }
-    const imageData = new Uint8Array(args.imageData);
-    const image = figma.createImage(imageData);
+    let imageBytes: Uint8Array;
+    try {
+        imageBytes = decodeBase64(args.imageData);
+    } catch {
+        return { isError: true, content: "Invalid imageData: not valid base64" };
+    }
+    const image = figma.createImage(imageBytes);
     const node = figma.createRectangle();
     node.x = args.x;
     node.y = args.y;

@@ -176,6 +176,10 @@ export function exportFile(server: McpServer, taskManager: TaskManager) {
                 }
 
                 const manifestPath = path.join(outputDir, "manifest.json");
+                // Deterministic order: completion order varies with timing.
+                manifest.sort((a, b) =>
+                    a.page < b.page ? -1 : a.page > b.page ? 1 : a.nodeId < b.nodeId ? -1 : 1
+                );
                 await fs.writeFile(
                     manifestPath,
                     JSON.stringify(

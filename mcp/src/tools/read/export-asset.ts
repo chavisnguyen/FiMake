@@ -24,12 +24,12 @@ export function exportAsset(server: McpServer, taskManager: TaskManager) {
 
             if (!outputPath) {
                 return await safeToolProcessor(
-                    taskManager.runTask("export-asset", taskParams)
+                    taskManager.runTask("export-asset", taskParams, { timeoutMs: 60_000 })
                 );
             }
 
             try {
-                const result = (await taskManager.runTask("export-asset", taskParams)) as TaskResult;
+                const result = (await taskManager.runTask("export-asset", taskParams, { timeoutMs: 60_000 })) as TaskResult;
                 if (result.isError) {
                     return {
                         content: [{ type: "text", text: JSON.stringify(result.content) }],

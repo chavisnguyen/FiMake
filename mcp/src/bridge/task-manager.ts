@@ -38,8 +38,12 @@ export class TaskManager {
 
     public runTask<TResult, TArgs>(
         command: string,
-        args: TArgs): Promise<TResult> {
+        args: TArgs,
+        opts?: { timeoutMs?: number }): Promise<TResult> {
         const id = generateUUID();
+        // Per-tool override (V2.2): heavy calls like export-asset need ~60s
+        // while interactive tools stay at the global TASK_TIMEOUT_MS.
+        const timeoutMs = opts?.timeoutMs ?? this.timeoutMs;
         const promise = new Promise((resolve, reject) => {
             this.addTask(id, command, args, resolve, reject);
             const task = this.tasks.get(id);
@@ -48,9 +52,9 @@ export class TaskManager {
                 // NOTE: intentionally NOT unref'd — the timeout is the only
                 // thing keeping a short-lived caller alive until settle.
                 task.timer = setTimeout(() => {
-                    console.warn(`[fimake] task timed out ${id} ${command} after ${this.timeoutMs}ms (plugin silent?)`);
+                    console.warn(`[fimake] task timed out ${id} ${command} after ${timeoutMs}ms (plugin silent?)`);
                     this.updateTask(id, { error: "Task timed out" }, "timed_out");
-                }, this.timeoutMs);
+                }, timeoutMs);
             }
         });
         return promise as Promise<TResult>;

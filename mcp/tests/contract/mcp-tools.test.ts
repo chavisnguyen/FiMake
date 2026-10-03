@@ -175,7 +175,7 @@ describe("create-image forwards fetched bytes", () => {
     const res: CallToolResult = await getHandler(handlers, "create-image")({ url: "https://x/y.png" });
     expect(runTaskMock(tm)).toHaveBeenCalledWith(
       "create-image",
-      expect.objectContaining({ url: "https://x/y.png", imageData: [1, 2, 3] }),
+      expect.objectContaining({ url: "https://x/y.png", imageData: "AQID" }),
     );
     expect(res.isError).toBe(false);
   });
@@ -237,7 +237,7 @@ describe("create-image redirects + format guard", () => {
     expect(String(fetchMock.mock.calls[1]?.[0])).toContain("https://cdn/x.jpg");
     expect(runTaskMock(tm)).toHaveBeenCalledWith(
       "create-image",
-      expect.objectContaining({ imageData: PNG }),
+      expect.objectContaining({ imageData: "iVBORw0KGgo=" }),
     );
   });
 
@@ -419,7 +419,7 @@ describe("set-image-fill fetches in Node, forwards bytes to the target node", ()
     vi.stubGlobal("fetch", vi.fn(async () => res("image/png", PNG)));
     const out = await call({ id: "1:1", url: "https://x/y.png", scaleMode: "FIT", targetFileKey: "k" });
     expect(out.isError).toBe(false);
-    expect(runTaskMock(tm)).toHaveBeenCalledWith("set-image-fill", expect.objectContaining({ id: "1:1", url: "https://x/y.png", scaleMode: "FIT", imageData: PNG, targetFileKey: "k" }));
+    expect(runTaskMock(tm)).toHaveBeenCalledWith("set-image-fill", expect.objectContaining({ id: "1:1", url: "https://x/y.png", scaleMode: "FIT", imageData: "iVBORw0KGgo=", targetFileKey: "k" }));
   });
 
   it("rejects non-Figma formats and SSRF redirects before the socket", async () => {

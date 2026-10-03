@@ -142,19 +142,19 @@ describe("plugin create tools", () => {
     const rect: SceneNodeStub = { id: "1:1", name: "Img", type: "RECTANGLE", resize: vi.fn() };
     figma.createRectangle.mockReturnValue(rect);
     figma.getNodeByIdAsync.mockResolvedValue({ appendChild: vi.fn() });
-    const res = await createImage({ x: 0, y: 0, width: 10, height: 10, name: "Img", url: "https://x", imageData: [1, 2, 3], parentId: "0:1" });
+    const res = await createImage({ x: 0, y: 0, width: 10, height: 10, name: "Img", url: "https://x", imageData: "AQID", parentId: "0:1" });
     expect(res.isError).toBe(false);
     expect((rect["fills"] as Array<{ type: string; scaleMode: string }>)[0]).toMatchObject({ type: "IMAGE", scaleMode: "FILL" });
     // No parentId → current page (previously detached + invisible on success).
     const rect2: SceneNodeStub = { id: "1:2", name: "Img2", type: "RECTANGLE", resize: vi.fn() };
     figma.createRectangle.mockReturnValue(rect2);
-    expect((await createImage({ x: 0, y: 0, width: 10, height: 10, name: "Img2", url: "https://x", imageData: [1, 2, 3] })).isError).toBe(false);
+    expect((await createImage({ x: 0, y: 0, width: 10, height: 10, name: "Img2", url: "https://x", imageData: "AQID" })).isError).toBe(false);
     expect(figma.currentPage.appendChild).toHaveBeenCalledWith(rect2);
     // Missing parent → loud error, node cleaned up (no invisible success).
     figma.getNodeByIdAsync.mockResolvedValue(null);
     const rect3: SceneNodeStub = { id: "1:3", name: "Img3", type: "RECTANGLE", resize: vi.fn(), remove: vi.fn() };
     figma.createRectangle.mockReturnValue(rect3);
-    expect((await createImage({ x: 0, y: 0, width: 10, height: 10, name: "Img3", url: "https://x", imageData: [1, 2, 3], parentId: "9:9" })).isError).toBe(true);
+    expect((await createImage({ x: 0, y: 0, width: 10, height: 10, name: "Img3", url: "https://x", imageData: "AQID", parentId: "9:9" })).isError).toBe(true);
     expect(rect3["remove"]).toHaveBeenCalled();
   });
 
@@ -221,7 +221,8 @@ describe("plugin read tools", () => {
   });
   it("getPages + getAllComponents", async () => {
     const figma: MockFigma = setupFigma();
-    figma.root.findAllWithCriteria.mockReturnValue([{ id: "0:1", name: "P", children: [] }]);
+    // Pages are figma.root.children (no full-file findAll).
+    (figma.root as unknown as { children: unknown[] }).children = [{ id: "0:1", name: "P", children: [] }];
     expect((await getPages({})).isError).toBe(false);
     figma.root.findAllWithCriteria.mockReturnValue([]);
     expect((await getAllComponents({})).content).toBe("No components found");

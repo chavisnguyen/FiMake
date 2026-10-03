@@ -251,7 +251,7 @@ describe("plugin branch coverage fill", () => {
     expect((await setImageFill({ id: "1:1", url: "https://x", scaleMode: "FILL" })).isError).toBe(true);
     const node: SceneNodeStub = { id: "1:1", name: "Hero", type: "FRAME", fills: [] };
     figma.getNodeByIdAsync.mockResolvedValue(node);
-    expect((await setImageFill({ id: "1:1", url: "https://x", scaleMode: "CROP", imageData: [1, 2, 3] })).isError).toBe(false);
+    expect((await setImageFill({ id: "1:1", url: "https://x", scaleMode: "CROP", imageData: "AQID" })).isError).toBe(false);
     expect(figma.createImage).toHaveBeenCalled();
     expect((node["fills"] as ImagePaint[])[0]).toEqual({ type: "IMAGE", imageHash: "h1", scaleMode: "CROP" });
   });

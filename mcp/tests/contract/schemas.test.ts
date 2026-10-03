@@ -143,8 +143,8 @@ describe("delete/update schemas", () => {
     expect(() => SetFillGradientParamsSchema.parse({ id: "1:1", stops: stops.slice(0, 1) })).toThrow();
     expect(() => SetFillGradientParamsSchema.parse({ id: "1:1", stops: [{ position: 1.5, color: "#000000FF" }, stops[1]] })).toThrow();
     expect(() => SetFillGradientParamsSchema.parse({ id: "1:1", stops, type: "ANGULAR" })).toThrow();
-    const img = SetImageFillParamsSchema.parse({ id: "1:1", url: "https://x/y.png", imageData: [1, 2] });
-    expect(img).toMatchObject({ scaleMode: "FILL", imageData: [1, 2] });
+    const img = SetImageFillParamsSchema.parse({ id: "1:1", url: "https://x/y.png", imageData: "AQI=" });
+    expect(img).toMatchObject({ scaleMode: "FILL", imageData: "AQI=" });
   });
   it("text style fields on create-text + set-text-style (all optional, no defaults) + list-fonts", () => {
     const t = CreateTextParamsSchema.parse({ x: 0, y: 0, text: "hi", width: 320, lineHeight: 20, letterSpacing: -2, textAlign: "CENTER", maxLines: 2, fontStyle: "Semibold" });

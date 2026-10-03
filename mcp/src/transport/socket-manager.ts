@@ -319,7 +319,7 @@ export class SocketManager {
     private pendingTtlMs: number;
     private maxRetries: number;
     private pending: Map<string, QueuedMessage> = new Map();
-    private sweep?: ReturnType<typeof setInterval>;
+    private sweep: ReturnType<typeof setInterval> | undefined;
 
     // Events
 

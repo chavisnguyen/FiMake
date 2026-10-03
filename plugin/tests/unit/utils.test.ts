@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { convertToRGBA, convertToHex } from "../../main/utils/color-conversion";
+import { decodeBase64 } from "../../main/utils/base64";
 import { getFontStyle } from "../../main/utils/get-font-style";
 import { getSolidColorPaint, getSolidHEXColorPaint } from "../../main/utils/get-solid-color-paint";
 import type { ColorHex } from "@shared/types/params/shared/color-hex";
@@ -73,5 +74,17 @@ describe("resolvePropertyKey", () => {
     expect(resolvePropertyKey(comp, "Nope")).toBe("Nope");
     expect(resolvePropertyKey(null, "Label")).toBe("Label");
     expect(resolvePropertyKey({}, "Label")).toBe("Label");
+  });
+});
+
+describe("decodeBase64", () => {
+  it("round-trips bytes without atob/Buffer", () => {
+    expect(Array.from(decodeBase64("AQID"))).toEqual([1, 2, 3]);
+    expect(Array.from(decodeBase64("iVBORw0KGgo="))).toEqual([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    expect(decodeBase64("").length).toBe(0);
+  });
+  it("rejects garbage instead of producing wrong bytes", () => {
+    expect(() => decodeBase64("!!!")).toThrow();
+    expect(() => decodeBase64("ABC")).toThrow();
   });
 });
