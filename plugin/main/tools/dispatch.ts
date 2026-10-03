@@ -116,12 +116,14 @@ function wrap<T>(command: string, fn: (args: T) => Promise<ToolResult>): Dispatc
   const run = wrapToolHandler(fn);
   const schema = PARAM_SCHEMAS[command];
   return (args: unknown) => {
-    if (args === undefined) return run({} as T);
-    if (typeof args !== "object" || args === null) {
+    // Missing args validate as {} — never bypass the schema, or required
+    // params (e.g. delete-node's id) would slip through as undefined.
+    const candidate = args === undefined ? {} : args;
+    if (typeof candidate !== "object" || candidate === null) {
       return Promise.resolve({ isError: true, content: "Invalid args: expected object" });
     }
-    if (!schema) return run(args as T);
-    const parsed = schema.safeParse(args);
+    if (!schema) return run(candidate as T);
+    const parsed = schema.safeParse(candidate);
     if (!parsed.success) {
       return Promise.resolve({ isError: true, content: `Invalid args for ${command}: ${parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ")}` });
     }

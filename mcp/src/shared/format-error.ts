@@ -11,11 +11,13 @@ export function safeStringify(value: unknown): string {
     });
 }
 
+/**
+ * One-line error text for tool responses (never throws, never leaks stack
+ * paths into the payload). Callers that need the stack log the Error object
+ * itself to stderr separately (wrapToolHandler already does).
+ */
 export function formatError(error: unknown): string {
-    if (error instanceof Error) {
-        // Keep the stack for real debugging — message alone hides where it threw.
-        return error.stack ?? error.message;
-    }
+    if (error instanceof Error) return error.message;
     try {
         return safeStringify(error);
     } catch {

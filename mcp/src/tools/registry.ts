@@ -43,16 +43,12 @@ import { exportFile } from "./read/export-file";
 import { listClients } from "./read/list-clients";
 
 /**
- * Tools that run purely Node-side (fetch, disk writes, fan-out over other
- * tools, connection state) and therefore intentionally have NO handler in
- * plugin/main/tools/dispatch.ts:
- * - get-selection: wraps whole TaskResult (no schema)
- * - create-image: fetches URL in Node, forwards bytes to plugin
- * - create-svg: resolves inline/url/filePath SVG in Node, forwards markup to plugin
- * - set-image-fill: fetches URL in Node, forwards bytes to plugin
- * - export-asset: optionally writes the asset to disk
- * - export-file: fans out over get-pages/get-node-info, writes JSON to disk
- * - list-clients: reads the bridge's connected plugin windows
+ * Tools with extra Node-side logic (fetch, disk writes, fan-out, connection
+ * state). Two subsets, named precisely:
+ * - NODE_ONLY_TOOLS: no handler in plugin/main/tools/dispatch.ts by design
+ *   (export-file fans out over other tools; list-clients reads bridge state).
+ * - NODE_WRAPPED_TOOLS: all tools whose MCP handler does Node work before
+ *   (or instead of) calling taskManager.runTask.
  * Every other tool forwards its params to the plugin (`name` doubles as the
  * task command) and must have a matching TOOL_HANDLERS entry.
  */

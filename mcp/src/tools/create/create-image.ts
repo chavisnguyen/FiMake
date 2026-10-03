@@ -2,8 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { TaskManager } from "../../bridge/task-manager";
 import { safeToolProcessor } from "../safe-tool-processor";
 import { withTarget, type TargetParams } from "../target";
-import { fetchGuarded } from "../fetch-guarded";
-import { MAX_IMAGE_BYTES, RASTER_ACCEPT, rasterFormatError } from "../raster-format";
+import { errorResult, fetchRaster } from "../raster-format";
 import { CreateImageParamsSchema, type CreateImageParams } from "../../shared/types/index";
 
 export function createImage(server: McpServer, taskManager: TaskManager) {
@@ -14,14 +13,8 @@ export function createImage(server: McpServer, taskManager: TaskManager) {
         async (params: CreateImageParams & TargetParams) => {
             // Fetch image in Node.js (no CORS restrictions). Failures return
             // isError instead of throwing so MCP clients always get a CallToolResult.
-            const fetched = await fetchGuarded(params.url, { accept: RASTER_ACCEPT, maxBytes: MAX_IMAGE_BYTES });
-            if (!fetched.ok) {
-                return { content: [{ type: "text" as const, text: fetched.message }], isError: true };
-            }
-            const formatError = rasterFormatError(fetched.bytes, fetched.mime, fetched.withHeaders);
-            if (formatError) {
-                return { content: [{ type: "text" as const, text: formatError }], isError: true };
-            }
+            const fetched = await fetchRaster(params.url);
+            if (!fetched.ok) return errorResult(fetched.message);
 
             // Send imageData to plugin instead of URL
             const pluginParams = {

@@ -25,10 +25,12 @@ export async function withNode(id: string, fn: (node: BaseNode) => void | Promis
     if (isErr(node)) return node;
     try {
         await fn(node);
+        // Serialize inside the try: a throwing serializer used to escape
+        // wrapToolHandler and surface inconsistently with the fn errors above.
+        return { isError: false, content: serializeNode(node as unknown as SceneNode) };
     } catch (error) {
         return { isError: true, content: formatError(error) };
     }
-    return { isError: false, content: serializeNode(node as unknown as SceneNode) };
 }
 
 /**

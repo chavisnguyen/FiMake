@@ -5,6 +5,7 @@ import type { TaskManager } from "../../bridge/task-manager";
 import { safeToolProcessor } from "../safe-tool-processor";
 import { withTarget, type TargetParams } from "../target";
 import { fetchGuarded } from "../fetch-guarded";
+import { errorResult } from "../raster-format";
 import { resolveAssetPath } from "../read/export-asset";
 import { CreateSvgParamsSchema, type CreateSvgParams } from "../../shared/types/index";
 
@@ -42,10 +43,6 @@ async function readSvgFile(filePath: string): Promise<string> {
     const stat = await fs.stat(resolved);
     if (stat.size > MAX_SVG_BYTES) throw new Error(`SVG exceeds ${MAX_SVG_BYTES} bytes`);
     return await fs.readFile(resolved, "utf-8");
-}
-
-function errorResult(text: string) {
-    return { content: [{ type: "text" as const, text }], isError: true };
 }
 
 export function createSvg(server: McpServer, taskManager: TaskManager) {

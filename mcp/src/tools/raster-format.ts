@@ -2,6 +2,7 @@
  * Raster format guards shared by every tool that forwards image bytes to
  * figma.createImage() (JPG/PNG/GIF only).
  */
+import { fetchGuarded } from "./fetch-guarded";
 /** Refuse absurd payloads before they bloat the socket message (10MB). */
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 /**
@@ -67,4 +68,26 @@ export function rasterFormatError(bytes: Uint8Array, mime: string, withHeaders: 
     // Explicit non-image (text/html, application/octet-stream...) gets a terse message;
     // image/* (webp/svg/avif/bmp...) or missing content-type gets actionable guidance.
     return mime && !mime.startsWith("image/") ? `Not an image (content-type: ${mime})` : unsupportedFormatMessage(bytes, mime);
+}
+
+export type FetchRasterResult =
+    | { ok: true; bytes: Uint8Array }
+    | { ok: false; message: string };
+
+/**
+ * Shared fetch+validate used by create-image and set-image-fill (they ran
+ * the same fetchGuarded→rasterFormatError lines with only the caller
+ * differing). Never throws — failures come back as `{ok:false}`.
+ */
+export async function fetchRaster(url: string): Promise<FetchRasterResult> {
+    const fetched = await fetchGuarded(url, { accept: RASTER_ACCEPT, maxBytes: MAX_IMAGE_BYTES });
+    if (!fetched.ok) return fetched;
+    const formatError = rasterFormatError(fetched.bytes, fetched.mime, fetched.withHeaders);
+    if (formatError) return { ok: false, message: formatError };
+    return { ok: true, bytes: fetched.bytes };
+}
+
+/** Uniform `{content, isError:true}` shape for pre-socket failures. */
+export function errorResult(text: string) {
+    return { content: [{ type: "text" as const, text }], isError: true };
 }
