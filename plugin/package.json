@@ -17,7 +17,7 @@
     "tsc:watch": "concurrently -n main,ui \"pnpm tsc:main -- --watch --preserveWatchOutput\" \"pnpm tsc:ui -- --watch --preserveWatchOutput\"",
     "build": "pnpm build:ui && pnpm build:main",
     "prebuild": "rm -rf dist",
-    "build:main": "node esbuild.config.mjs",
+    "build:main": "node esbuild.config.mjs --minify",
     "build:ui": "vite build --minify esbuild",
     "build:watch": "concurrently -n main,ui \"pnpm build:main -- --watch\" \"pnpm build:ui -- --watch\"",
     "dev": "concurrently -n tsc,build 'pnpm:tsc:watch' 'pnpm:build:watch'"
