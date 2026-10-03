@@ -253,6 +253,59 @@ describe("plugin read tools", () => {
     figma.root.findAllWithCriteria.mockReturnValue([{ id: "3:1", name: "C", key: "k", componentPropertyDefinitions: {} }]);
     expect((await getAllComponents({})).isError).toBe(false);
   });
+  it("findNodesByName matches substring/exact, caps at limit", async () => {
+    const { findNodesByName } = await import("../../main/tools/read/find-nodes-by-name");
+    const figma: MockFigma = setupFigma();
+    const kids = [
+      { id: "1:1", name: "Buy Button", type: "RECTANGLE" },
+      { id: "1:2", name: "buy caption", type: "TEXT" },
+      { id: "1:3", name: "Hero", type: "FRAME" },
+    ];
+    (figma.root as unknown as { children: unknown[] }).children = [
+      { id: "0:1", name: "Page 1", type: "PAGE", findAll: (pred: (n: { name: string }) => boolean) => kids.filter((k) => pred(k)) },
+    ];
+    const sub = await findNodesByName({ name: "buy" });
+    expect(sub.isError).toBe(false);
+    expect(sub.content).toEqual([
+      { id: "1:1", name: "Buy Button", type: "RECTANGLE", pageId: "0:1", pageName: "Page 1" },
+      { id: "1:2", name: "buy caption", type: "TEXT", pageId: "0:1", pageName: "Page 1" },
+    ]);
+    const exact = await findNodesByName({ name: "buy", exact: true });
+    expect(exact).toMatchObject({ isError: true });
+    const capped = await findNodesByName({ name: "buy", limit: 1 });
+    expect((capped.content as unknown[])).toHaveLength(1);
+    const miss = await findNodesByName({ name: "zzz-nope" });
+    expect(miss.isError).toBe(true);
+  });
+  it("get-design-audit flags empty/zero/default/hidden/low-contrast", async () => {
+    const { getDesignAudit } = await import("../../main/tools/read/get-design-audit");
+    const figma: MockFigma = setupFigma();
+    const solid = (r: number, g: number, b: number) => [{ type: "SOLID", color: { r, g, b } }];
+    const frame = {
+      id: "0:1", name: "Card", type: "FRAME", visible: true, width: 300, height: 200, fills: solid(1, 1, 1),
+      children: [
+        { id: "1:1", name: "Title", type: "TEXT", visible: true, width: 200, height: 20, characters: "Hi", fills: solid(0.2, 0.2, 0.2) },
+        { id: "1:2", name: "Sub", type: "TEXT", visible: true, width: 200, height: 20, characters: "", fills: solid(0, 0, 0) },
+        { id: "1:3", name: "Rectangle 12", type: "RECTANGLE", visible: true, width: 0, height: 10, fills: solid(1, 0, 0) },
+        { id: "1:4", name: "Pale", type: "TEXT", visible: true, width: 200, height: 20, characters: "yo", fills: solid(0.85, 0.85, 0.85) },
+        { id: "1:5", name: "Gone", type: "TEXT", visible: false, width: 10, height: 10, characters: "x", fills: solid(0, 0, 0) },
+      ],
+    };
+    figma.getNodeByIdAsync.mockResolvedValue(frame);
+    const res = await getDesignAudit({ id: "0:1" });
+    expect(res.isError).toBe(false);
+    const body = res.content as { issues: Array<{ nodeId: string; check: string }> };
+    const byId = Object.fromEntries(body.issues.map((i) => [i.nodeId, i.check]));
+    expect(byId["1:2"]).toBe("empty-text");
+    // 1:3 is both zero-size and default-named — one issue per check.
+    expect(body.issues.filter((i) => i.nodeId === "1:3").map((i) => i.check).sort()).toEqual(["default-name", "zero-size"]);
+    expect(byId["1:4"]).toBe("low-contrast");
+    expect(byId["1:5"]).toBe("hidden");
+    expect(JSON.stringify(body.issues)).toContain("Rectangle 12");
+    expect(body.issues.find((i) => i.nodeId === "1:1")).toBeUndefined();
+    figma.getNodeByIdAsync.mockResolvedValue(null);
+    expect((await getDesignAudit({ id: "9:9" })).isError).toBe(true);
+  });
   it("getAllComponents survives variant components (real-file crash)", async () => {
     const figma: MockFigma = setupFigma();
     // Variant thật trong Figma throw khi đọc getter này — message copy từ

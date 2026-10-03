@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "command": "create-card",
+    "recordedAt": "2026-10-03T09:05:48.039Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "create-card",
+    "args": {
+      "x": 320,
+      "y": 300,
+      "width": 280,
+      "title": "E2E Night",
+      "meta": "Hall A · 20:00",
+      "price": "$10",
+      "buttonLabel": "Buy",
+      "parentId": "21:2"
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": {
+      "cardId": "21:12",
+      "titleId": "21:13",
+      "buttonId": "21:16",
+      "buttonLabelId": "21:17"
+    }
+  }
+}

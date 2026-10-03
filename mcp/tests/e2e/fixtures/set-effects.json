@@ -1,14 +1,14 @@
 {
   "_meta": {
     "command": "set-effects",
-    "recordedAt": "2026-09-23T10:50:26.287Z",
+    "recordedAt": "2026-10-03T09:05:48.087Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "set-effects",
     "args": {
-      "id": "2071:12810",
+      "id": "21:3",
       "effects": [
         {
           "type": "DROP_SHADOW",
@@ -30,19 +30,28 @@
   "response": {
     "isError": false,
     "content": {
-      "id": "2071:12810",
+      "id": "21:3",
       "name": "e2e-rect",
       "type": "RECTANGLE",
-      "x": 10,
-      "y": 10,
-      "width": 100,
-      "height": 50,
+      "x": 42,
+      "y": 77,
+      "width": 120,
+      "height": 60,
       "layoutSizingHorizontal": "FIXED",
       "layoutSizingVertical": "FIXED",
       "fills": [
         {
-          "type": "SOLID",
-          "color": "#d9d9d9FF"
+          "type": "GRADIENT_LINEAR",
+          "gradientStops": [
+            {
+              "position": 0,
+              "color": "#6e00ffff"
+            },
+            {
+              "position": 1,
+              "color": "#e5091400"
+            }
+          ]
         }
       ],
       "strokes": [

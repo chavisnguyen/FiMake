@@ -1,20 +1,20 @@
 {
   "_meta": {
     "command": "clone-node",
-    "recordedAt": "2026-09-23T07:27:03.634Z",
+    "recordedAt": "2026-10-03T09:05:48.047Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "clone-node",
     "args": {
-      "id": "2066:12780"
+      "id": "21:3"
     }
   },
   "response": {
     "isError": false,
     "content": {
-      "id": "2066:12786",
+      "id": "21:18",
       "name": "e2e-rect",
       "type": "RECTANGLE",
       "x": 10,

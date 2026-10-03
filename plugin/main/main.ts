@@ -16,6 +16,7 @@ const CONSOLE_HEIGHT = 640;
 const NEEDS_ALL_PAGES = new Set([
   "get-pages",
   "get-all-components",
+  "find-nodes-by-name",
 ]);
 
 function isResizeRequest(msg: unknown): msg is UiResizeRequest {

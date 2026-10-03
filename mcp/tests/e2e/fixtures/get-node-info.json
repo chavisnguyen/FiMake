@@ -1,40 +1,57 @@
 {
   "_meta": {
     "command": "get-node-info",
-    "recordedAt": "2026-09-23T07:27:05.216Z",
+    "recordedAt": "2026-10-03T09:05:48.447Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "get-node-info",
     "args": {
-      "id": "5:45314"
+      "id": "6:2"
     }
   },
   "response": {
     "isError": false,
     "content": {
-      "id": "5:45314",
-      "name": "Arrow Down",
-      "type": "COMPONENT",
-      "x": 2079,
-      "y": 1058,
-      "width": 16,
-      "height": 16,
+      "id": "6:2",
+      "name": "01 Home - Search",
+      "type": "FRAME",
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 2000,
+      "layoutMode": "VERTICAL",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "itemSpacing": 0,
+      "primaryAxisAlignItems": "MIN",
+      "counterAxisAlignItems": "MIN",
       "layoutSizingHorizontal": "FIXED",
       "layoutSizingVertical": "FIXED",
       "fills": [
         {
           "type": "SOLID",
-          "visible": false,
           "color": "#ffffffFF"
         }
       ],
       "children": [
         {
-          "id": "5:45315",
-          "name": "Vector",
-          "type": "VECTOR"
+          "id": "6:6",
+          "name": "Navbar",
+          "type": "FRAME"
+        },
+        {
+          "id": "6:15",
+          "name": "Hero",
+          "type": "FRAME"
+        },
+        {
+          "id": "6:24",
+          "name": "OnSaleSection",
+          "type": "FRAME"
         }
       ],
       "childrenTruncated": true

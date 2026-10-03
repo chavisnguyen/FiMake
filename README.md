@@ -34,4 +34,4 @@ No Homebrew? See [Usage](docs/usage.md#without-homebrew). Building from source? 
 
 ## Tools
 
-36 tools: 28 forward directly to the plugin (`name` = task command), 8 have extra Node-side logic. Full list: [docs/tools.md](docs/tools.md).
+39 tools: 30 forward directly to the plugin (`name` = task command), 9 have extra Node-side logic. Full list: [docs/tools.md](docs/tools.md).

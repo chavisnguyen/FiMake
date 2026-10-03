@@ -1,0 +1,40 @@
+{
+  "_meta": {
+    "command": "find-nodes-by-name",
+    "recordedAt": "2026-10-03T09:05:47.993Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "find-nodes-by-name",
+    "args": {
+      "name": "e2e-batch"
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": [
+      {
+        "id": "21:7",
+        "name": "e2e-batch-row",
+        "type": "FRAME",
+        "pageId": "0:1",
+        "pageName": "Free Space"
+      },
+      {
+        "id": "21:8",
+        "name": "e2e-batch-input",
+        "type": "RECTANGLE",
+        "pageId": "0:1",
+        "pageName": "Free Space"
+      },
+      {
+        "id": "21:9",
+        "name": "e2e-batch-label",
+        "type": "TEXT",
+        "pageId": "0:1",
+        "pageName": "Free Space"
+      }
+    ]
+  }
+}

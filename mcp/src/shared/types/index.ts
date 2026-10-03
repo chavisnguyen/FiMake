@@ -13,6 +13,7 @@ export * from './params/create/create-image';
 export * from './params/create/create-svg';
 export * from './params/create/add-prototype-link';
 export * from './params/create/batch-create';
+export * from './params/create/create-card';
 
 // Read
 export * from './params/read/get-node-info';
@@ -21,6 +22,8 @@ export * from './params/read/get-pages';
 export * from './params/read/export-asset';
 export * from './params/read/export-file';
 export * from './params/read/list-fonts';
+export * from './params/read/find-nodes-by-name';
+export * from './params/read/get-design-audit';
 
 // Delete
 export * from './params/delete/delete-node';

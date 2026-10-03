@@ -1,21 +1,21 @@
 {
   "_meta": {
     "command": "set-corner-radius",
-    "recordedAt": "2026-09-23T07:27:03.749Z",
+    "recordedAt": "2026-10-03T09:05:48.092Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
   "request": {
     "command": "set-corner-radius",
     "args": {
-      "id": "2066:12780",
+      "id": "21:3",
       "cornerRadius": 8
     }
   },
   "response": {
     "isError": false,
     "content": {
-      "id": "2066:12780",
+      "id": "21:3",
       "name": "e2e-rect",
       "type": "RECTANGLE",
       "x": 42,
@@ -27,8 +27,17 @@
       "cornerRadius": 8,
       "fills": [
         {
-          "type": "SOLID",
-          "color": "#ff0000FF"
+          "type": "GRADIENT_LINEAR",
+          "gradientStops": [
+            {
+              "position": 0,
+              "color": "#6e00ffff"
+            },
+            {
+              "position": 1,
+              "color": "#e5091400"
+            }
+          ]
         }
       ],
       "strokes": [
@@ -37,8 +46,24 @@
           "color": "#00ff00FF"
         }
       ],
-      "strokeWeight": 1,
-      "strokeAlign": "INSIDE"
+      "strokeWeight": 2,
+      "strokeAlign": "INSIDE",
+      "effects": [
+        {
+          "type": "DROP_SHADOW",
+          "color": "#00000040",
+          "offset": {
+            "x": 0,
+            "y": 2
+          },
+          "radius": 6,
+          "spread": 0
+        },
+        {
+          "type": "LAYER_BLUR",
+          "radius": 1
+        }
+      ]
     }
   }
 }

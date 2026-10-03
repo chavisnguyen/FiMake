@@ -190,6 +190,18 @@ async function main(): Promise<void> {
 
   let cloneId: string | undefined;
   if (rectId) {
+    await rec("find-nodes-by-name", { name: "e2e-batch" });
+    await rec("get-design-audit", { id: sbId });
+    await rec("create-card", {
+      x: 320,
+      y: 300,
+      width: 280,
+      title: "E2E Night",
+      meta: "Hall A · 20:00",
+      price: "$10",
+      buttonLabel: "Buy",
+      parentId: sbId,
+    });
     const cl = await rec("clone-node", { id: rectId });
     cloneId = contentId(cl.content);
     await rec("move-node", { id: rectId, x: 42, y: 77 });

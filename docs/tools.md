@@ -1,6 +1,6 @@
-# Tools (36)
+# Tools (39)
 
-28 tools forward directly to the plugin (`name` = task command), 8 have extra Node-side logic.
+30 tools forward directly to the plugin (`name` = task command), 9 have extra Node-side logic.
 
 Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_ONLY_TOOLS` in `mcp/src/tools/registry.ts`.
 
@@ -19,6 +19,8 @@ Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_
 | `get-pages` | plugin | Get all pages in the current file. |
 | `get-all-components` | plugin | Get all components in the current file. |
 | `list-fonts` | plugin | Fonts available to Figma (no runtime upload — install locally). No `family`: names only; with `family` substring: exact style names for `fontStyle`. |
+| `find-nodes-by-name` | plugin | Find nodes by name across the whole file (substring unless `exact:true`). Returns `[{id, name, type, pageId, pageName}]` up to `limit` (default 50). |
+| `get-design-audit` | plugin | Static audit of a subtree: empty texts, zero-area nodes, default names, hidden layers, low-contrast text (WCAG AA 4.5:1). Returns `{audited, scanned, truncated, issues}`. |
 | `move-node` | plugin | Move a node. |
 | `resize-node` | plugin | Resize a node. |
 | `set-fill-color` | plugin | Set a solid fill color (`#RRGGBBAA`; alpha `00` = transparent). |
@@ -39,6 +41,7 @@ Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_
 | `create-svg` | node+plugin | Editable vector from SVG: exactly one of `svg` (inline), `url` (fetched in Node, same SSRF guards as `create-image`), `filePath` (local `.svg`). Keeps intrinsic size; `x`/`y`/`parentId` place it. Max 5MB, rejects `<!ENTITY`. |
 | `set-image-fill` | node+plugin | Use an image (`url`, fetched in Node like `create-image`) as the fill of an EXISTING node; `scaleMode` `FILL`/`FIT`/`CROP`/`TILE`. |
 | `validate-image` | node-only | Pre-check an image URL before `create-image`/`set-image-fill`: reports `{ok, bytes, mime, width?, height?}` without touching Figma. Catches 403s, wrong formats, oversized/tiny images. |
+| `create-card` | node-only | One-call product card: fans out over `batch-create` (+ `create-image` for the header) — no plugin handler by design. Auto-layout frame + title + optional meta/price/button (+ optional header image). Returns `{cardId, titleId, buttonId?, imageId?}`. |
 | `export-asset` | node+plugin | Rendered asset with real path data (`SVG` markup or `PNG`/`JPG` base64, `scale` max 4). `PNG`/`JPG` double as a frame screenshot — use after `batch-create` to visually self-review (`batch-create` → `export-asset` PNG → critique → fix). Prefer `outputPath` + Read the file when you need to SEE pixels (inline base64 is heavy and not every client renders it). With `outputPath`, writes to disk and returns `{path, bytes}` (max 20MB). |
 | `export-file` | node-only | Fans out over `get-pages` + `get-node-info` and writes one JSON per top-level frame + `manifest.json`. Params: `outputDir` (default `<cwd>/exports/export-<ts>`), `maxNodes` (default 5000), `maxChars` (default 35000). Guarded: max 500 frames, all writes confined to `outputDir`. No plugin handler by design. |
 | `list-clients` | node-only | List open Figma files with the plugin connected (one entry per window: `fileName`, `fileKey`, `connectedAt`). No plugin handler by design. |

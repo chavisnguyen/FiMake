@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "list-fonts",
-    "recordedAt": "2026-09-23T11:23:37.887Z",
+    "recordedAt": "2026-10-03T09:05:47.737Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },

@@ -8,6 +8,7 @@ import type { TaskResult } from "../../src/bridge/task-manager";
 
 // Custom tools keep their own registration modules.
 import { createImage } from "../../src/tools/create/create-image";
+import { createCard } from "../../src/tools/create/create-card";
 import { createSvg } from "../../src/tools/create/create-svg";
 import { setImageFill } from "../../src/tools/update/set-image-fill";
 import { getSelection } from "../../src/tools/read/get-selection";
@@ -43,6 +44,8 @@ const SAMPLE_PARAMS: Record<string, Record<string, unknown>> = {
   "get-pages": {},
   "get-all-components": {},
   "list-fonts": { family: "inter" },
+  "find-nodes-by-name": { name: "buy" },
+  "get-design-audit": { id: "0:1" },
   "move-node": { id: "1:1", x: 1, y: 2 },
   "resize-node": { id: "1:1", width: 5, height: 5 },
   "set-fill-color": { id: "1:1", color: "#FF0000FF" },
@@ -96,11 +99,11 @@ describe("registry: every simple tool forwards its command + formats result", ()
     });
   }
 
-  it("registers the full set: simple tools + 7 custom ones (list-clients needs a bridge)", () => {
+  it("registers the full set: simple tools + 8 custom ones (list-clients needs a bridge)", () => {
     const { server, handlers } = mockServerBundle();
     registerAllTools(server, mockTaskManager());
-    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 7);
-    for (const name of ["get-selection", "create-image", "create-svg", "validate-image", "set-image-fill", "export-asset", "export-file"]) {
+    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 8);
+    for (const name of ["get-selection", "create-card", "create-image", "create-svg", "validate-image", "set-image-fill", "export-asset", "export-file"]) {
       expect(handlers.has(name)).toBe(true);
     }
     expect(handlers.has("list-clients")).toBe(false);
@@ -111,7 +114,7 @@ describe("registry: every simple tool forwards its command + formats result", ()
     const fakeIo = { on: vi.fn() };
     const { socketManager } = createBridge(fakeIo as unknown as Server);
     registerAllTools(server, mockTaskManager(), socketManager);
-    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 8);
+    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 9);
     expect(handlers.has("list-clients")).toBe(true);
     const res: CallToolResult = await getHandler(handlers, "list-clients")({});
     expect(res.isError).toBe(false);
@@ -154,6 +157,55 @@ describe("get-selection (same envelope as every other tool)", () => {
     getSelection(server, tm);
     const res: CallToolResult = await getHandler(handlers, "get-selection")();
     expect(res.isError).toBe(true);
+  });
+});
+
+describe("create-card fans out over batch-create", () => {
+  function setup() {
+    const { server, handlers } = mockServerBundle();
+    const calls: Array<{ command: string; args: Record<string, unknown> }> = [];
+    const tm = {
+      runTask: vi.fn(async (command: string, args: Record<string, unknown>) => {
+        calls.push({ command, args });
+        if (command === "batch-create") {
+          return {
+            isError: false,
+            content: {
+              created: [
+                { index: 0, op: "create-frame", ref: "card", id: "9:1" },
+                { index: 4, op: "create-text", ref: "title", id: "9:2" },
+                { index: 7, op: "create-frame", ref: "btn", id: "9:3" },
+                { index: 11, op: "create-text", ref: "buttonLabel", id: "9:4" },
+              ],
+            },
+          };
+        }
+        return { isError: false, content: { id: "9:9" } };
+      }),
+    };
+    createCard(server, tm as never);
+    return { call: (p: Record<string, unknown>) => getHandler(handlers, "create-card")(p), calls };
+  }
+
+  it("builds the batch with refs + atomic, returns ids", async () => {
+    const { call, calls } = setup();
+    const out = await call({ title: "Show", meta: "Hall", price: "$10", buttonLabel: "Buy" });
+    expect(out.isError).toBe(false);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.command).toBe("batch-create");
+    const body = calls[0]!.args as { operations: Array<{ op: string; ref?: string }>; atomic: boolean };
+    expect(body.atomic).toBe(true);
+    expect(body.operations.map((o) => o.op)).toContain("create-frame");
+    expect(body.operations.map((o) => o.ref)).toContain("btn");
+    expect(JSON.parse(toolText(out))).toEqual({ cardId: "9:1", titleId: "9:2", buttonId: "9:3", buttonLabelId: "9:4" });
+  });
+
+  it("skips button ops when no label, propagates batch errors", async () => {
+    const { call, calls } = setup();
+    const out = await call({ title: "Show" });
+    expect(out.isError).toBe(false);
+    const body = calls[0]!.args as { operations: Array<{ op: string; ref?: string }> };
+    expect(body.operations.map((o) => o.ref)).not.toContain("btn");
   });
 });
 

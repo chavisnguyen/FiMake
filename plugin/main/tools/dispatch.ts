@@ -15,7 +15,9 @@ import {
   DeleteNodeParamsSchema,
   EditComponentPropertyParamsSchema,
   ExportAssetParamsSchema,
+  FindNodesByNameParamsSchema,
   GetAllComponentsParamsSchema,
+  GetDesignAuditParamsSchema,
   GetNodeInfoParamsSchema,
   GetPagesParamsSchema,
   ListFontsParamsSchema,
@@ -47,9 +49,11 @@ import { addComponentProperty } from "./create/add-component-property";
 import { addPrototypeLink } from "./create/add-prototype-link";
 import { batchCreate } from "./create/batch-create";
 import { getSelection } from "./read/get-selection";
+import { findNodesByName } from "./read/find-nodes-by-name";
 import { getNodeInfo } from "./read/get-node-info";
 import { getPages } from "./read/get-pages";
 import { getAllComponents } from "./read/get-all-components";
+import { getDesignAudit } from "./read/get-design-audit";
 import { listFonts } from "./read/list-fonts";
 import { exportAsset } from "./read/export-asset";
 import { moveNode } from "./update/move-node";
@@ -87,8 +91,10 @@ const PARAM_SCHEMAS: Record<string, z.ZodTypeAny> = {
   "get-node-info": GetNodeInfoParamsSchema,
   "get-pages": GetPagesParamsSchema,
   "get-all-components": GetAllComponentsParamsSchema,
+  "get-design-audit": GetDesignAuditParamsSchema,
   "list-fonts": ListFontsParamsSchema,
   "export-asset": ExportAssetParamsSchema,
+  "find-nodes-by-name": FindNodesByNameParamsSchema,
   "move-node": MoveNodeParamsSchema,
   "resize-node": ResizeNodeParamsSchema,
   "set-fill-color": SetFillColorParamsSchema,
@@ -143,9 +149,11 @@ export const TOOL_HANDLERS: Record<string, DispatchFn> = {
   "add-component-property": wrap("add-component-property", addComponentProperty),
   "add-prototype-link": wrap("add-prototype-link", addPrototypeLink),
   "get-selection": wrap("get-selection", getSelection),
+  "find-nodes-by-name": wrap("find-nodes-by-name", findNodesByName),
   "get-node-info": wrap("get-node-info", getNodeInfo),
   "get-pages": wrap("get-pages", getPages),
   "get-all-components": wrap("get-all-components", getAllComponents),
+  "get-design-audit": wrap("get-design-audit", getDesignAudit),
   "list-fonts": wrap("list-fonts", listFonts),
   "export-asset": wrap("export-asset", exportAsset),
   "move-node": wrap("move-node", moveNode),

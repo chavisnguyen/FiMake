@@ -17,6 +17,8 @@ import {
   DeleteComponentPropertyParamsSchema,
   DeleteNodeParamsSchema,
   EditComponentPropertyParamsSchema,
+  FindNodesByNameParamsSchema,
+  GetDesignAuditParamsSchema,
   GetAllComponentsParamsSchema,
   GetNodeInfoParamsSchema,
   GetPagesParamsSchema,
@@ -35,6 +37,7 @@ import {
   SetTextStyleParamsSchema,
 } from "../shared/types/index";
 import { getSelection } from "./read/get-selection";
+import { createCard } from "./create/create-card";
 import { createImage } from "./create/create-image";
 import { createSvg } from "./create/create-svg";
 import { validateImage } from "./read/validate-image";
@@ -53,8 +56,8 @@ import { listClients } from "./read/list-clients";
  * Every other tool forwards its params to the plugin (`name` doubles as the
  * task command) and must have a matching TOOL_HANDLERS entry.
  */
-export const NODE_ONLY_TOOLS = ["export-file", "list-clients"] as const;
-export const NODE_WRAPPED_TOOLS = ["get-selection", "create-image", "create-svg", "validate-image", "set-image-fill", "export-asset", "export-file", "list-clients"] as const;
+export const NODE_ONLY_TOOLS = ["export-file", "list-clients", "validate-image", "create-card"] as const;
+export const NODE_WRAPPED_TOOLS = ["get-selection", "create-card", "create-image", "create-svg", "validate-image", "set-image-fill", "export-asset", "export-file", "list-clients"] as const;
 export interface SimpleToolDef {
   name: string;
   description: string;
@@ -75,6 +78,8 @@ export const SIMPLE_TOOL_DEFS: SimpleToolDef[] = [
   { name: "get-pages", description: "Get all pages in the current file.", shape: GetPagesParamsSchema.shape },
   { name: "get-all-components", description: "Get all components in the current file.", shape: GetAllComponentsParamsSchema.shape },
   { name: "list-fonts", description: "List fonts available to Figma (fonts cannot be uploaded at runtime — install locally first). Without `family`: family names only; with `family` (substring): each match with its exact style names to pass as `fontStyle`.", shape: ListFontsParamsSchema.shape },
+  { name: "find-nodes-by-name", description: "Find nodes by name across the whole file (substring unless exact:true). Returns [{id, name, type, pageId, pageName}] up to `limit` (default 50) — the persistent answer to \"$ref only lives in one batch\": resolve a name to an id once, reuse it in later calls.", shape: FindNodesByNameParamsSchema.shape },
+  { name: "get-design-audit", description: "Static audit of a frame/section subtree: empty texts, zero-area nodes, default layer names (\"Rectangle 12\"), hidden layers, and low-contrast text vs the nearest solid ancestor background (WCAG AA 4.5:1). Returns {audited, scanned, truncated, issues:[{nodeId, nodeName, nodeType, check, detail}]}. Run after building, fix what it lists.", shape: GetDesignAuditParamsSchema.shape },
   { name: "move-node", description: "Move a node.", shape: MoveNodeParamsSchema.shape },
   { name: "resize-node", description: "Resize a node.", shape: ResizeNodeParamsSchema.shape },
   { name: "set-fill-color", description: "Set a solid fill color of a node (#RRGGBBAA; alpha 00 = transparent).", shape: SetFillColorParamsSchema.shape },
@@ -108,6 +113,7 @@ export function registerAllTools(server: McpServer, taskManager: TaskManager, so
     registerSimpleTool(server, taskManager, def);
   }
   getSelection(server, taskManager);
+  createCard(server, taskManager);
   createImage(server, taskManager);
   createSvg(server, taskManager);
   validateImage(server, taskManager);

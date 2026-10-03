@@ -88,3 +88,13 @@ describe("decodeBase64", () => {
     expect(() => decodeBase64("ABC")).toThrow();
   });
 });
+
+describe("contrast", () => {
+  it("black on white is 21, same color is 1, gray on white is low", async () => {
+    const { contrastRatio, luminance } = await import("../../main/utils/contrast");
+    expect(contrastRatio({ r: 0, g: 0, b: 0 }, { r: 1, g: 1, b: 1 })).toBeCloseTo(21, 0);
+    expect(contrastRatio({ r: 1, g: 1, b: 1 }, { r: 1, g: 1, b: 1 })).toBeCloseTo(1, 2);
+    expect(luminance({ r: 1, g: 1, b: 1 })).toBeCloseTo(1, 2);
+    expect(contrastRatio({ r: 0.5, g: 0.5, b: 0.5 }, { r: 1, g: 1, b: 1 })).toBeLessThan(4.5);
+  });
+});

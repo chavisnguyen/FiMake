@@ -1,0 +1,27 @@
+{
+  "_meta": {
+    "command": "get-design-audit",
+    "recordedAt": "2026-10-03T09:05:47.997Z",
+    "source": "real-figma",
+    "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
+  },
+  "request": {
+    "command": "get-design-audit",
+    "args": {
+      "id": "21:2"
+    }
+  },
+  "response": {
+    "isError": false,
+    "content": {
+      "audited": {
+        "id": "21:2",
+        "name": "fimake-e2e-sandbox",
+        "type": "FRAME"
+      },
+      "scanned": 10,
+      "truncated": false,
+      "issues": []
+    }
+  }
+}

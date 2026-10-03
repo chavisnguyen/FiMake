@@ -183,6 +183,22 @@ describe("e2e replay (real MCP + mock plugin, real-data fixtures)", () => {
       // sub-call get-node-info (mock trả cùng 1 canned response cho mọi id),
       // nên chỉ lock shape + isError, không deep-equal số liệu.
       if (name === "export-file") continue;
+      // create-card cũng là fan-out (batch-create với refs riêng của nó):
+      // mock synthesize created entries với mock ids nên chỉ lock shape
+      // {cardId, titleId} + isError, không deep-equal ids thật đã record.
+      if (name === "create-card") {
+        const fixture = loadFixture<unknown>(name);
+        const args =
+          typeof fixture.args === "object" && fixture.args !== null
+            ? (fixture.args as Record<string, unknown>)
+            : {};
+        const { text, isError } = await callTool(name, args);
+        expect(isError, `${name}: isError`).toBe(fixture.isError);
+        const shape = JSON.parse(text) as Record<string, unknown>;
+        expect(typeof shape["cardId"], `${name}: cardId`).toBe("string");
+        expect(typeof shape["titleId"], `${name}: titleId`).toBe("string");
+        continue;
+      }
       const fixture = loadFixture<unknown>(name);
       const args =
         typeof fixture.args === "object" && fixture.args !== null

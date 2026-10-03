@@ -18,6 +18,7 @@ import { io, type Socket } from "socket.io-client";
 import {
   SOCKET_EVENTS,
   acknowledgeStartTask,
+  BatchCreateParamsSchema,
   isStartTaskPayload,
   type StartTaskPayload,
 } from "@shared/types";
@@ -50,9 +51,55 @@ function echoArgs(command: string, args: unknown, content: unknown): unknown {
   return base;
 }
 
+/**
+ * Same recorded operations → faithful echo (the batch-create fixture test
+ * deep-equals real data). Anything else (e.g. a composite's own batch)
+ * gets synthesized entries — see synthesizeBatch.
+ */
+function sameOperations(args: unknown, recordedRequestArgs: unknown): boolean {
+  // Normalize BOTH sides through the batch schema first: the MCP server
+  // injects schema defaults (fontSize 14, atomic:false, …) before
+  // forwarding, so raw-JSON equality would never hold even for the exact
+  // recorded call.
+  const normalize = (v: unknown): string | null => {
+    const parsed = BatchCreateParamsSchema.safeParse(v);
+    if (!parsed.success) return null;
+    try {
+      return JSON.stringify(parsed.data.operations);
+    } catch {
+      return null;
+    }
+  };
+  const a = normalize(args);
+  const b = normalize(recordedRequestArgs);
+  return a !== null && b !== null && a === b;
+}
+
+/**
+ * Composite tools (create-card) fan out over batch-create with THEIR OWN
+ * refs (card/title/btn/…) — the canned batch-create fixture carries the
+ * recorded run's refs (row/input), so echoing it would drop every ref and
+ * fail the composite. Synthesize instead: one created entry per requested
+ * op with deterministic mock ids. Atomics/rollbacks never trigger here
+ * (synthesis always succeeds), which is exactly the replay contract.
+ */
+function synthesizeBatch(args: unknown, fallback: unknown): unknown {
+  if (typeof args !== "object" || args === null) return fallback;
+  const ops = (args as { operations?: unknown }).operations;
+  if (!Array.isArray(ops)) return fallback;
+  return {
+    created: ops.map((op, index) => {
+      const o = (typeof op === "object" && op !== null ? op : {}) as { op?: unknown; ref?: unknown };
+      const entry: Record<string, unknown> = { index, op: typeof o.op === "string" ? o.op : "unknown", id: `mock:${index}` };
+      if (typeof o.ref === "string") entry["ref"] = o.ref;
+      return entry;
+    }),
+  };
+}
+
 export class MockFigmaPlugin {
   private socket: Socket | null = null;
-  private fixtures = new Map<string, { isError: boolean; content: unknown }>();
+  private fixtures = new Map<string, { isError: boolean; content: unknown; requestArgs?: unknown }>();
   readonly received: StartTaskPayload[] = [];
 
   constructor(private url: string, private opts: MockPluginOptions = {}) {}
@@ -73,6 +120,7 @@ export class MockFigmaPlugin {
       this.fixtures.set(cmd, {
         isError: raw.response.isError ?? false,
         content: raw.response.content ?? null,
+        requestArgs: raw.request?.args,
       });
     }
   }
@@ -124,7 +172,9 @@ export class MockFigmaPlugin {
       });
       return;
     }
-    const content = echoArgs(task.command, task.args, structuredClone(hit.content));
+    const content = task.command === "batch-create" && !sameOperations(task.args, hit.requestArgs)
+      ? synthesizeBatch(task.args, structuredClone(hit.content))
+      : echoArgs(task.command, task.args, structuredClone(hit.content));
     if (hit.isError) {
       this.socket?.emit(SOCKET_EVENTS.TASK_FAILED, { taskId: task.id, isError: true, content });
     } else {

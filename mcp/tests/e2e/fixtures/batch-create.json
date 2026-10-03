@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "batch-create",
-    "recordedAt": "2026-09-23T11:33:12.933Z",
+    "recordedAt": "2026-10-03T09:05:47.923Z",
     "source": "real-figma",
     "note": "Overwrite bằng pnpm record:e2e khi Figma thật đang Connected."
   },
@@ -18,7 +18,7 @@
             "width": 300,
             "height": 48,
             "name": "e2e-batch-row",
-            "parentId": "2071:12891"
+            "parentId": "21:2"
           }
         },
         {
@@ -68,29 +68,29 @@
         {
           "index": 0,
           "op": "create-frame",
-          "id": "2071:12892",
+          "id": "21:7",
           "ref": "row"
         },
         {
           "index": 1,
           "op": "create-rectangle",
-          "id": "2071:12893",
+          "id": "21:8",
           "ref": "input"
         },
         {
           "index": 2,
           "op": "create-text",
-          "id": "2071:12894"
+          "id": "21:9"
         },
         {
           "index": 3,
           "op": "set-layout",
-          "id": "2071:12892"
+          "id": "21:7"
         },
         {
           "index": 4,
           "op": "set-corner-radius",
-          "id": "2071:12893"
+          "id": "21:8"
         }
       ]
     }
