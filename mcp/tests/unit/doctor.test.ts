@@ -63,6 +63,34 @@ describe("fimake doctor", () => {
     expect(report.ok).toBe(false);
     expect(formatDoctorReport(report)).toContain("boom");
   });
+
+  it("bare 'fetch failed' without ECONNREFUSED cause is not mistaken for empty port", async () => {
+    // Undici wraps every network error as TypeError: fetch failed —
+    // only the ECONNREFUSED cause means "nothing listens there".
+    const report = await runDoctor(10101, fetchOf(async () => {
+      throw new TypeError("fetch failed");
+    }));
+    expect(report.ok).toBe(false);
+    expect(formatDoctorReport(report)).not.toContain("brew services start fimake");
+    expect(formatDoctorReport(report)).toContain("fetch failed");
+  });
+
+  it("probe timeout → hung-server hint, not the start hint", async () => {
+    const timeout = Object.assign(new Error("The operation was aborted due to timeout"), { name: "TimeoutError" });
+    const report = await runDoctor(10101, fetchOf(async () => {
+      throw timeout;
+    }));
+    expect(report.ok).toBe(false);
+    expect(formatDoctorReport(report)).toContain("may be hung");
+  });
+
+  it("truncates huge window lists", async () => {
+    const clients = Array.from({ length: 12 }, (_, i) => ({ fileName: `File number ${i} with a very long name attached` }));
+    const report = await runDoctor(10101, healthOf({ ok: true, transport: "streamable-http", clients }));
+    const text = formatDoctorReport(report);
+    expect(text).toContain("12 windows");
+    expect(text).toContain("and 7 more");
+  });
 });
 
 describe("listen helper", () => {

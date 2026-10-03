@@ -14,8 +14,15 @@ describe("config", () => {
     expect(envStartSchema.parse({ TRANSPORT: "STREAMABLE-HTTP" }).TRANSPORT).toBe("streamable-http");
   });
 
-  it("falls back to stdio for unknown transport", () => {
-    expect(envStartSchema.parse({ TRANSPORT: "sse" }).TRANSPORT).toBe("stdio");
+  it("rejects unknown transport instead of silently falling back", () => {
+    // A typo like TRANSPORT=sse used to boot stdio silently — the user
+    // thought they were in HTTP mode. Now it fails fast with a clear error.
+    expect(() => envStartSchema.parse({ TRANSPORT: "sse" })).toThrow();
+  });
+
+  it("rejects malformed JSON_BODY_LIMIT", () => {
+    expect(() => envStartSchema.parse({ JSON_BODY_LIMIT: "lots" })).toThrow();
+    expect(envStartSchema.parse({ JSON_BODY_LIMIT: "512kb" }).JSON_BODY_LIMIT).toBe("512kb");
   });
 
   it("coerces numeric strings, rejects non-positive", () => {

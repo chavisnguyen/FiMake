@@ -5,6 +5,9 @@ import { debugLog, infoLog } from "../shared/log";
 
 export class Orchestrator {
 
+    private socketManager: SocketManager;
+    private taskManager: TaskManager;
+
     constructor(socketManager: SocketManager, taskManager: TaskManager) {
         this.socketManager = socketManager;
         this.taskManager = taskManager;
@@ -21,18 +24,25 @@ export class Orchestrator {
             // Pull routing fields out of args: the plugin's zod schemas
             // don't declare them, so they travel in the envelope instead.
             const { cleanArgs, target } = splitTarget(task.args);
-            this.socketManager.sendMessage('start-task', target === undefined
-                ? {
-                    id: task.id,
-                    command: task.command,
-                    args: cleanArgs,
-                }
-                : {
-                    id: task.id,
-                    command: task.command,
-                    args: cleanArgs,
-                    target,
-                });
+            try {
+                this.socketManager.sendMessage('start-task', target === undefined
+                    ? {
+                        id: task.id,
+                        command: task.command,
+                        args: cleanArgs,
+                    }
+                    : {
+                        id: task.id,
+                        command: task.command,
+                        args: cleanArgs,
+                        target,
+                    });
+            } catch (error) {
+                // Never leave a task stuck in pending until the timeout:
+                // a send failure settles it now with the reason attached.
+                console.error(`Failed to send start-task ${task.id}:`, error);
+                this.taskManager.updateTask(task.id, error instanceof Error ? error.message : String(error), 'failed');
+            }
         });
 
 
@@ -52,8 +62,5 @@ export class Orchestrator {
             this.taskManager.updateTask(task.taskId, task.content, 'failed');
         });
     }
-
-    private socketManager: SocketManager;
-    private taskManager: TaskManager;
 
 }

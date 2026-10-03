@@ -13,10 +13,10 @@ export const envStartSchema = z.object({
     //* If not specified, the default is 'stdio'.
     //* The 'stdio' transport is used for local work.
     //* The 'streamable-http' transport is used for HTTP-based communication.
-    TRANSPORT: z.string().default("stdio").optional().transform((val) => {
-        if (val?.toLowerCase() === "streamable-http") return "streamable-http";
-        return "stdio";
-    }),
+    TRANSPORT: z.preprocess(
+        (val) => (typeof val === "string" ? val.toLowerCase() : val),
+        z.enum(["stdio", "streamable-http"]).default("stdio")
+    ),
     //* How long (ms) a tool call waits for the Figma plugin to report the task
     //* as finished/failed before giving up. Was a hardcoded 5000ms, which is
     //* too short for slower operations and gives no room for the plugin to
@@ -34,12 +34,21 @@ export const envStartSchema = z.object({
     //* (previous behavior); set to your origin in networked deployments.
     CORS_ORIGIN: z.string().default("*"),
     //* Upper bound for JSON bodies on /mcp (prevents oversized payload DoS).
-    JSON_BODY_LIMIT: z.string().default("1mb"),
+    JSON_BODY_LIMIT: z.string().regex(/^\s*\d+(\.\d+)?\s*([kmg]?b?)?\s*$/i, "expected like \"1mb\", \"512kb\" or plain bytes").default("1mb"),
 });
 
 export type EnvStartConfig = z.infer<typeof envStartSchema>;
 
-export const config = envStartSchema.parse(process.env);
+function parseConfig(): EnvStartConfig {
+    const parsed = envStartSchema.safeParse(process.env);
+    if (parsed.success) return parsed.data;
+    const details = parsed.error.issues.map((i) => `  ${i.path.join(".") || "(root)"}: ${i.message}`).join("\n");
+    throw new Error(
+        `Invalid fimake configuration (check mcp/.env):\n${details}`
+    );
+}
+
+export const config = parseConfig();
 
 /** Backwards-compat const; prefer `config.PORT` for new code. */
 export const PORT = config.PORT;

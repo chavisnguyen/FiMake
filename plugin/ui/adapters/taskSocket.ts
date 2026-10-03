@@ -45,8 +45,19 @@ export function connectTaskSocket(url: string, events: TaskSocketEvents): TaskSo
     reconnectionDelay: 1000,
   });
 
+  // Latest FILE_INFO not yet acknowledged by a live connection. socket.io
+  // buffers emits made while disconnected, but an explicit slot survives
+  // even a full reconnect where the buffer was dropped.
+  let pendingHello: PluginClientInfo | null = null;
+
   socket.on("connect", () => {
     events.onStatus(true);
+    // Flush a FILE_INFO that arrived before the transport was up.
+    if (pendingHello !== null) {
+      const info = pendingHello;
+      pendingHello = null;
+      socket.emit(SOCKET_EVENTS.CLIENT_HELLO, info);
+    }
   });
   socket.on("disconnect", () => {
     events.onStatus(false);
@@ -83,6 +94,7 @@ export function connectTaskSocket(url: string, events: TaskSocketEvents): TaskSo
     disconnect: () => {
       if (closed) return;
       closed = true;
+      pendingHello = null;
       offFinished();
       offFailed();
       socket.disconnect();
@@ -90,10 +102,16 @@ export function connectTaskSocket(url: string, events: TaskSocketEvents): TaskSo
     announceFile: (info: PluginClientInfo) => {
       if (closed) return;
       try {
-        socket.emit(SOCKET_EVENTS.CLIENT_HELLO, info);
+        if (socket.connected) {
+          socket.emit(SOCKET_EVENTS.CLIENT_HELLO, info);
+        } else {
+          pendingHello = info;
+          socket.emit(SOCKET_EVENTS.CLIENT_HELLO, info);
+        }
       } catch {
         // ignore — server already counts the window as connected,
         // the name is enrichment, not required for tasks to flow
+        pendingHello = info;
       }
     },
   };

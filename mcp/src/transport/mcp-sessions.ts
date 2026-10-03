@@ -71,6 +71,14 @@ function jsonResponse(res: ServerResponse, status: number, body: unknown, sessio
     res.end(JSON.stringify(body));
 }
 
+/** Shared 500 path for both POST branches (transport threw after headers may exist). */
+function internalError(res: ServerResponse, context: string, error: unknown): void {
+    console.error(`Error handling MCP POST request (${context}):`, error);
+    if (!res.headersSent) {
+        jsonResponse(res, 500, { jsonrpc: "2.0", error: { code: -32603, message: "Internal server error" }, id: null });
+    }
+}
+
 /**
  * Framework-free MCP session store + request handler.
  * Works on raw Node req/res — no Hono/Express knowledge — so it can be
@@ -92,6 +100,10 @@ export class McpSessionStore {
         // ponytail: idle sessions never send DELETE, so entries would leak.
         // Sweep periodically; upgrade to explicit heartbeat when multi-user.
         this.sweep = setInterval(() => this.prune(), opts?.sweepMs ?? 60 * 1000);
+        // Don't hold the process (or vitest) open when the store is forgotten.
+        if (typeof (this.sweep as unknown as { unref?: () => void }).unref === "function") {
+            (this.sweep as unknown as { unref: () => void }).unref();
+        }
     }
 
     /** Active session count (tests / monitoring). */
@@ -114,7 +126,15 @@ export class McpSessionStore {
                 dropped += 1;
                 // Fire-and-forget: free server state; a stale client gets
                 // 400 on next use and re-initializes cleanly.
-                stale?.close().catch((err) => console.error("Error closing idle session:", err));
+                // close() runs inside the promise chain so a synchronous
+                // throw becomes a rejection instead of escaping setInterval.
+                try {
+                    Promise.resolve()
+                        .then(() => stale?.close())
+                        .catch((err) => console.error("Error closing idle session:", err));
+                } catch (err) {
+                    console.error("Error closing idle session:", err);
+                }
             }
         }
         return dropped;
@@ -147,10 +167,7 @@ export class McpSessionStore {
                     }
                     await existing.handleRequest(req, res, parsed.body);
                 } catch (error) {
-                    console.error("Error handling MCP POST request:", error);
-                    if (!res.headersSent) {
-                        jsonResponse(res, 500, { jsonrpc: "2.0", error: { code: -32603, message: "Internal server error" }, id: null });
-                    }
+                    internalError(res, "existing session", error);
                 }
                 return;
             }
@@ -183,10 +200,7 @@ export class McpSessionStore {
             try {
                 await transport.handleRequest(req, res, parsed.body);
             } catch (error) {
-                console.error("Error handling MCP POST request:", error);
-                if (!res.headersSent) {
-                    jsonResponse(res, 500, { jsonrpc: "2.0", error: { code: -32603, message: "Internal server error" }, id: null });
-                }
+                internalError(res, "new session", error);
             }
             return;
         }

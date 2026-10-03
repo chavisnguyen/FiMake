@@ -35,12 +35,16 @@ function isHealthBody(value: unknown): value is HealthBody {
 
 function clientNames(clients: unknown): string {
     if (!Array.isArray(clients) || clients.length === 0) return "no plugin windows";
-    const names = clients.map((c) => {
+    const MAX_SHOWN = 5;
+    const MAX_NAME = 80;
+    const names = clients.slice(0, MAX_SHOWN).map((c) => {
         if (typeof c !== "object" || c === null) return "(unnamed)";
         const name = (c as { fileName?: unknown }).fileName;
-        return typeof name === "string" && name.length > 0 ? name : "(unnamed)";
+        if (typeof name !== "string" || name.length === 0) return "(unnamed)";
+        return name.length > MAX_NAME ? `${name.slice(0, MAX_NAME)}…` : name;
     });
-    return `${clients.length} window${clients.length === 1 ? "" : "s"}: ${names.join(", ")}`;
+    const extra = clients.length > MAX_SHOWN ? ` (…and ${clients.length - MAX_SHOWN} more)` : "";
+    return `${clients.length} window${clients.length === 1 ? "" : "s"}: ${names.join(", ")}${extra}`;
 }
 
 /**
@@ -74,6 +78,13 @@ export async function runDoctor(port: number, fetchImpl: FetchImpl = fetch): Pro
                 name: "server",
                 ok: false,
                 detail: `nothing on port ${port} — start the server: \`brew services start fimake\` (stdio setup? then this is expected, your client starts it).`,
+            });
+        }
+        if (isTimeout(error)) {
+            return done({
+                name: "server",
+                ok: false,
+                detail: `probe of port ${port} timed out after 3s — the server may be hung (restart it: \`brew services restart fimake\`). If it persists: lsof -i :${port}`,
             });
         }
         return done({
@@ -152,9 +163,25 @@ function isRefused(error: unknown): boolean {
     const cause = rec.cause as Record<string, unknown> | undefined;
     const causeCode = cause !== null && typeof cause === "object" && typeof cause.code === "string" ? cause.code : "";
     if (code === "ECONNREFUSED" || causeCode === "ECONNREFUSED") return true;
-    // Undici surfaces refused connections as TypeError: fetch failed.
+    // Undici wraps a refused connection as "fetch failed" with an
+    // ECONNREFUSED cause — but it wraps EVERY network error that way
+    // (DNS, reset, …), so only trust it together with the cause code.
+    if (causeCode !== "") return false;
     const message = error instanceof Error ? error.message : "";
-    return message.includes("fetch failed") || message.includes("ECONNREFUSED");
+    return message.includes("ECONNREFUSED");
+}
+
+/** AbortSignal.timeout() fired: the port answered TCP but never HTTP. */
+function isTimeout(error: unknown): boolean {
+    if (typeof error !== "object" || error === null) return false;
+    const rec = error as Record<string, unknown>;
+    const name = typeof rec.name === "string" ? rec.name : "";
+    if (name === "TimeoutError") return true;
+    const cause = rec.cause as Record<string, unknown> | undefined;
+    const causeName = cause !== null && typeof cause === "object" && typeof cause.name === "string" ? cause.name : "";
+    if (causeName === "TimeoutError") return true;
+    const message = error instanceof Error ? error.message : "";
+    return message.toLowerCase().includes("aborted due to timeout");
 }
 
 function describeFetchError(error: unknown): string {

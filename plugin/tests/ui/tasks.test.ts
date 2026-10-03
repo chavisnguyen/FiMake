@@ -58,7 +58,8 @@ describe("describeContent", () => {
     expect(describeContent({ ok: 1 })).toBe('{"ok":1}');
     const circular: Record<string, unknown> = {};
     circular.self = circular;
-    expect(describeContent(circular)).toContain("[object Object]");
+    // Circular refs stay readable instead of degrading to "[object Object]".
+    expect(describeContent(circular)).toContain("[circular]");
   });
 });
 

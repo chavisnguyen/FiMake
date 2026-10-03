@@ -50,11 +50,20 @@ export function summarizeArgs(args: unknown): string {
   return parts.join(" · ");
 }
 
-/** Stringify plugin content for tooltips / failure notes (never throws). */
+/** Stringify plugin content for tooltips / failure notes (never throws, circular-safe). */
 export function describeContent(content: unknown): string {
   if (typeof content === "string") return content;
   try {
-    return JSON.stringify(content);
+    const seen = new Set<object>();
+    const text = JSON.stringify(content, (_key, value: unknown) => {
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) return "[circular]";
+        seen.add(value);
+      }
+      return value;
+    });
+    // JSON.stringify returns undefined for undefined/functions/symbols.
+    return typeof text === "string" ? text : String(content);
   } catch {
     return String(content);
   }

@@ -29,7 +29,8 @@ export async function startSTDIO() {
         // Start HTTP server for Socket.IO connections from Figma plugin
         listenWithFriendlyError(httpServer, config.PORT, "Socket.IO server");
     } catch (error) {
-        console.error('Error starting STDIO server:', error);
+        // Don't log here: index.ts logs "Failed to start server:" for every
+        // startup failure — logging in both places printed the same error twice.
         throw error;
     }
 }

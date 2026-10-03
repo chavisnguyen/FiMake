@@ -109,7 +109,13 @@ export function exportFile(server: McpServer, taskManager: TaskManager) {
                 for (const rawPage of rawPages) {
                     const page = safeParsePage(rawPage);
                     if (!page || !Array.isArray(page.nodes)) continue;
-                    for (const nodeStub of page.nodes) jobs.push({ page, nodeStub });
+                    for (const nodeStub of page.nodes) {
+                        // The plugin shape is cast, not validated: a non-string
+                        // id used to throw inside Promise.all and abort the
+                        // whole batch (leaving orphan files, no manifest).
+                        if (typeof nodeStub?.id !== "string" || typeof nodeStub?.name !== "string") continue;
+                        jobs.push({ page, nodeStub });
+                    }
                 }
                 if (jobs.length > MAX_EXPORT_FRAMES) {
                     throw new Error(`Export exceeds ${MAX_EXPORT_FRAMES} frames; narrow the file or raise the limit in code.`);

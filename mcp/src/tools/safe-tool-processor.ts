@@ -1,14 +1,20 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { TaskResult } from "../bridge/task-manager";
-import { formatError } from "../shared/format-error";
+import { formatError, safeStringify } from "../shared/format-error";
 
 export async function safeToolProcessor(task: Promise<TaskResult>): Promise<CallToolResult> {
     try {
         const result = await task;
+        let text: string;
+        try {
+            text = safeStringify(result.content);
+        } catch {
+            text = String(result.content);
+        }
         return {
             content: [{
                 type: "text",
-                text: JSON.stringify(result.content)
+                text
             }],
             isError: result.isError
         } as CallToolResult;

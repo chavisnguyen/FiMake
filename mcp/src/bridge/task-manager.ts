@@ -87,8 +87,14 @@ export class TaskManager {
 
     private _onTaskAddedCallback?: (task: Task) => void;
 
-    // Register a callback for when a task is added
+    // Register a callback for when a task is added.
+    // Single-subscriber by design (one bridge owns one manager) — registering
+    // twice means a previous bridge was not torn down, so fail loudly
+    // instead of silently dropping the first bridge's events.
     public onTaskAdded(callback: (task: Task) => void) {
+        if (typeof this._onTaskAddedCallback === "function") {
+            throw new Error("TaskManager.onTaskAdded registered twice: create exactly one bridge (see createBridge)");
+        }
         this._onTaskAddedCallback = callback;
     }
 
@@ -135,6 +141,15 @@ export class TaskManager {
         } else if (status === 'failed'
             || status === 'timed_out'
         ) {
+            task?.resolve({
+                isError: true,
+                content: result,
+            });
+        } else {
+            // Unknown status (only reachable from untyped JS callers):
+            // settle as an error instead of deleting the entry and leaving
+            // the promise hanging until the timeout fires.
+            console.error("Attempt to update task with unknown status", id, result, status);
             task?.resolve({
                 isError: true,
                 content: result,

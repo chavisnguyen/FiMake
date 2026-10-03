@@ -80,11 +80,20 @@ function describeTarget(target: TaskTarget): string {
 // forever: pruneExpired() drops entries older than pendingTtlMs or retried
 // more than maxRetries.
 export class SocketManager {
-    constructor(server: Server, ackTimeoutMs: number = 5000, pendingTtlMs: number = 300000, maxRetries: number = 5) {
+    constructor(server: Server, ackTimeoutMs: number = 5000, pendingTtlMs: number = 300000, maxRetries: number = 5, sweepMs: number = 60000) {
         this.server = server;
         this.ackTimeoutMs = ackTimeoutMs;
         this.pendingTtlMs = pendingTtlMs;
         this.maxRetries = maxRetries;
+        // Sweep even with no connections: pruneExpired() otherwise only runs
+        // on connect/flush, leaking queued payloads (which can hold image
+        // bytes) while nobody is connected.
+        if (sweepMs > 0) {
+            this.sweep = setInterval(() => this.pruneExpired(), sweepMs);
+            if (typeof (this.sweep as unknown as { unref?: () => void }).unref === "function") {
+                (this.sweep as unknown as { unref: () => void }).unref();
+            }
+        }
 
         this.server.on('connection', (socket) => {
             this.sockets.add(socket);
@@ -249,6 +258,14 @@ export class SocketManager {
         }
     }
 
+    /** Stop the background prune timer (timers are unref'd; this is for explicit teardown). */
+    public stopSweep(): void {
+        if (this.sweep !== undefined) {
+            clearInterval(this.sweep);
+            this.sweep = undefined;
+        }
+    }
+
     /** Drop queued entries older than TTL; returns number dropped. */
     public pruneExpired(now: number = Date.now()): number {
         let dropped = 0;
@@ -295,6 +312,7 @@ export class SocketManager {
     private pendingTtlMs: number;
     private maxRetries: number;
     private pending: Map<string, QueuedMessage> = new Map();
+    private sweep?: ReturnType<typeof setInterval>;
 
     // Events
 
