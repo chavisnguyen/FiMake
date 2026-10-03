@@ -9,7 +9,7 @@ export async function deleteComponentProperty(args: DeleteComponentPropertyParam
         return { isError: true, content: "Component not found" };
     }
     const component = loaded;
-    if (!(component.type === "COMPONENT")) {
+    if (!(component.type === "COMPONENT" || component.type === "COMPONENT_SET")) {
         return { isError: true, content: "Node is not a component" };
     }
     (component as ComponentNode).deleteComponentProperty(resolvePropertyKey(component, args.name));

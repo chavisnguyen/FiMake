@@ -3,6 +3,7 @@
 > Nguồn: review full `mcp/src` (69 files), `plugin/{main,ui,shared}`, `Makefile`, `.github/`, `docs/plans`, `pnpm outdated`, grep `TODO|as any|console.log`.
 > Hiện trạng: repo khỏe (CI 2 jobs, `make check`, 0 TODO, release đều tới `v1.0.39`). Nợ còn lại là bug logic + security + perf dưới đây.
 > Tự đánh giá độ tin cậy (đã đối chiếu code 03/10/2026): ~90% claim đã verify trực tiếp file:line. 5 điểm đã đính chính trong plan: (1) `listen.ts` không phải typo mà là thiết kế gây hiểu nhầm, (2) `main.ts` bug chính là im lặng không phải `TypeError`, (3) lộ `socketId` hạ xuống low, (4) `COMPONENT_SET` cần verify Figma docs, (5) số liệu perf là ước lượng phải benchmark. Broadcast storm nâng lên P0 với mutating tools.
+> Tiến độ (03/10/2026): Phase 0 xong (`v1.0.40` đã publish từ 02/10, chỉ cần push commit plan) + Phase 8.0 xong (description `export-asset`) + Phase 1 batch 1 xong (create-instance/create-image/BOOLEAN+SET/corner-0/get-selection/main-malformed/MCP-envelope/unicast). Đính chính sau verify typings: `clone-node` KHÔNG detached (`clone()` auto-parent currentPage, `plugin-api.d.ts`) — không cần fix, chỉ thừa gán name; `color-conversion` fallback đen không tới được qua API (schema `ColorHex` khóa 8-digit + test `schemas.test.ts:117` lock) — thu lại thành cải tiến LLM-UX (chấp nhận `#RRGGBB`), không phải P0.
 
 Execution rules (giữ như P2/V2):
 - 1 item = 1 commit, `make check` xanh (typecheck+lint+test+build).
@@ -23,32 +24,32 @@ Acceptance: `git status` sạch, `make check` xanh.
 ## Phase 1 — P0 correctness (làm trước, sai mà vẫn `success`)
 
 ### 1.1 Plugin `main/tools/create`
-- [ ] `create-instance.ts:20` — chỉ `getNodeByIdAsync` check null rồi không `appendChild` (nhánh `parentId` no-op, đã verify code). Fix: append vào `parentId` (dùng `appendToParent` ở `node-helper.ts:39`), fail nếu parent không chứa được.
-- [ ] `create-instance.ts:6` — cast `as ComponentNode` không check type, message `createInstance is not a function` khi truyền RECTANGLE gây hiểu lầm. Cần guard type rõ. Mở rộng sang `COMPONENT_SET`: **cần verify Figma docs trước** (chưa xác minh API cho def trên Set — không coi là fact, chỉ là giả thuyết cần check).
-- [ ] `socket-manager.ts:184-230` broadcast mọi task tới mọi window — **nâng severity lên P0 với mutating tools**: mở 2 window = `create-rectangle` chạy 2 lần, lần 2 log ồn ở `task-manager.ts:113`. Fix: unicast theo target, chỉ broadcast khi explicit (xem chi tiết Phase 5, làm cùng Phase 1 cho tool tạo node).
-- [ ] `create-image.ts:28` — thiếu `else append`: không `parentId` -> rectangle detached invisible. Thêm nhánh append default + test.
-- [ ] `clone-node.ts:12` — `clone()` xong return luôn. Fix: append/re-parent (cùng parent hoặc `parentId` param).
+- [x] `create-instance.ts:20` — chỉ `getNodeByIdAsync` check null rồi không `appendChild` (nhánh `parentId` no-op, đã verify code). Fix: append vào `parentId` (dùng `appendToParent` ở `node-helper.ts:39`), fail nếu parent không chứa được. → DONE 03/10: validate parent TRƯỚC khi create (tránh leak instance auto-parent), guard type COMPONENT, append đúng parent.
+- [x] `create-instance.ts:6` — cast `as ComponentNode` không check type, message `createInstance is not a function` khi truyền RECTANGLE gây hiểu lầm. VERIFIED 03/10 qua typings: `ComponentSetNode extends ComponentPropertiesMixin` (có `addComponentProperty`) nhưng KHÔNG có `createInstance` (chỉ `ComponentNode`) → create-instance từ chối non-COMPONENT rõ ràng; add/edit/delete-component-property mở cho `COMPONENT_SET`. DONE.
+- [x] `socket-manager.ts:184-230` broadcast mọi task tới mọi window — **nâng severity lên P0 với mutating tools**: mở 2 window = `create-rectangle` chạy 2 lần, lần 2 log ồn ở `task-manager.ts:113`. Fix: unicast theo target, chỉ broadcast khi explicit (xem chi tiết Phase 5, làm cùng Phase 1 cho tool tạo node). → DONE 03/10: untargeted chỉ gửi 1 window (ưu tiên activeSocket), targeted giữ nguyên, docs/tools.md cập nhật, test single-delivery.
+- [x] `create-image.ts:28` — thiếu `else append`: không `parentId` -> rectangle detached invisible. Thêm nhánh append default + test. → DONE 03/10: append currentPage khi không parentId; parent lạ → lỗi loud + cleanup node (đồng nhất createSvg).
+- [ ] `clone-node.ts:12` — VERIFIED NO-FIX 03/10: `clone()` auto-parent currentPage theo typings, params không có `parentId`, node luôn visible. Không đổi behavior.
 - [ ] `create-image.ts:5`, `set-image-fill.ts:5` — `imageData:number[]` JSON phình 3-4x (để Phase 5 đổi base64, ở đây chỉ fix orphan): `create-image.ts:14` `figma.createImage` xong parent fail chỉ `node.remove():33`, image còn trong storage -> cần cleanup + test.
 
 ### 1.2 Plugin `main/tools/update`
-- [ ] `set-corner-radius.ts:11,14,17,20` — `&& args.*` skip `0` **chỉ với 4 góc lẻ** (đã verify: `cornerRadius` chung ở `:8` gán trực tiếp nên `0` vẫn được). Đổi 4 nhánh lẻ sang `!==undefined`. Thêm test `0` cho từng góc lẻ.
+- [x] `set-corner-radius.ts:11,14,17,20` — `&& args.*` skip `0` **chỉ với 4 góc lẻ** (đã verify: `cornerRadius` chung ở `:8` gán trực tiếp nên `0` vẫn được). Đổi 4 nhánh lẻ sang `!==undefined`. Thêm test `0` cho từng góc lẻ. → DONE 03/10.
 - [ ] `set-fill-color.ts:13` / `set-stroke-color.ts:11` / `export-asset.ts:8` — `"fills" in node` không đủ: TEXT `fills===mixed` sẽ overwrite per-segment runs (read path đã xử lý ở `serialization.ts:190`, write chưa). Fix: giữ runs hoặc báo lỗi explicit.
 - [ ] `set-text-style.ts:17,26` — `getRangeAllFontNames(0,len)` khi `len==0 && mixed` -> fallback cứng `"Inter"`, mất font gốc. Fix: giữ font hiện tại / skip load khi rỗng.
 - [ ] `set-parent-id.ts:6,30,35` — `loadAllPagesAsync` mỗi call dù cùng page (đắt, `getNodeByIdAsync` đã on-demand). Move xong mới set `layoutPositioning:35` -> partial-move nếu throw. Fix: set trước hoặc rollback + test.
 - [ ] `set-layout.ts:9,12,24` — `[prop,value,transform?:(v:never)=>unknown]` + `as never` mất type check. Viết lại generic đúng + test.
 - [ ] `set-effects.ts:8,27` — `toFigmaEffect` return thiếu `spread/offset` cho shadow rồi `as Effect`. Bổ sung field.
-- [ ] `add-component-property.ts:16` — `Boolean("false")===true`. Parse string `"true"/"false"` đúng.
+- [x] `add-component-property.ts:16` — `Boolean("false")===true`. Parse string `"true"/"false"` đúng. → DONE 03/10 (parse case-insensitive + mở COMPONENT_SET).
 - [ ] `add-prototype-link.ts:33,40` — `duration/1000` có thể `NaN`, `easing/direction` cứng. Validate + default rõ.
 
 ### 1.3 Plugin read/misc
-- [ ] `color-conversion.ts:11` — regex chỉ `#RRGGBBAA`, `#fff/#RRGGBB` thành đen `{0,0,0,1}`. Viết parser full + test `#FF0000` (case phổ biến nhất, hiện thiếu trong `utils.test.ts`).
-- [ ] `get-selection.ts:5,8` — `if(selection)` với `[]` truthy nên nhánh `not found:11` chết + `serializeNode` mỗi node budget mới -> unbounded. Fix: check `length`, bound tổng payload.
+- [x] `color-conversion.ts:11` — VERIFIED 03/10: schema `ColorHex` khóa 8-digit (`color-hex.ts:4`, test `schemas.test.ts:117` lock) nên fallback đen không tới được qua API. Thu lại thành cải tiến LLM-UX (Phase 8.2: chấp nhận `#RRGGBB`), không fix ở Phase 1.
+- [x] `get-selection.ts:5,8` — `if(selection)` với `[]` truthy nên nhánh `not found:11` chết + `serializeNode` mỗi node budget mới -> unbounded. Fix: check `length`, bound tổng payload. → DONE 03/10 (check `length` + message "Selection is empty"; bound payload để Phase 5).
 - [ ] `delete-component-property.ts:8` — map `Node not found` thành `Component not found`, mất context. Giữ message gốc.
 - [ ] `node-helper.ts:14,24,31` — `isErr` check `"isError" in value` dễ mis-classify + `withNode` serialize ngoài `try`. Fix: branded type / symbol guard, wrap serialize trong try.
 - [ ] `batch-create.ts:13,43,47` — chỉ resolve `$ref` cho `id/parentId`, `componentId/instanceId/nodeId/destinationId` fail cross-ref. Check duplicate ref trước handler (hiện sau, tốn 1 call). Thêm op `create-svg` inline để giảm calls (V2.6).
 
 ### 1.4 MCP envelope
-- [ ] `tools/read/get-selection.ts:11-21` (nặng nhất MCP) — không dùng `safeToolProcessor`, `isError:false` cứng. Fix: dùng chung processor + envelope `{isError,content}` như 34 tools còn lại. Thêm contract test lock shape trong `mcp-tools.test.ts`.
+- [x] `tools/read/get-selection.ts:11-21` (nặng nhất MCP) — không dùng `safeToolProcessor`, `isError:false` cứng. Fix: dùng chung processor + envelope `{isError,content}` như 34 tools còn lại. Thêm contract test lock shape trong `mcp-tools.test.ts`. → DONE 03/10 (dùng `safeToolProcessor`, contract test assert forward `isError` cả 2 chiều).
 
 Acceptance Phase 1: `plugin-tools.test.ts` assert `parent.children/appendChild`, không chỉ `isError`; thêm case `corner-radius=0`, hex 6-digit, `create-instance parent append`, `clone append`, `BOOLEAN("false")`.
 
@@ -57,7 +58,7 @@ Acceptance Phase 1: `plugin-tools.test.ts` assert `parent.children/appendChild`,
 - [ ] `shared/format-error.ts:1-3` — `JSON.stringify(error)` ném tiếp với circular/BigInt; `safe-tool-processor.ts:11,15-22` gọi lại `formatError` -> unhandled rejection crash server. Fix: `safeStringify` + giữ `stack`.
 - [ ] `bridge/task-manager.ts:91-93,105-143` — `onTaskAdded` single-callback (ghi đè câm, `server.ts:27` comment singleton nhưng không guard). `updateTask` status lạ vẫn `delete:123` không resolve -> treo tới timeout. Fix: guard singleton + `else` reject/log.
 - [ ] `bridge/orchestrator.ts:24-35,56-57` — `sendMessage` không `try/catch`, field khai báo sau constructor. Fix: try/catch + reorder.
-- [ ] `main/main.ts:32,62,108` — bug chính (đã verify): malformed `START_TASK:32-34` `return` im lặng không emit `TASK_FAILED` → server chờ ack/task settle tới timeout. `task.taskId:62` trong `catch` khó trigger `TypeError` vì `null` đã return sớm ở `:32` (chỉ là edge, tách severity thấp riêng). `prevOnMessage:108` floating promise. Fix: emit `TASK_FAILED` cho malformed + `task?.taskId ?? "unknown"` + `await`.
+- [x] `main/main.ts:32,62,108` — bug chính (đã verify): malformed `START_TASK:32-34` `return` im lặng không emit `TASK_FAILED` → server chờ ack/task settle tới timeout. `task.taskId:62` trong `catch` khó trigger `TypeError` vì `null` đã return sớm ở `:32` (chỉ là edge, tách severity thấp riêng). `prevOnMessage:108` floating promise. Fix: emit `TASK_FAILED` cho malformed + `task?.taskId ?? "unknown"` + `await`. → DONE 03/10 (emit `TASK_FAILED` với taskId thật khi còn, `"unknown"` khi mất; `prevOnMessage` để Phase 2 lint `no-floating-promises`).
 - [ ] `transport/mcp-sessions.ts:94,117,140-189` — `setInterval` không `unref` (treo vitest), `stale?.close().catch()` không bắt sync-throw, duplicate POST error handling. Fix: `unref`, try/catch sync, gộp helper.
 - [ ] `transport/socket-manager.ts:91,108-112,191,284,232-243` — `activeSocket` dead state (`deliver` không dùng), `pruneExpired` chỉ chạy khi connection/flush -> leak `pending` (chứa image 10MB). Fix: sweep interval như `McpSessionStore`.
 - [ ] `config/config.ts:16-19,42` — `parse()` throw lúc import trước `try index.ts:51`, `TRANSPORT: z.string().transform` nuốt typo thành `stdio`, `JSON_BODY_LIMIT` fallback câm. Fix: `z.enum(["stdio","streamable-http"])`, refine format, friendly error.
@@ -126,10 +127,10 @@ Acceptance: có test traversal/symlink, SSRF alt-IP, Socket auth, CORS, Zip-Slip
 
 > Kết luận đối chiếu: LLM mô tả đúng ~80%. Sai 20% ở tiền đề nhóm 1 ("mù hoàn toàn") — thực tế `export-asset` đã trả PNG/JPG base64 (`mcp/src/tools/read/export-asset.ts:23`, `plugin/.../export-asset.ts:36-39` dùng `exportAsync SCALE`, `scale` max 4) nên **nhìn được nhưng phải 2 bước thủ công**, thiếu audit tự động (`grep contrast|audit` = 0 hit). Nhóm 2+3 đúng: `MAX_BATCH_OPERATIONS=50` (`batch-create.ts:14`), 1 card ~12 ops, batch chỉ cho 11 op (không có `create-image/create-svg` trong `batch-create.ts:28-40` + `docs/tools.md:17`), `$ref` Map sống trong 1 call (`batch-create.ts:21`), `no rollback` by design (`docs/tools.md:17`, `registry.ts:76`), `create-text` whole-node style. Phần "check 70/30" đúng 90%: `export-asset` description chỉ nói icons/logos (`:23`), `grep verify|review|screenshot|critique|self-review` trong `mcp/src` = 0 hit, `docs/` không có pattern batch→export→fix — nhưng fix "sửa docs/tools.md" vô tác dụng runtime vì client chỉ đọc tool description lúc `list_tools`; phải sửa description + ghi rõ inline-base64 vs `outputPath` client nào render được.
 
-### 8.0 Cheap — guidance (làm đầu, không code tool mới, thuộc P4)
-- [ ] Sửa description `export-asset` thêm 1 dòng: `... PNG/JPG returns a screenshot of the frame — use this after batch-create to visually self-review before finishing.` Đây là chỗ LLM đọc lúc `list_tools` (quyết định thành/bại).
-- [ ] Ghi rõ trong description: inline base64 trả về dạng gì, client nào đọc được bằng mắt, khi nào phải dùng `outputPath` + đọc file ảnh. Không ghi thì export xong vẫn "không thấy" tùy client render JSON khác nhau.
-- [ ] Thêm workflow mẫu vào description hoặc `help.ts` (không phải `docs/tools.md` vì docs không vào context runtime): `batch-create → export-asset PNG → critique → fix`.
+### 8.0 Cheap — guidance (làm đầu, không code tool mới, thuộc P4) → DONE 03/10
+- [x] Sửa description `export-asset` thêm 1 dòng: `... PNG/JPG returns a screenshot of the frame — use this after batch-create to visually self-review before finishing.` Đây là chỗ LLM đọc lúc `list_tools` (quyết định thành/bại).
+- [x] Ghi rõ trong description: inline base64 trả về dạng gì, client nào đọc được bằng mắt, khi nào phải dùng `outputPath` + đọc file ảnh. Không ghi thì export xong vẫn "không thấy" tùy client render JSON khác nhau.
+- [ ] Thêm workflow mẫu vào description hoặc `help.ts` (không phải `docs/tools.md` vì docs không vào context runtime): `batch-create → export-asset PNG → critique → fix`. (còn lại: `docs/tools.md` đã đồng bộ; `help.ts` để sau)
 
 ### 8.1 Medium — DX cho LLM (lỗi nhỏ nhưng tốn nhiều token, làm sau Phase 1-3 P4)
 - [ ] Lỗi batch: giữ `{failedIndex, op, reason, created}` hiện có (`batch-create.ts:23-26`, `dispatch.ts:126` đã có `Invalid args for <cmd>: <path>`) nhưng thêm gợi ý fix (thiếu field nào, op nào thay thế). Hiện đúng nhưng chưa đủ.

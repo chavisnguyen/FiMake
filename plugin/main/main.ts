@@ -31,6 +31,19 @@ async function handleStartTask(task: StartTaskHandler): Promise<void> {
   try {
     if (!task || typeof task.taskId !== "string" || typeof task.command !== "string") {
       console.error('Ignoring malformed START_TASK payload:', task);
+      // Best-effort settle: when the taskId survived, report the failure
+      // against it so the MCP side settles immediately instead of waiting
+      // for the task timeout. Without a taskId there is nothing to route
+      // back to — the MCP timeout remains the backstop.
+      const taskId = typeof (task as StartTaskHandler)?.taskId === "string"
+        ? (task as StartTaskHandler).taskId
+        : "unknown";
+      emit<TaskFailedHandler>('TASK_FAILED', {
+        name: 'TASK_FAILED',
+        taskId,
+        content: "Malformed START_TASK payload (missing taskId/command)",
+        isError: true
+      })
       return;
     }
     if (NEEDS_ALL_PAGES.has(task.command)) {
@@ -63,7 +76,7 @@ async function handleStartTask(task: StartTaskHandler): Promise<void> {
     console.error(error);
     emit<TaskFailedHandler>('TASK_FAILED', {
       name: 'TASK_FAILED',
-      taskId: task.taskId,
+      taskId: task?.taskId ?? "unknown",
       content: error instanceof Error ? error.message : JSON.stringify(error),
       isError: true
     })

@@ -182,9 +182,11 @@ export class SocketManager {
     }
 
     private deliver(message: SocketMessage, data: unknown) {
-        // Default: broadcast to all connected plugin sockets (if multiple
-        // Figma windows open) — prevents race where second window never
-        // receives tasks. Ack from any socket clears the pending queue.
+        // Untargeted tasks go to exactly ONE plugin window (never all):
+        // broadcasting a mutating tool to N windows would execute it N
+        // times (duplicate nodes) while only the first settle wins and the
+        // rest log "update after completed" noise. Prefer the most recently
+        // active socket when it is still connected, else the first socket.
         // Targeted tasks (targetFileKey/targetFileName) go only to matching
         // windows; with no match yet the entry stays queued so it fires
         // when the right file connects (or times out via TaskManager).
@@ -202,6 +204,11 @@ export class SocketManager {
                 console.warn(`[fimake] No plugin matches target ${describeTarget(target)} (connected: ${known}); keeping task ${taskIdOf(data) ?? "unknown"} queued.`);
                 return;
             }
+        } else if (message === 'start-task' && targets.length > 1) {
+            const preferred = this.activeSocket !== null && this.sockets.has(this.activeSocket)
+                ? this.activeSocket
+                : targets[0]!;
+            targets = [preferred];
         }
         if (targets.length === 0) {
             if (message === 'start-task') {

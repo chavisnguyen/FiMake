@@ -8,16 +8,16 @@ export async function setCornerRadius(args: SetCornerRadiusParams): Promise<Tool
             (node as unknown as { cornerRadius: number }).cornerRadius = args.cornerRadius;
         }
 
-        if ("topLeftRadius" in node && args.topLeftRadius) {
+        if ("topLeftRadius" in node && args.topLeftRadius !== undefined) {
             (node as unknown as { topLeftRadius: number }).topLeftRadius = args.topLeftRadius!;
         }
-        if ("topRightRadius" in node && args.topRightRadius) {
+        if ("topRightRadius" in node && args.topRightRadius !== undefined) {
             (node as unknown as { topRightRadius: number }).topRightRadius = args.topRightRadius!;
         }
-        if ("bottomLeftRadius" in node && args.bottomLeftRadius) {
+        if ("bottomLeftRadius" in node && args.bottomLeftRadius !== undefined) {
             (node as unknown as { bottomLeftRadius: number }).bottomLeftRadius = args.bottomLeftRadius!;
         }
-        if ("bottomRightRadius" in node && args.bottomRightRadius) {
+        if ("bottomRightRadius" in node && args.bottomRightRadius !== undefined) {
             (node as unknown as { bottomRightRadius: number }).bottomRightRadius = args.bottomRightRadius;
         }
     });

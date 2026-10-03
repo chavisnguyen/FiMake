@@ -32,7 +32,13 @@ export async function createImage(args: CreateImagePluginParams): Promise<ToolRe
         } else if (parent) {
             node.remove();
             return { isError: true, content: `Parent ${args.parentId} does not support children (type: ${parent.type})` };
+        } else {
+            node.remove();
+            return { isError: true, content: "Parent node not found" };
         }
+    }
+    else {
+        figma.currentPage.appendChild(node);
     }
 
     return {

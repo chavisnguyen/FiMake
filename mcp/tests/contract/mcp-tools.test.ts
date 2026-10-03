@@ -137,15 +137,23 @@ describe("registry: every simple tool forwards its command + formats result", ()
   });
 });
 
-describe("get-selection (special case: no schema, wraps whole TaskResult)", () => {
-  it("stringifies whole result and always isError=false", async () => {
+describe("get-selection (same envelope as every other tool)", () => {
+  it("forwards content and propagates isError from the plugin", async () => {
     const { server, handlers } = mockServerBundle();
     const tm = mockTaskManager({ isError: false, content: [{ id: "1:1" }] });
     getSelection(server, tm);
     const res: CallToolResult = await getHandler(handlers, "get-selection")();
     expect(runTaskMock(tm)).toHaveBeenCalledWith("get-selection", {});
     expect(res.isError).toBe(false);
-    expect(parseToolText<TaskResult>(res)).toEqual({ isError: false, content: [{ id: "1:1" }] });
+    expect(parseToolText<unknown>(res)).toEqual([{ id: "1:1" }]);
+  });
+
+  it("reports timeouts/failures instead of swallowing them", async () => {
+    const { server, handlers } = mockServerBundle();
+    const tm = mockTaskManager({ isError: true, content: { error: "Task timed out" } });
+    getSelection(server, tm);
+    const res: CallToolResult = await getHandler(handlers, "get-selection")();
+    expect(res.isError).toBe(true);
   });
 });
 

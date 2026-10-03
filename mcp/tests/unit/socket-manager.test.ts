@@ -146,6 +146,20 @@ describe("SocketManager", () => {
     expect(socketA.emitted).toHaveLength(0);
   });
 
+  it("delivers untargeted tasks to exactly one window (no broadcast duplicates)", () => {
+    const server = createFakeServer();
+    const sm = new SocketManager(asSocketIoServer(server), 50);
+    const socketA = createFakeSocket({ ackBehavior: "ack" });
+    const socketB = createFakeSocket({ ackBehavior: "ack" });
+    server.connect(socketA);
+    server.connect(socketB);
+    // Two windows open, no target: only one executes (previously both did,
+    // duplicating mutating tools while extra settles logged noise).
+    sm.sendMessage("start-task", { id: "t-1", command: "create-rectangle", args: {} });
+    const total = socketA.emitted.length + socketB.emitted.length;
+    expect(total).toBe(1);
+  });
+
   it("matches by fileName when no fileKey is given", () => {
     const server = createFakeServer();
     const sm = new SocketManager(asSocketIoServer(server), 50);

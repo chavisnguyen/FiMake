@@ -92,13 +92,29 @@ describe("plugin create tools", () => {
     expect((await cloneNode({ id: "1:1" })).isError).toBe(false);
   });
 
-  it("createInstance: component missing / parent missing / ok", async () => {
+  it("createInstance: component missing / non-component / parent missing / ok", async () => {
     const figma: MockFigma = setupFigma();
     figma.getNodeByIdAsync.mockResolvedValue(null);
     expect((await createInstance({ componentId: "9:9", name: "I", x: 0, y: 0 })).isError).toBe(true);
-    const comp = { createInstance: vi.fn(() => ({ name: "", x: 0, y: 0 })) };
+    // RECTANGLE has no createInstance — must fail with a clear message, not a TypeError.
+    figma.getNodeByIdAsync.mockResolvedValue({ type: "RECTANGLE" });
+    expect((await createInstance({ componentId: "1:1", name: "I", x: 0, y: 0 })).content).toBe(
+      "Node is not a component (createInstance needs a COMPONENT node)"
+    );
+    // Parent validated BEFORE creating: missing parent leaks nothing and errors.
+    const instance = { name: "", x: 0, y: 0 };
+    const comp = { type: "COMPONENT", createInstance: vi.fn(() => instance) };
     figma.getNodeByIdAsync.mockImplementation(async (id: string) => (id === "1:1" ? comp : null));
     expect((await createInstance({ componentId: "1:1", name: "I", x: 0, y: 0, parentId: "9:9" })).content).toBe("Parent node not found");
+    expect(comp.createInstance).not.toHaveBeenCalled();
+    // Parent found → appended there; no parentId → current page.
+    const parent = { appendChild: vi.fn() };
+    figma.getNodeByIdAsync.mockImplementation(async (id: string) => (id === "1:1" ? comp : parent));
+    expect((await createInstance({ componentId: "1:1", name: "I", x: 0, y: 0, parentId: "0:1" })).isError).toBe(false);
+    expect(parent.appendChild).toHaveBeenCalledWith(instance);
+    figma.getNodeByIdAsync.mockImplementation(async (id: string) => (id === "1:1" ? comp : null));
+    expect((await createInstance({ componentId: "1:1", name: "I", x: 0, y: 0 })).isError).toBe(false);
+    expect(figma.currentPage.appendChild).toHaveBeenCalledWith(instance);
   });
 
   it("addComponentProperty validates type + boolean coercion", async () => {
@@ -112,6 +128,13 @@ describe("plugin create tools", () => {
     const res = await addComponentProperty({ componentId: "1:1", name: "flag", type: "BOOLEAN", defaultValue: "true" });
     expect(res.isError).toBe(false);
     expect(comp.addComponentProperty).toHaveBeenCalledWith("flag", "BOOLEAN", true);
+    // "false" must stay false — Boolean("false") === true would flip the default.
+    await addComponentProperty({ componentId: "1:1", name: "off", type: "BOOLEAN", defaultValue: "false" });
+    expect(comp.addComponentProperty).toHaveBeenCalledWith("off", "BOOLEAN", false);
+    // COMPONENT_SET carries definitions too (ComponentPropertiesMixin) — allowed.
+    const set = { type: "COMPONENT_SET", addComponentProperty: vi.fn() };
+    figma.getNodeByIdAsync.mockResolvedValue(set);
+    expect((await addComponentProperty({ componentId: "1:1", name: "n", type: "TEXT", defaultValue: "x" })).isError).toBe(false);
   });
 
   it("createImage builds IMAGE rectangle", async () => {
@@ -122,6 +145,17 @@ describe("plugin create tools", () => {
     const res = await createImage({ x: 0, y: 0, width: 10, height: 10, name: "Img", url: "https://x", imageData: [1, 2, 3], parentId: "0:1" });
     expect(res.isError).toBe(false);
     expect((rect["fills"] as Array<{ type: string; scaleMode: string }>)[0]).toMatchObject({ type: "IMAGE", scaleMode: "FILL" });
+    // No parentId → current page (previously detached + invisible on success).
+    const rect2: SceneNodeStub = { id: "1:2", name: "Img2", type: "RECTANGLE", resize: vi.fn() };
+    figma.createRectangle.mockReturnValue(rect2);
+    expect((await createImage({ x: 0, y: 0, width: 10, height: 10, name: "Img2", url: "https://x", imageData: [1, 2, 3] })).isError).toBe(false);
+    expect(figma.currentPage.appendChild).toHaveBeenCalledWith(rect2);
+    // Missing parent → loud error, node cleaned up (no invisible success).
+    figma.getNodeByIdAsync.mockResolvedValue(null);
+    const rect3: SceneNodeStub = { id: "1:3", name: "Img3", type: "RECTANGLE", resize: vi.fn(), remove: vi.fn() };
+    figma.createRectangle.mockReturnValue(rect3);
+    expect((await createImage({ x: 0, y: 0, width: 10, height: 10, name: "Img3", url: "https://x", imageData: [1, 2, 3], parentId: "9:9" })).isError).toBe(true);
+    expect(rect3["remove"]).toHaveBeenCalled();
   });
 
   it("createSvg places the vector frame, re-parents, cleans up on bad parent, reports invalid SVG", async () => {
@@ -177,6 +211,9 @@ describe("plugin read tools", () => {
     const figma: MockFigma = getFigma();
     figma.currentPage.selection = [asSceneNode({ id: "1:1", name: "A", type: "RECTANGLE", x: 0, y: 0, width: 1, height: 1 })];
     expect((await getSelection()).isError).toBe(false);
+    // Empty array is truthy — must report empty, not success with [].
+    figma.currentPage.selection = [];
+    expect(await getSelection()).toMatchObject({ isError: true, content: "Selection is empty" });
     figma.getNodeByIdAsync.mockResolvedValue(null);
     expect((await getNodeInfo({ id: "9:9" })).isError).toBe(true);
     figma.getNodeByIdAsync.mockResolvedValue(sceneNodeStub());

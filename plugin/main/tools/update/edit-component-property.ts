@@ -7,7 +7,7 @@ export async function editComponentProperty(args: EditComponentPropertyParams): 
     if (!component) {
         return { isError: true, content: "Component not found" };
     }
-    if (!(component.type === "COMPONENT")) {
+    if (!(component.type === "COMPONENT" || component.type === "COMPONENT_SET")) {
         return { isError: true, content: "Node is not a component" };
     }
     const componentNode = component as ComponentNode;

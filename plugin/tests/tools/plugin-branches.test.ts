@@ -86,6 +86,11 @@ describe("plugin branch coverage fill", () => {
     expect(res.isError).toBe(false);
     expect(node["topLeftRadius"]).toBe(1);
     expect(node["bottomRightRadius"]).toBe(4);
+    // 0 is a value, not "omitted" — resetting a corner to square must work.
+    node["topLeftRadius"] = 8;
+    const zero: ToolResult = await setCornerRadius({ id: "1:1", cornerRadius: 4, topLeftRadius: 0 });
+    expect(zero.isError).toBe(false);
+    expect(node["topLeftRadius"]).toBe(0);
   });
 
   it("setLayout returns errorMessage when props missing", async () => {

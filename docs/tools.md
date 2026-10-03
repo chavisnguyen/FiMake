@@ -38,13 +38,13 @@ Contract parity is enforced by `mcp/tests/contract/mcp-tools.test.ts` and `NODE_
 | `create-image` | node+plugin | Fetches `url` in Node (no CORS), forwards `imageData` bytes to plugin. |
 | `create-svg` | node+plugin | Editable vector from SVG: exactly one of `svg` (inline), `url` (fetched in Node, same SSRF guards as `create-image`), `filePath` (local `.svg`). Keeps intrinsic size; `x`/`y`/`parentId` place it. Max 5MB, rejects `<!ENTITY`. |
 | `set-image-fill` | node+plugin | Use an image (`url`, fetched in Node like `create-image`) as the fill of an EXISTING node; `scaleMode` `FILL`/`FIT`/`CROP`/`TILE`. |
-| `export-asset` | node+plugin | Rendered asset with real path data (`SVG` markup or `PNG`/`JPG` base64, `scale` max 4). With `outputPath`, writes to disk and returns `{path, bytes}` (max 20MB). |
+| `export-asset` | node+plugin | Rendered asset with real path data (`SVG` markup or `PNG`/`JPG` base64, `scale` max 4). `PNG`/`JPG` double as a frame screenshot — use after `batch-create` to visually self-review (`batch-create` → `export-asset` PNG → critique → fix). Prefer `outputPath` + Read the file when you need to SEE pixels (inline base64 is heavy and not every client renders it). With `outputPath`, writes to disk and returns `{path, bytes}` (max 20MB). |
 | `export-file` | node-only | Fans out over `get-pages` + `get-node-info` and writes one JSON per top-level frame + `manifest.json`. Params: `outputDir` (default `<cwd>/exports/export-<ts>`), `maxNodes` (default 5000), `maxChars` (default 35000). Guarded: max 500 frames, all writes confined to `outputDir`. No plugin handler by design. |
 | `list-clients` | node-only | List open Figma files with the plugin connected (one entry per window: `fileName`, `fileKey`, `connectedAt`). No plugin handler by design. |
 
 ## Multi-window targeting
 
-Every tool accepts `targetFileKey` (stable id, preferred) and `targetFileName` (human fallback). Both omitted = broadcast to all connected windows (old behavior).
+Every tool accepts `targetFileKey` (stable id, preferred) and `targetFileName` (human fallback). Both omitted = delivered to exactly one connected window (the most recently active one) — never broadcast, so a mutating tool can't execute twice when two files are open. Pass `targetFileKey` explicitly whenever more than one file is open to control which file executes.
 
 1. Call `list-clients` to see what's open.
 2. Pass `targetFileKey` on every follow-up call so only that file executes.
