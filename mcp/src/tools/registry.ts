@@ -37,6 +37,7 @@ import {
 import { getSelection } from "./read/get-selection";
 import { createImage } from "./create/create-image";
 import { createSvg } from "./create/create-svg";
+import { validateImage } from "./read/validate-image";
 import { setImageFill } from "./update/set-image-fill";
 import { exportAsset } from "./read/export-asset";
 import { exportFile } from "./read/export-file";
@@ -53,7 +54,7 @@ import { listClients } from "./read/list-clients";
  * task command) and must have a matching TOOL_HANDLERS entry.
  */
 export const NODE_ONLY_TOOLS = ["export-file", "list-clients"] as const;
-export const NODE_WRAPPED_TOOLS = ["get-selection", "create-image", "create-svg", "set-image-fill", "export-asset", "export-file", "list-clients"] as const;
+export const NODE_WRAPPED_TOOLS = ["get-selection", "create-image", "create-svg", "validate-image", "set-image-fill", "export-asset", "export-file", "list-clients"] as const;
 export interface SimpleToolDef {
   name: string;
   description: string;
@@ -109,6 +110,7 @@ export function registerAllTools(server: McpServer, taskManager: TaskManager, so
   getSelection(server, taskManager);
   createImage(server, taskManager);
   createSvg(server, taskManager);
+  validateImage(server, taskManager);
   setImageFill(server, taskManager);
   exportAsset(server, taskManager);
   exportFile(server, taskManager);

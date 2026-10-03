@@ -71,7 +71,7 @@ export function rasterFormatError(bytes: Uint8Array, mime: string, withHeaders: 
 }
 
 export type FetchRasterResult =
-    | { ok: true; bytes: Uint8Array }
+    | { ok: true; bytes: Uint8Array; mime: string }
     | { ok: false; message: string };
 
 /**
@@ -84,7 +84,7 @@ export async function fetchRaster(url: string): Promise<FetchRasterResult> {
     if (!fetched.ok) return fetched;
     const formatError = rasterFormatError(fetched.bytes, fetched.mime, fetched.withHeaders);
     if (formatError) return { ok: false, message: formatError };
-    return { ok: true, bytes: fetched.bytes };
+    return { ok: true, bytes: fetched.bytes, mime: fetched.mime };
 }
 
 /** Uniform `{content, isError:true}` shape for pre-socket failures. */

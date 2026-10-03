@@ -96,11 +96,11 @@ describe("registry: every simple tool forwards its command + formats result", ()
     });
   }
 
-  it("registers the full set: simple tools + 6 custom ones (list-clients needs a bridge)", () => {
+  it("registers the full set: simple tools + 7 custom ones (list-clients needs a bridge)", () => {
     const { server, handlers } = mockServerBundle();
     registerAllTools(server, mockTaskManager());
-    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 6);
-    for (const name of ["get-selection", "create-image", "create-svg", "set-image-fill", "export-asset", "export-file"]) {
+    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 7);
+    for (const name of ["get-selection", "create-image", "create-svg", "validate-image", "set-image-fill", "export-asset", "export-file"]) {
       expect(handlers.has(name)).toBe(true);
     }
     expect(handlers.has("list-clients")).toBe(false);
@@ -111,7 +111,7 @@ describe("registry: every simple tool forwards its command + formats result", ()
     const fakeIo = { on: vi.fn() };
     const { socketManager } = createBridge(fakeIo as unknown as Server);
     registerAllTools(server, mockTaskManager(), socketManager);
-    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 7);
+    expect(handlers.size).toBe(SIMPLE_TOOL_DEFS.length + 8);
     expect(handlers.has("list-clients")).toBe(true);
     const res: CallToolResult = await getHandler(handlers, "list-clients")({});
     expect(res.isError).toBe(false);
