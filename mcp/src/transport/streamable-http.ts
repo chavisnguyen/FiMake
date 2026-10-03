@@ -18,7 +18,9 @@ export function isAllowedOrigin(origin: string | undefined, corsOrigin: string =
     if (!origin) return true;
     if (corsOrigin !== "*" && origin === corsOrigin) return true;
     try {
-        return ["localhost", "127.0.0.1", "[::1]"].includes(new URL(origin).hostname);
+        const url = new URL(origin);
+        if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+        return ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
     } catch {
         return false;
     }

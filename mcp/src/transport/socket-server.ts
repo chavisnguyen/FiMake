@@ -19,6 +19,15 @@ export function createSocketServer(httpServer: HttpServer): Server {
             allowedHeaders: ["Content-Type", "Authorization", "mcp-session-id"],
             credentials: false,
         },
+        // Cap the wire frame: image bytes already travel as JSON arrays, so
+        // this must fit the biggest legit payload (export-asset PNG scale 4)
+        // with headroom — it stops absurd OOMs, not crafted ones (see
+        // MAX_PLUGIN_PAYLOAD_JSON for the per-message content cap).
+        // NOTE: no auth token here by design yet — the bridge is
+        // loopback-filtered (see listen.ts) and a token would have to be
+        // injected into the Figma manifest at build time. Tracked in P4 plan
+        // Phase 3 as the follow-up once loopback-only is insufficient.
+        maxHttpBufferSize: 64 * 1024 * 1024,
         // Socket.IO needs polling for the initial handshake.
         transports: ["polling", "websocket"],
         allowUpgrades: true,

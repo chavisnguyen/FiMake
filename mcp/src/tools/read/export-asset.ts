@@ -4,17 +4,14 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { TaskManager, TaskResult } from "../../bridge/task-manager";
 import { ExportAssetParamsSchema, type ExportAssetParams } from "../../shared/types/index";
 import { safeToolProcessor } from "../safe-tool-processor";
+import { resolveOutputPath } from "../output-path";
 import { withTarget, type TargetParams } from "../target";
 
 /** Max decoded asset bytes accepted before writing to disk (20MB). */
 export const MAX_ASSET_BYTES = 20 * 1024 * 1024;
 
 export function resolveAssetPath(outputPath: string): string {
-    if (outputPath.includes("\0")) throw new Error("Invalid outputPath");
-    const resolved = path.resolve(outputPath);
-    const root = path.parse(resolved).root;
-    if (resolved === root) throw new Error("Refusing to write to filesystem root");
-    return resolved;
+    return resolveOutputPath(outputPath, "outputPath");
 }
 
 export function exportAsset(server: McpServer, taskManager: TaskManager) {

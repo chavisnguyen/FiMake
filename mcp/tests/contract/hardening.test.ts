@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import * as fs from "fs";
 import * as http from "http";
+import * as os from "os";
 import * as path from "path";
 import type { Server } from "socket.io";
 import { TaskManager } from "../../src/bridge/task-manager";
@@ -45,6 +46,16 @@ describe("export guards", () => {
     expect(() => resolveAssetPath("/")).toThrow();
     expect(() => resolveAssetPath("a\0b")).toThrow();
     expect(resolveAssetPath("out/a.png")).toBe(path.resolve("out/a.png"));
+  });
+
+  it("output paths refuse sensitive locations", () => {
+    const home = os.homedir();
+    expect(() => resolveAssetPath(path.join(home, ".ssh", "authorized_keys"))).toThrow();
+    expect(() => resolveAssetPath(path.join(home, ".zshrc"))).toThrow();
+    expect(() => resolveExportDir("/etc/fimake")).toThrow();
+    // Legit locations still work: home non-dot dirs, tmpdir, relative paths.
+    expect(() => resolveAssetPath(path.join(home, "Documents", "x.png"))).not.toThrow();
+    expect(() => resolveAssetPath(path.join(os.tmpdir(), "x.png"))).not.toThrow();
   });
 
   it("caps are sane", () => {

@@ -18,6 +18,97 @@ export function isBlockedHost(hostname: string): boolean {
     if (/^fc00:/.test(host) || /^fd00:/.test(host) || /^fe80:/.test(host)) return true;
     // AWS/GCP/Azure instance metadata endpoints
     if (host === "169.254.169.254" || host === "metadata.google.internal" || host === "169.254.169.253") return true;
+    // Alternate IP literal encodings (bypass the dotted-decimal checks above):
+    // decimal (2130706433), hex (0x7f000001), octal (017700000001),
+    // mixed (0x7f.0.0.1, 0177.0.0.1) and IPv4-mapped IPv6 (::ffff:7f00:1).
+    const mapped = ipv4MappedTail(host);
+    if (mapped !== null) return isBlockedIPv4(mapped);
+    const bytes = parseIPv4Literal(host);
+    if (bytes !== null) return isBlockedIPv4(bytes);
+    return false;
+}
+
+/**
+ * Parse an IPv4 literal in any common encoding (inet_aton semantics):
+ * single decimal/hex/octal number, or 2–4 dot-separated parts where each
+ * part may be decimal, 0x-hex or 0-octal and the last part absorbs the
+ * remaining bytes. Returns null when `host` is not an IP literal at all
+ * (e.g. a DNS name) — never throws.
+ */
+export function parseIPv4Literal(host: string): [number, number, number, number] | null {
+    const partValue = (p: string): number | null => {
+        if (/^0x[0-9a-f]+$/i.test(p)) return bounded(parseInt(p, 16));
+        if (/^0[0-7]+$/.test(p) && p.length > 1) return bounded(parseInt(p, 8));
+        if (/^\d+$/.test(p)) return bounded(Number(p));
+        return null;
+    };
+    const bounded = (n: number): number | null =>
+        Number.isSafeInteger(n) && n >= 0 && n <= 0xffffffff ? n : null;
+    // Leading 0 means octal (inet_aton) — check before decimal, whose
+    // Number() would swallow the digits and overflow the 32-bit range.
+    if (/^0[0-7]+$/.test(host) && host.length > 1) {
+        const n = bounded(parseInt(host, 8));
+        if (n === null) return null;
+        return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255];
+    }
+    if (/^\d+$/.test(host)) {
+        const n = bounded(Number(host));
+        if (n === null) return null;
+        return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255];
+    }
+    if (/^0x[0-9a-f]+$/i.test(host)) {
+        const n = bounded(parseInt(host, 16));
+        if (n === null) return null;
+        return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255];
+    }
+    const parts = host.split(".");
+    if (parts.length < 2 || parts.length > 4) return null;
+    const nums: number[] = [];
+    for (const p of parts) {
+        if (p.length === 0) return null;
+        const v = partValue(p);
+        if (v === null) return null;
+        nums.push(v);
+    }
+    if (nums.length === 4) {
+        if (nums.some((n) => n > 255)) return null;
+        return [nums[0]!, nums[1]!, nums[2]!, nums[3]!];
+    }
+    if (nums.length === 3) {
+        const [a, b, c] = nums as [number, number, number];
+        if (a > 255 || b > 255 || c > 65535) return null;
+        return [a, b, (c >> 8) & 255, c & 255];
+    }
+    const [a, b] = nums as [number, number];
+    if (a > 255 || b > 16777215) return null;
+    return [a, (b >> 16) & 255, (b >> 8) & 255, b & 255];
+}
+
+/** Extract the embedded IPv4 from ::ffff: mapped forms (dotted or hex tail). */
+function ipv4MappedTail(host: string): [number, number, number, number] | null {
+    const prefix = "::ffff:";
+    if (!host.startsWith(prefix)) return null;
+    const tail = host.slice(prefix.length);
+    if (tail.includes(".")) return parseIPv4Literal(tail);
+    // Hex tail: last 32 bits as one or two hextets (7f00:1, 7f00:0001).
+    const groups = tail.split(":");
+    if (groups.length === 0 || groups.length > 2) return null;
+    if (!groups.every((g) => /^[0-9a-f]{1,4}$/i.test(g))) return null;
+    const n = parseInt(groups.join("").padStart(8, "0").slice(-8), 16);
+    if (!Number.isSafeInteger(n)) return null;
+    return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255];
+}
+
+/** True when IPv4 bytes fall in a non-public range. */
+function isBlockedIPv4([a, b]: [number, number, number, number]): boolean {
+    if (a === 127) return true; // loopback
+    if (a === 10) return true; // private
+    if (a === 172 && b >= 16 && b <= 31) return true; // private
+    if (a === 192 && b === 168) return true; // private
+    if (a === 169 && b === 254) return true; // link-local + cloud metadata
+    if (a === 0) return true; // "this network"
+    if (a >= 224) return true; // multicast + reserved + broadcast
+    if (a === 100 && b >= 64 && b <= 127) return true; // carrier-grade NAT
     return false;
 }
 
@@ -38,17 +129,28 @@ function hasHeaders(response: Response): boolean {
     return !!headers && typeof headers.get === "function";
 }
 
-// Simple in-memory rate limiter: max 20 fetches per minute per process (shared by every tool).
-const fetchTimestamps: number[] = [];
+// Per-host rate limiter: max 20 fetches per minute per host (a single abusive
+// host used to starve the whole process under the old global bucket).
+const fetchTimestamps = new Map<string, number[]>();
 const RATE_LIMIT_MAX = 20;
 const RATE_LIMIT_WINDOW_MS = 60_000;
-function isRateLimited(now: number = Date.now()): boolean {
-    while (fetchTimestamps.length > 0 && now - fetchTimestamps[0]! > RATE_LIMIT_WINDOW_MS) {
-        fetchTimestamps.shift();
+function isRateLimited(host: string, now: number = Date.now()): boolean {
+    let stamps = fetchTimestamps.get(host);
+    if (!stamps) {
+        stamps = [];
+        fetchTimestamps.set(host, stamps);
     }
-    if (fetchTimestamps.length >= RATE_LIMIT_MAX) return true;
-    fetchTimestamps.push(now);
+    while (stamps.length > 0 && now - stamps[0]! > RATE_LIMIT_WINDOW_MS) {
+        stamps.shift();
+    }
+    if (stamps.length >= RATE_LIMIT_MAX) return true;
+    stamps.push(now);
     return false;
+}
+
+/** Test hook: clear rate-limit state between cases. */
+export function resetFetchRateLimit(): void {
+    fetchTimestamps.clear();
 }
 
 export type FetchGuardedResult =
@@ -84,7 +186,7 @@ export async function fetchGuarded(url: string, opts: { accept: string; maxBytes
     if (isBlockedHost(currentUrl.hostname)) {
         return fail("Image host is blocked (private/internal network)");
     }
-    if (isRateLimited()) {
+    if (isRateLimited(currentUrl.hostname)) {
         return fail("Rate limited: too many image fetches, try again shortly");
     }
     const init = (signal: AbortSignal): RequestInit => ({
@@ -98,6 +200,8 @@ export async function fetchGuarded(url: string, opts: { accept: string; maxBytes
     });
     let response: Response | undefined;
     const ctrl = new AbortController();
+    // One budget for the whole hop chain AND the body download: clearing the
+    // timer before arrayBuffer() used to let a slowloris body stream forever.
     const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
     try {
         for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
@@ -136,24 +240,28 @@ export async function fetchGuarded(url: string, opts: { accept: string; maxBytes
             response = res;
             break;
         }
+        if (!response) return fail("Failed to fetch image: no response");
+        if (!response.ok) return fail(`Failed to fetch image: HTTP ${response.status}`);
+        // Defense-in-depth: re-check the final URL actually fetched.
+        // (Full DNS-rebinding pinning would need a custom dispatcher; the
+        // per-hop + final re-checks close the cheap variants.)
+        try {
+            const finalUrl = new URL(response.url || currentUrl.toString());
+            if (isBlockedHost(finalUrl.hostname)) return fail("Image redirect target is blocked (private/internal network)");
+        } catch {
+            // ignore parse errors
+        }
+        const withHeaders = hasHeaders(response);
+        const contentType = withHeaders ? getHeader(response, "content-type").toLowerCase() : "";
+        const mime = contentType.split(";")[0]?.trim() ?? "";
+        const len = withHeaders ? Number(getHeader(response, "content-length") || 0) : 0;
+        if (len > opts.maxBytes) return fail(`Image exceeds ${opts.maxBytes} bytes`);
+        // Still inside try: the abort signal stays armed during the body
+        // download, so a slowloris body can't stream past the budget.
+        const arrayBuffer = await response.arrayBuffer();
+        if (arrayBuffer.byteLength > opts.maxBytes) return fail(`Image exceeds ${opts.maxBytes} bytes`);
+        return { ok: true, bytes: new Uint8Array(arrayBuffer), mime, withHeaders };
     } finally {
         clearTimeout(timer);
     }
-    if (!response) return fail("Failed to fetch image: no response");
-    if (!response.ok) return fail(`Failed to fetch image: HTTP ${response.status}`);
-    // Defense-in-depth: re-check the final URL actually fetched.
-    try {
-        const finalUrl = new URL(response.url || currentUrl.toString());
-        if (isBlockedHost(finalUrl.hostname)) return fail("Image redirect target is blocked (private/internal network)");
-    } catch {
-        // ignore parse errors
-    }
-    const withHeaders = hasHeaders(response);
-    const contentType = withHeaders ? getHeader(response, "content-type").toLowerCase() : "";
-    const mime = contentType.split(";")[0]?.trim() ?? "";
-    const len = withHeaders ? Number(getHeader(response, "content-length") || 0) : 0;
-    if (len > opts.maxBytes) return fail(`Image exceeds ${opts.maxBytes} bytes`);
-    const arrayBuffer = await response.arrayBuffer();
-    if (arrayBuffer.byteLength > opts.maxBytes) return fail(`Image exceeds ${opts.maxBytes} bytes`);
-    return { ok: true, bytes: new Uint8Array(arrayBuffer), mime, withHeaders };
 }

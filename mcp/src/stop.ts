@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { config } from "./config/config";
 import type { Exec } from "./install-plugin";
 
 const execFileAsync = promisify(execFile);
@@ -31,7 +32,7 @@ export async function stopSharedServer(exec: Exec = defaultExec): Promise<StopRe
             ok: true,
             message:
                 "Stopped the shared fimake server. " +
-                "Run `fimake doctor` to confirm port 10101 is free — " +
+                `Run \`fimake doctor\` to confirm port ${config.PORT} is free — ` +
                 "if it is still held, an MCP client spawned its own server via stdio (see `fimake --help`).",
         };
     } catch (error) {
@@ -42,7 +43,7 @@ export async function stopSharedServer(exec: Exec = defaultExec): Promise<StopRe
                 message:
                     "Could not run `brew` (not installed or not on PATH). " +
                     "Stop the server the way it was started — e.g. quit the terminal running " +
-                    "`TRANSPORT=streamable-http ./fimake-*`, or kill the process on port 10101 (lsof -i :10101).",
+                    `\`TRANSPORT=streamable-http ./fimake-*\`, or kill the process on port ${config.PORT} (lsof -i :${config.PORT}).`,
             };
         }
         return {

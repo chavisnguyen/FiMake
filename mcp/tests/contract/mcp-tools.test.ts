@@ -358,7 +358,9 @@ describe("create-svg resolves one source in Node, forwards only svg", () => {
     vi.stubGlobal("fetch", vi.fn(async () => svgRes("<!doctype html><html></html>", "text/html")));
     const html = await call({ url: "https://x/page" });
     expect(html.isError).toBe(true);
-    expect(toolText(html)).toContain("Not an SVG");
+    // HTML pages start with a DOCTYPE — rejected as DOCTYPE before the
+    // generic not-an-SVG check.
+    expect(toolText(html)).toContain("DOCTYPE");
     vi.stubGlobal("fetch", vi.fn(async () => svgRes("", "text/plain", 302, "http://169.254.169.254/")));
     const ssrf = await call({ url: "https://x/redirect" });
     expect(ssrf.isError).toBe(true);
@@ -388,6 +390,10 @@ describe("create-svg resolves one source in Node, forwards only svg", () => {
     expect(toolText(await call({}))).toContain("exactly one");
     expect(toolText(await call({ svg: SVG, url: "https://x/a.svg" }))).toContain("exactly one");
     expect(toolText(await call({ svg: `<!DOCTYPE svg [<!ENTITY a "b">]>${SVG}` }))).toContain("ENTITY");
+    expect(toolText(await call({ svg: "<!DOCTYPE svg><svg/>" }))).toContain("DOCTYPE");
+    expect(toolText(await call({ svg: '<svg><script>alert(1)</script></svg>' }))).toContain("script");
+    expect(toolText(await call({ svg: '<svg><a href="http://evil/x">x</a></svg>' }))).toContain("remote");
+    expect(toolText(await call({ svg: '<svg onload="x()">x</svg>' }))).toContain("on*");
     expect(toolText(await call({ svg: "<div/>" }))).toContain("Not an SVG");
     expect(toolText(await call({ svg: `<svg>${"a".repeat(5 * 1024 * 1024)}</svg>` }))).toContain("exceeds");
     expect(runTaskMock(tm)).not.toHaveBeenCalled();

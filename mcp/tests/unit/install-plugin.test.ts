@@ -218,6 +218,19 @@ describe("installPlugin --no-register", () => {
         expect(fs.existsSync(result.manifestPath)).toBe(true);
         expect(fetchMock).toHaveBeenCalledWith(
             "https://github.com/chavisnguyen/FiMake/releases/download/v9.9.9/fimake-plugin.zip",
+            expect.objectContaining({ signal: expect.any(AbortSignal) }),
         );
+    });
+
+    it("rejects a malicious --version-tag", async () => {
+        await expect(installPlugin({ versionTag: "../../../evil", noRegister: true })).rejects.toThrow("--version-tag");
+    });
+
+    it("getFlagValue never swallows the next flag as a value", async () => {
+        const { getFlagValue } = await import("../../src/install-plugin");
+        expect(getFlagValue(["--dir", "--no-register"], "--dir")).toBeUndefined();
+        expect(getFlagValue(["--dir"], "--dir")).toBeUndefined();
+        expect(getFlagValue(["--dir", "/tmp/x"], "--dir")).toBe("/tmp/x");
+        expect(getFlagValue(["--no-register"], "--dir")).toBeUndefined();
     });
 });

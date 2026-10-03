@@ -4,6 +4,10 @@ import type { TaskManager, TaskResult } from "../../bridge/task-manager";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ExportFileParamsSchema, type ExportFileParams } from "../../shared/types/index";
 import { pickTargetParams, withTarget, type TargetParams } from "../target";
+import { assertInsideDir, resolveOutputPath } from "../output-path";
+
+// Re-exported for existing importers (contract tests import from here).
+export { assertInsideDir };
 
 interface PageStubNode {
     id: string;
@@ -41,21 +45,12 @@ function safeParsePage(rawPage: unknown): PageStub | null {
 }
 
 export function resolveExportDir(outputDirParam: string | undefined): string {
-    const outputDir = path.resolve(
-        outputDirParam ?? path.join(process.cwd(), "exports", `export-${Date.now()}`)
+    return resolveOutputPath(
+        outputDirParam === undefined
+            ? path.join(process.cwd(), "exports", `export-${Date.now()}`)
+            : outputDirParam,
+        "outputDir"
     );
-    if (outputDir.includes("\0")) throw new Error("Invalid outputDir");
-    const root = path.parse(outputDir).root;
-    if (outputDir === root) throw new Error("Refusing to export into filesystem root");
-    return outputDir;
-}
-
-/** Assert a derived file stays inside outputDir (blocks ../ via node names). */
-export function assertInsideDir(dir: string, file: string): void {
-    const rel = path.relative(dir, file);
-    if (rel.startsWith("..") || path.isAbsolute(rel)) {
-        throw new Error(`Refusing to write outside outputDir: ${file}`);
-    }
 }
 
 /** Whether a get-node-info payload was cut by the maxNodes/maxChars budget. */

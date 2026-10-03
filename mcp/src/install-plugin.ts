@@ -175,11 +175,35 @@ export function readSettings(settingsPath: string): FigmaSettings {
 export function backupSettings(settingsPath: string): string {
     const backupPath = `${settingsPath}.bak-${Date.now()}`;
     fs.copyFileSync(settingsPath, backupPath);
+    pruneBackups(settingsPath);
     return backupPath;
 }
 
+/** Keep the 5 most recent backups; older ones accumulate forever otherwise. */
+export function pruneBackups(settingsPath: string, keep = 5): void {
+    let entries: string[] = [];
+    try {
+        entries = fs
+            .readdirSync(path.dirname(settingsPath))
+            .filter((f) => f.startsWith(`${path.basename(settingsPath)}.bak-`))
+            .sort();
+    } catch {
+        return;
+    }
+    for (const old of entries.slice(0, Math.max(0, entries.length - keep))) {
+        try {
+            fs.unlinkSync(path.join(path.dirname(settingsPath), old));
+        } catch {
+            // best-effort — a stale backup is clutter, not a failure
+        }
+    }
+}
+
 export function writeSettings(settingsPath: string, settings: FigmaSettings): void {
-    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+    // Atomic write: a crash mid-write must not truncate settings.json.
+    const tmp = `${settingsPath}.tmp-${process.pid}`;
+    fs.writeFileSync(tmp, JSON.stringify(settings, null, 2));
+    fs.renameSync(tmp, settingsPath);
 }
 
 // ---------------------------------------------------------------------------
@@ -261,7 +285,9 @@ async function defaultAsk(question: string): Promise<string> {
 // ---------------------------------------------------------------------------
 
 export async function downloadPluginZip(url: string, destZip: string, fetchImpl: typeof fetch = fetch): Promise<void> {
-    const res = await fetchImpl(url);
+    // Bound the download: no timeout + no size cap used to let a hung or
+    // hostile endpoint stall install-plugin (or fill the disk) silently.
+    const res = await fetchImpl(url, { signal: AbortSignal.timeout(120_000) });
     if (!res.ok) {
         throw new Error(
             `Failed to download the plugin zip (HTTP ${res.status}) from ${url}. ` +
@@ -272,13 +298,38 @@ export async function downloadPluginZip(url: string, destZip: string, fetchImpl:
     if (buf.byteLength === 0) {
         throw new Error(`Downloaded plugin zip from ${url} is empty — the release asset may be missing.`);
     }
+    if (buf.byteLength > MAX_PLUGIN_ZIP_BYTES) {
+        throw new Error(`Downloaded plugin zip is ${buf.byteLength} bytes (cap ${MAX_PLUGIN_ZIP_BYTES}) — refusing to write it.`);
+    }
     await fsp.mkdir(path.dirname(destZip), { recursive: true });
     await fsp.writeFile(destZip, buf);
 }
 
+/** Cap on the release zip download (the real asset is < 1MB). */
+export const MAX_PLUGIN_ZIP_BYTES = 25 * 1024 * 1024;
+
 export function unzipPlugin(zipPath: string, destDir: string): void {
+    // No extractAllTo: entry names in a hostile zip ("../../evil", absolute
+    // paths) would escape destDir (Zip-Slip). Extract entry-by-entry after
+    // validating each target stays inside destDir.
     const zip = new AdmZip(zipPath);
-    zip.extractAllTo(destDir, true);
+    for (const entry of zip.getEntries()) {
+        const name = entry.entryName.replace(/\\/g, "/");
+        if (name === "" || name.startsWith("/") || /^[A-Za-z]:\//.test(name)) {
+            throw new Error(`Unsafe entry in plugin zip (absolute path): ${entry.entryName}`);
+        }
+        const target = path.resolve(destDir, name);
+        const rel = path.relative(destDir, target);
+        if (rel.startsWith("..") || path.isAbsolute(rel)) {
+            throw new Error(`Unsafe entry in plugin zip (escapes directory): ${entry.entryName}`);
+        }
+        if (entry.isDirectory) {
+            fs.mkdirSync(target, { recursive: true });
+        } else {
+            fs.mkdirSync(path.dirname(target), { recursive: true });
+            fs.writeFileSync(target, entry.getData());
+        }
+    }
 }
 
 /** Like verifyPluginDir, but returns undefined instead of throwing (used to detect a reusable dir). */
@@ -292,10 +343,17 @@ export function tryVerifyPluginDir(dir: string): PluginPaths | undefined {
 
 async function downloadAndExtract(versionTag: string, version: string, installDir: string): Promise<PluginPaths> {
     const zipUrl = `https://github.com/chavisnguyen/FiMake/releases/download/${versionTag}/fimake-plugin.zip`;
-    const destZip = path.join(os.tmpdir(), `fimake-plugin-${version}.zip`);
-    await downloadPluginZip(zipUrl, destZip);
-    unzipPlugin(destZip, installDir);
-    return verifyPluginDir(installDir);
+    // Unpredictable temp dir (not tmp/fimake-plugin-<version>.zip): a fixed
+    // name is symlink-attackable by another local user.
+    const workDir = await fsp.mkdtemp(path.join(os.tmpdir(), "fimake-plugin-"));
+    const destZip = path.join(workDir, "plugin.zip");
+    try {
+        await downloadPluginZip(zipUrl, destZip);
+        unzipPlugin(destZip, installDir);
+        return verifyPluginDir(installDir);
+    } finally {
+        await fsp.rm(workDir, { recursive: true, force: true });
+    }
 }
 
 /** Fail fast if the zip didn't contain what we expect, before touching Figma at all. */
@@ -339,6 +397,11 @@ export interface InstallPluginResult {
 
 export async function installPlugin(opts: InstallPluginOptions): Promise<InstallPluginResult> {
     const versionTag = opts.versionTag ?? `v${SERVER_VERSION}`;
+    // versionTag becomes a URL path segment — validate its shape so
+    // "../../../evil" can't turn the download into something unexpected.
+    if (!/^v\d+\.\d+\.\d+(-[\w.]+)?$/.test(versionTag)) {
+        throw new Error(`Invalid --version-tag "${versionTag}" (expected like v1.2.3).`);
+    }
     const version = versionTag.replace(/^v/, "");
     const installDir = opts.dir ?? defaultInstallDir(version, process.env);
 
@@ -394,10 +457,15 @@ export async function installPlugin(opts: InstallPluginOptions): Promise<Install
 // CLI entry
 // ---------------------------------------------------------------------------
 
-function getFlagValue(args: string[], flag: string): string | undefined {
+/** Exported for unit tests: missing/flag values must not be swallowed. */
+export function getFlagValue(args: string[], flag: string): string | undefined {
     const idx = args.indexOf(flag);
     if (idx === -1) return undefined;
-    return args[idx + 1];
+    const value = args[idx + 1];
+    // Missing value (`--dir` last) or the next flag (`--dir --no-register`)
+    // must not be swallowed as the value.
+    if (value === undefined || value.startsWith("--")) return undefined;
+    return value;
 }
 
 export async function runInstallPluginCli(args: string[]): Promise<number> {

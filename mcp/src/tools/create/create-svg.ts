@@ -18,13 +18,27 @@ const SVG_START = /^\s*(<\?xml[^>]*>\s*)?(<!--[\s\S]*?-->\s*)*(<!DOCTYPE[^>]*>\s
 export function validateSvg(svg: string): string | null {
     if (Buffer.byteLength(svg, "utf-8") > MAX_SVG_BYTES) return `SVG exceeds ${MAX_SVG_BYTES} bytes`;
     if (/<!ENTITY/i.test(svg)) return "SVG must not declare XML entities (<!ENTITY)";
-    if (!SVG_START.test(svg)) return "Not an SVG: content must start with <svg (optionally after <?xml, comments or DOCTYPE)";
+    // No DTD at all: external subsets are an XXE channel and Figma's
+    // createNodeFromSvg needs no DOCTYPE to parse.
+    if (/<!DOCTYPE/i.test(svg)) return "SVG must not contain a DOCTYPE declaration";
+    if (/<script[\s>]/i.test(svg)) return "SVG must not contain <script>";
+    if (/<foreignObject[\s>]/i.test(svg)) return "SVG must not contain <foreignObject>";
+    // Event-handler attributes execute in renderers that run SVG scripts.
+    if (/\son[a-z]+\s*=/i.test(svg)) return "SVG must not contain event-handler attributes (on*)";
+    // Remote references leak the fetch (SSRF) to whoever renders the node:
+    // block http(s) in href/src/xlink:href, allow data: URIs and #fragments.
+    if (/(?:href|src)\s*=\s*(?:"|')\s*https?:/i.test(svg)) return "SVG must not reference remote URLs (href/src)";
+    if (!SVG_START.test(svg)) return "Not an SVG: content must start with <svg (optionally after <?xml or comments)";
     return null;
 }
 
 async function readSvgFile(filePath: string): Promise<string> {
     const resolved = resolveAssetPath(filePath);
     if (path.extname(resolved).toLowerCase() !== ".svg") throw new Error("filePath must point to a .svg file");
+    // Best-effort symlink guard (TOCTOU remains: the link can be swapped
+    // between check and read — documented in output-path.ts).
+    const lst = await fs.lstat(resolved);
+    if (lst.isSymbolicLink()) throw new Error("filePath must not be a symlink");
     const stat = await fs.stat(resolved);
     if (stat.size > MAX_SVG_BYTES) throw new Error(`SVG exceeds ${MAX_SVG_BYTES} bytes`);
     return await fs.readFile(resolved, "utf-8");

@@ -43,9 +43,16 @@ function readAuthInfo(socket: Socket): PluginClientInfo {
 
 function pickClientInfo(info: PluginClientInfo): PluginClientInfo {
     const out: PluginClientInfo = {};
-    if (typeof info.fileName === "string") out.fileName = info.fileName.slice(0, 200);
-    if (typeof info.fileKey === "string") out.fileKey = info.fileKey.slice(0, 200);
+    // Strip control characters (log injection via \r\n in file names) and
+    // cap length — handshake strings are display-only.
+    if (typeof info.fileName === "string") out.fileName = cleanDisplay(info.fileName);
+    if (typeof info.fileKey === "string") out.fileKey = cleanDisplay(info.fileKey);
     return out;
+}
+
+/** Remove C0/C1 controls + DEL, collapse whitespace, cap at 200 chars. */
+function cleanDisplay(value: string): string {
+    return value.replace(/[\0-\x1f\x7f-\x9f]/g, "").replace(/\s+/g, " ").trim().slice(0, 200);
 }
 
 /** Routing target carried by a `start-task` envelope, if any. */
