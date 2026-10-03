@@ -7,7 +7,24 @@ export default tseslint.config(
     ignores: ["dist/**", "coverage/**", "node_modules/**"],
   },
   {
-    files: ["src/**/*.ts", "tests/**/*.ts"],
+    files: ["src/**/*.ts"],
+    plugins: {
+      "@typescript-eslint": tseslint.plugin,
+    },
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-floating-promises": "error",
+    },
+  },
+  {
+    files: ["tests/**/*.ts"],
     plugins: {
       "@typescript-eslint": tseslint.plugin,
     },

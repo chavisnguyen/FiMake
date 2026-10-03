@@ -1,0 +1,26 @@
+{
+  // Shared compiler options for main/ui/tests. Each project extends this
+  // and sets only its own target/lib/include. Relative paths below resolve
+  // from THIS file's directory (plugin/), so extenders inherit them as-is.
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": ["./node_modules/@figma", "./node_modules/@types"],
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../mcp/src/shared/*"],
+      "utils/*": ["./main/utils/*"],
+      "tools/*": ["./main/tools/*"],
+      "serialization/*": ["./main/serialization/*"]
+    }
+  }
+}

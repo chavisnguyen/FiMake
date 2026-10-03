@@ -1,26 +1,11 @@
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
-    "skipLibCheck": true,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "typeRoots": ["../node_modules/@figma", "../node_modules/@types"],
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["../../mcp/src/shared/*"]
-    }
+    "resolveJsonModule": true
   }
 }

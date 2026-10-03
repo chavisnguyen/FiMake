@@ -10,7 +10,7 @@ import {
   isStartTaskPayload,
   type PluginClientInfo,
   type StartTaskPayload,
-} from "@shared/types";
+} from "@shared/types/transport/socket-protocol";
 import type {
   StartTaskHandler,
   TaskFailedHandler,
