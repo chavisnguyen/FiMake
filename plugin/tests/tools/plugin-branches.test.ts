@@ -16,6 +16,7 @@ import { setImageFill } from "../../main/tools/update/set-image-fill";
 import { setTextStyle } from "../../main/tools/update/set-text-style";
 import { createText } from "../../main/tools/create/create-text";
 import { listFonts } from "../../main/tools/read/list-fonts";
+import { resetFontCache } from "../../main/tools/read/list-fonts";
 
 describe("plugin branch coverage fill", () => {
   beforeEach(() => setupFigma());
@@ -317,6 +318,7 @@ describe("plugin branch coverage fill", () => {
   });
 
   it("listFonts: names only without filter, styles per family with a filter", async () => {
+    resetFontCache();
     setupFigma({
       listAvailableFontsAsync: vi.fn(async () => [
         { fontName: { family: "Inter", style: "Regular" } },
@@ -328,6 +330,7 @@ describe("plugin branch coverage fill", () => {
     expect((await listFonts({ family: "sf" })).content).toEqual([{ family: "SF Pro", styles: ["Semibold"] }]);
 
     const many = Array.from({ length: 31 }, (_, i) => ({ fontName: { family: `Font ${i}`, style: "Regular" } }));
+    resetFontCache();
     setupFigma({ listAvailableFontsAsync: vi.fn(async () => many) });
     const broad = (await listFonts({ family: "font" })).content as { count: number; hint?: string };
     expect(broad.count).toBe(31);

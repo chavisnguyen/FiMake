@@ -7,6 +7,11 @@ const MAX_FAMILIES_WITH_STYLES = 30;
 let fontCache: { at: number; fonts: Font[] } | null = null;
 const FONT_CACHE_TTL_MS = 60_000;
 
+/** Test hook: drop the cached font list. */
+export function resetFontCache(): void {
+    fontCache = null;
+}
+
 async function cachedFonts(): Promise<Font[]> {
     const now = Date.now();
     if (fontCache !== null && now - fontCache.at < FONT_CACHE_TTL_MS) return fontCache.fonts;

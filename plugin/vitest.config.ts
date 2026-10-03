@@ -4,10 +4,10 @@ import path from "path";
 export default defineConfig({
   resolve: {
     alias: {
-      utils: path.resolve(__dirname, "main/utils"),
-      tools: path.resolve(__dirname, "main/tools"),
-      serialization: path.resolve(__dirname, "main/serialization"),
-      "@shared": path.resolve(__dirname, "../mcp/src/shared"),
+      utils: path.resolve(import.meta.dirname, "main/utils"),
+      tools: path.resolve(import.meta.dirname, "main/tools"),
+      serialization: path.resolve(import.meta.dirname, "main/serialization"),
+      "@shared": path.resolve(import.meta.dirname, "../mcp/src/shared"),
     },
   },
   define: {

@@ -20,7 +20,7 @@ const IdOrRef = z.union([
     z.string().regex(/^\$[A-Za-z0-9_-]+$/),
 ]).describe("Node id (page:node) or \"$ref\" of an earlier op in this batch");
 
-function op<N extends string, S extends z.AnyZodObject>(name: N, params: S) {
+function op<N extends string, S extends z.ZodType>(name: N, params: S) {
     return z.object({ op: z.literal(name), ref: RefName.optional(), params });
 }
 

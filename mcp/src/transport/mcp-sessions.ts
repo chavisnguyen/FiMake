@@ -196,7 +196,11 @@ export class McpSessionStore {
                 },
             });
             transport.onclose = () => this.forget(transport);
-            await mcpServer.connect(transport);
+            // SDK 1.32 internal mismatch under exactOptionalPropertyTypes
+            // (their Transport wants required onclose, their class declares
+            // it optional): onclose is assigned just above, so this cast is
+            // safe and scoped to the call.
+            await mcpServer.connect(transport as unknown as Parameters<typeof mcpServer.connect>[0]);
             try {
                 await transport.handleRequest(req, res, parsed.body);
             } catch (error) {

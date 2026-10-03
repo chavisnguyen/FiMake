@@ -189,7 +189,12 @@ describe("e2e replay (real MCP + mock plugin, real-data fixtures)", () => {
           : {};
       const { text, isError } = await callTool(name, args);
       expect(isError, `${name}: isError`).toBe(fixture.isError);
-      const parsed = JSON.parse(text) as unknown;
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(text) as unknown;
+      } catch {
+        throw new Error(`${name}: tool text is not JSON: ${text.slice(0, 300)}`);
+      }
       if (name === "get-selection") {
         // get-selection dùng chung safeToolProcessor như mọi tool: text là
         // content trực tiếp (không còn double-envelope TaskResult như trước).

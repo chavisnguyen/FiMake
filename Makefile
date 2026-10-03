@@ -8,7 +8,7 @@ help:
 	@echo "typecheck  Typecheck sources and tests (mcp + plugin)"
 	@echo "lint       Forbid explicit any and friends (mcp + plugin)"
 	@echo "build      Production builds (mcp + plugin)"
-	@echo "check      typecheck + lint + test + build (pre-push gate)"
+	@echo "check      typecheck + lint + build + test, in that order (build before test: e2e replays dist)"
 	@echo "release    Verify versions, run check, push + create GitHub Release (usage: make release V=1.0.33)"
 	@echo "dev-mcp    Watch + restart the MCP server"
 	@echo "dev-plugin Watch + rebuild the plugin (re-run it in Figma to reload)"
@@ -38,7 +38,7 @@ build:
 	cd mcp && pnpm build
 	cd plugin && pnpm build
 
-check: typecheck lint test build
+check: typecheck lint build test
 
 dev-mcp:
 	cd mcp && pnpm dev
