@@ -11,7 +11,10 @@ import { SetCornerRadiusParamsSchema } from "../update/set-corner-radius";
 import { SetTextStyleParamsSchema } from "../update/set-text-style";
 import { SetParentIdParamsSchema } from "../update/set-parent-id";
 
-export const MAX_BATCH_OPERATIONS = 50;
+/** Default per-call op cap (server env BATCH_MAX_OPS overrides it). */
+export const DEFAULT_BATCH_OPERATIONS = 200;
+/** Hard ceiling: the plugin validates with this, so BATCH_MAX_OPS can't exceed it. */
+export const MAX_BATCH_OPERATIONS = 1000;
 
 const RefName = z.string().regex(/^[A-Za-z0-9_-]+$/)
     .describe("Name this op's node so later ops can use \"$<ref>\" as an id/parentId");
@@ -39,12 +42,18 @@ const OperationSchema = z.discriminatedUnion("op", [
     op("set-parent-id", SetParentIdParamsSchema.extend({ id: IdOrRef, parentId: IdOrRef })),
 ]);
 
-export const BatchCreateParamsSchema = z.object({
-    operations: z.array(OperationSchema).min(1).max(MAX_BATCH_OPERATIONS)
-        .describe("Run in order in ONE plugin task. Each op is { op: <tool name>, ref?, params: <that tool's params> }"),
-    atomic: z.boolean().optional().default(false)
-        .describe("When true, a failing op removes the nodes earlier ops created (best-effort rollback) instead of leaving a half-built subtree. Default false = keep partial work + report {failedIndex, created}."),
-});
+/** Schema with a configurable op cap; the server passes config.BATCH_MAX_OPS. */
+export function createBatchCreateParamsSchema(maxOperations: number) {
+    return z.object({
+        operations: z.array(OperationSchema).min(1).max(maxOperations)
+            .describe("Run in order in ONE plugin task. Each op is { op: <tool name>, ref?, params: <that tool's params> }"),
+        atomic: z.boolean().optional().default(false)
+            .describe("When true, a failing op removes the nodes earlier ops created (best-effort rollback) instead of leaving a half-built subtree. Default false = keep partial work + report {failedIndex, created}."),
+    });
+}
+
+/** Ceiling-capped schema for the plugin and for types; the server enforces the configured cap. */
+export const BatchCreateParamsSchema = createBatchCreateParamsSchema(MAX_BATCH_OPERATIONS);
 
 export type BatchCreateParams = z.infer<typeof BatchCreateParamsSchema>;
 export type BatchCreateInput = z.input<typeof BatchCreateParamsSchema>;

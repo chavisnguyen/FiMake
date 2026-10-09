@@ -25,7 +25,7 @@ import { SetFillGradientParamsSchema } from "../../src/shared/types/params/updat
 import { SetImageFillParamsSchema } from "../../src/shared/types/params/update/set-image-fill";
 import { SetTextStyleParamsSchema } from "../../src/shared/types/params/update/set-text-style";
 import { ListFontsParamsSchema } from "../../src/shared/types/params/read/list-fonts";
-import { BatchCreateParamsSchema } from "../../src/shared/types/params/create/batch-create";
+import { BatchCreateParamsSchema, createBatchCreateParamsSchema, MAX_BATCH_OPERATIONS } from "../../src/shared/types/params/create/batch-create";
 import { SetCornerRadiusParamsSchema } from "../../src/shared/types/params/update/set-corner-radius";
 import { SetLayoutParamsSchema } from "../../src/shared/types/params/update/set-layout";
 import { SetParentIdParamsSchema } from "../../src/shared/types/params/update/set-parent-id";
@@ -155,7 +155,7 @@ describe("delete/update schemas", () => {
     expect(() => SetTextStyleParamsSchema.parse({ id: "1:1", textAlign: "TOP" })).toThrow();
     expect(ListFontsParamsSchema.parse({})).toEqual({});
   });
-  it("batch-create: known ops only, $ref ids, 1..50 ops, per-op schema defaults still apply", () => {
+  it("batch-create: known ops only, $ref ids, 1..cap ops, per-op schema defaults still apply", () => {
     const ok = BatchCreateParamsSchema.parse({
       operations: [
         { op: "create-frame", ref: "row", params: { x: 0, y: 0, width: 600, height: 56 } },
@@ -171,8 +171,11 @@ describe("delete/update schemas", () => {
     expect(() => BatchCreateParamsSchema.parse(one({ op: "create-frame", ref: "bad ref", params: { x: 0, y: 0, width: 1, height: 1 } }))).toThrow();
     expect(() => BatchCreateParamsSchema.parse({ operations: [] })).toThrow();
     const frame = { op: "create-frame", params: { x: 0, y: 0, width: 1, height: 1 } };
-    expect(() => BatchCreateParamsSchema.parse({ operations: Array(51).fill(frame) })).toThrow();
-    expect(() => BatchCreateParamsSchema.parse({ operations: Array(50).fill(frame) })).not.toThrow();
+    const capped = createBatchCreateParamsSchema(50);
+    expect(() => capped.parse({ operations: Array(51).fill(frame) })).toThrow();
+    expect(() => capped.parse({ operations: Array(50).fill(frame) })).not.toThrow();
+    expect(() => BatchCreateParamsSchema.parse({ operations: Array(MAX_BATCH_OPERATIONS).fill(frame) })).not.toThrow();
+    expect(() => BatchCreateParamsSchema.parse({ operations: Array(MAX_BATCH_OPERATIONS + 1).fill(frame) })).toThrow();
     expect(() => SetInstancePropertiesParamsSchema.parse({ instanceId: "1:1", properties: { a: 1 } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { characters: "prop" } })).not.toThrow();
     expect(() => SetNodeComponentPropertyReferencesParamsSchema.parse({ id: "1:1", componentPropertyReferences: { bogus: "x" } })).toThrow();

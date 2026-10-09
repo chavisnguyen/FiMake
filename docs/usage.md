@@ -23,6 +23,7 @@ tail -f "$(brew --prefix)/var/log/fimake.log"   # server logs
 | `TASK_ACK_TIMEOUT_MS` | `5000` | Socket ack budget; unacked sends are queued for retry on reconnect. |
 | `CORS_ORIGIN` | `*` | `*` = localhost only (other machines and web pages are refused). Set a real origin only for [networked use](./troubleshooting.md#networked-non-localhost-use). |
 | `JSON_BODY_LIMIT` | `1mb` | Max JSON body on `/mcp`. |
+| `BATCH_MAX_OPS` | `200` | Max ops per `batch-create` call (ceiling 1000). |
 | `DEBUG=1` | off | Verbose wire logging. Task lifecycle lines always log as `[fimake]`. |
 
 ## Without Homebrew

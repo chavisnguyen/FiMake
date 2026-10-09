@@ -1,5 +1,6 @@
 import { z } from "zod";
 import dotenv from "dotenv";
+import { DEFAULT_BATCH_OPERATIONS, MAX_BATCH_OPERATIONS } from "../shared/types/params/create/batch-create";
 
 // Load .env BEFORE parsing process.env so TRANSPORT/PORT/TIMEOUTS from
 // mcp/.env actually take effect (previously index.ts called dotenv.config()
@@ -35,6 +36,11 @@ export const envStartSchema = z.object({
     CORS_ORIGIN: z.string().default("*"),
     //* Upper bound for JSON bodies on /mcp (prevents oversized payload DoS).
     JSON_BODY_LIMIT: z.string().regex(/^\s*\d+(\.\d+)?\s*([kmg]?b?)?\s*$/i, "expected like \"1mb\", \"512kb\" or plain bytes").default("1mb"),
+    //* Max ops per `batch-create` call. Measured ~10 ms/op in Figma, so the
+    //* default 200 (~2 s) sits well under TASK_TIMEOUT_MS; raise it (up to
+    //* the plugin-side ceiling) only if TASK_TIMEOUT_MS has room. No rollback
+    //* on failure, so a bigger batch leaves more to clean up after an error.
+    BATCH_MAX_OPS: z.coerce.number().int().positive().max(MAX_BATCH_OPERATIONS).default(DEFAULT_BATCH_OPERATIONS),
 });
 
 export type EnvStartConfig = z.infer<typeof envStartSchema>;

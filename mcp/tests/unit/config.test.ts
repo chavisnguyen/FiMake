@@ -44,4 +44,11 @@ describe("config", () => {
     expect(c.CORS_ORIGIN).toBe("*");
     expect(c.JSON_BODY_LIMIT).toBe("1mb");
   });
+
+  it("BATCH_MAX_OPS defaults to 200, is configurable, capped at the plugin ceiling", () => {
+    expect(envStartSchema.parse({}).BATCH_MAX_OPS).toBe(200);
+    expect(envStartSchema.parse({ BATCH_MAX_OPS: "50" }).BATCH_MAX_OPS).toBe(50);
+    expect(() => envStartSchema.parse({ BATCH_MAX_OPS: 0 })).toThrow();
+    expect(() => envStartSchema.parse({ BATCH_MAX_OPS: 1001 })).toThrow();
+  });
 });
