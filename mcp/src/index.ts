@@ -60,6 +60,13 @@ try {
         process.exit(await runInstallPluginCli(args));
     }
 
+    // `fimake install-mcp`: register the FiMake MCP server into AGY, Claude Code,
+    // Kiro, Codex, Claude Desktop, and OpenCode global configs.
+    if (parseSubcommand(args) === "install-mcp") {
+        const { runInstallMcpCli } = await import("./install-mcp");
+        process.exit(await runInstallMcpCli(args));
+    }
+
     if (config.TRANSPORT === "streamable-http") {
         await startStreamableHTTP();
     } else {

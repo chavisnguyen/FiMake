@@ -1,5 +1,5 @@
 /** CLI subcommand parsing (pure — safe to unit test, unlike index.ts). */
-export type Subcommand = "doctor" | "stop" | "install-plugin";
+export type Subcommand = "doctor" | "stop" | "install-plugin" | "install-mcp";
 
 /**
  * Subcommand is argv[2] exactly — never `args.includes()`, which also
@@ -7,6 +7,6 @@ export type Subcommand = "doctor" | "stop" | "install-plugin";
  */
 export function parseSubcommand(argv: string[]): Subcommand | undefined {
     const [first] = argv;
-    if (first === "doctor" || first === "stop" || first === "install-plugin") return first;
+    if (first === "doctor" || first === "stop" || first === "install-plugin" || first === "install-mcp") return first;
     return undefined;
 }
