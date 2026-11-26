@@ -162,34 +162,34 @@ jobs:
         # cannot resolve the repo from git remotes.
         run: gh release upload ${{ github.ref_name }} assets/* --clobber --repo chavisnguyen/FiMake
 
-  bump-tap:
-    # Runs only after attach: the tap formula points at release download URLs,
-    # so it must never update before the binaries exist (no polling needed).
+  bump-formula:
+    # Runs only after attach: Formula/fimake.rb points at release download URLs,
+    # so it must never update before the binaries exist.
     needs: [attach]
     runs-on: ubuntu-latest
     steps:
-      - name: Download release binaries + bump tap formula
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Download release binaries + bump Formula/fimake.rb
         env:
-          GH_TOKEN: ${{ secrets.TAP_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          TAG="${{ github.ref_name }}"   # e.g. v1.0.0
+          TAG="${{ github.ref_name }}"
+          REPO_DIR="$PWD"
           WORK=$(mktemp -d)
-          cd "$WORK"
-          # attach already finished in this workflow run — single download, no retry loop.
           gh release download "$TAG" --repo chavisnguyen/FiMake \
             --pattern 'fimake-macos-arm64' \
             --pattern 'fimake-macos-x64' \
             --pattern 'fimake-linux-x64' \
-            --pattern 'fimake.1'
-          test -f fimake-macos-arm64 && test -f fimake-macos-x64 && test -f fimake-linux-x64 && test -f fimake.1
-          SHA_ARM=$(sha256sum fimake-macos-arm64 | cut -d' ' -f1)
-          SHA_INTEL=$(sha256sum fimake-macos-x64 | cut -d' ' -f1)
-          SHA_LINUX=$(sha256sum fimake-linux-x64 | cut -d' ' -f1)
-          SHA_MAN=$(sha256sum fimake.1 | cut -d' ' -f1)
-          git clone "https://${GH_TOKEN}@github.com/chavisnguyen/homebrew-fimake" tap --depth 1
-          cd tap
-          git checkout master
+            --pattern 'fimake.1' \
+            --dir "$WORK"
+          SHA_ARM=$(sha256sum "$WORK/fimake-macos-arm64" | cut -d' ' -f1)
+          SHA_INTEL=$(sha256sum "$WORK/fimake-macos-x64" | cut -d' ' -f1)
+          SHA_LINUX=$(sha256sum "$WORK/fimake-linux-x64" | cut -d' ' -f1)
+          SHA_MAN=$(sha256sum "$WORK/fimake.1" | cut -d' ' -f1)
+          cd "$REPO_DIR"
           python3 - "$TAG" "$SHA_ARM" "$SHA_INTEL" "$SHA_LINUX" "$SHA_MAN" <<'EOF'
           import re, sys
           tag, arm, intel, linux, man = sys.argv[1:6]
@@ -201,78 +201,15 @@ jobs:
                      f"https://github.com/chavisnguyen/FiMake/releases/download/{tag}/fimake-macos-x64", s)
           s = re.sub(r"https://github\.com/chavisnguyen/FiMake/releases/download/[^/\"']+/fimake-linux-x64",
                      f"https://github.com/chavisnguyen/FiMake/releases/download/{tag}/fimake-linux-x64", s)
+          s = re.sub(r"https://github\.com/chavisnguyen/FiMake/releases/download/[^/\"']+/fimake\.1",
+                     f"https://github.com/chavisnguyen/FiMake/releases/download/{tag}/fimake.1", s)
           s = re.sub(r'(fimake-macos-arm64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{arm}", s)
           s = re.sub(r'(fimake-macos-x64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{intel}", s)
           s = re.sub(r'(fimake-linux-x64"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{linux}", s)
-          # NOTE: no `postinstall` that auto-runs `install-plugin` on purpose.
-          # postinstall runs sandboxed + non-interactive: it can't quit Figma
-          # (osascript GUI), and patching settings.json while Figma runs gets
-          # overwritten on quit. Brew also discourages touching $HOME there.
-          # The `caveats` block below is the supported pattern — brew prints it
-          # after every install/upgrade, and `fimake doctor` re-checks plugin
-          # registration on demand.
-          # `brew services start fimake` = the one shared streamable-http
-          # server every MCP client connects to (docs/quickstart.md).
-          # Blocks are stripped and re-inserted every release so edits here
-          # always reach the tap.
-          # The manpage ships as a release asset (man/fimake.1 in this repo)
-          # and installs via a `resource` stanza: the formula's `url` is a
-          # single-file binary, so the manpage needs its own download with
-          # its own sha256. Same strip + re-insert treatment as service/caveats.
-          man_block_lines = [
-              '  resource "manpage" do',
-              f'    url "https://github.com/chavisnguyen/FiMake/releases/download/{tag}/fimake.1"',
-              f'    sha256 "{man}"',
-              "  end",
-              "",
-              "",
-          ]
-          man_block = "\n".join(man_block_lines)
-          s = re.sub(r'  resource "manpage" do\n.*?\n  end\n\n?', "", s, flags=re.S)
-          s = s.replace("  def install", man_block + "  def install", 1)
-          # Wire the staged resource into `def install` (idempotent).
-          s = re.sub(r'    resource\("manpage"\)\.stage \{ man1\.install "fimake\.1" \}\n', "", s)
-          s = s.replace(
-              '    bin.install asset => "fimake"\n',
-              '    bin.install asset => "fimake"\n    resource("manpage").stage { man1.install "fimake.1" }\n',
-              1,
-          )
-          # Assert the manpage in `brew test` so a broken resource fails CI,
-          # not users (idempotent: no-op once present).
-          if 'man1/"fimake.1"' not in s:
-              s = s.replace(
-                  'assert_match version.to_s, shell_output("#{bin}/fimake --version")',
-                  'assert_match version.to_s, shell_output("#{bin}/fimake --version")\n    assert_predicate man1/"fimake.1", :exist?',
-                  1,
-              )
-          blocks_lines = [
-              "  service do",
-              "    run [opt_bin/\"fimake\"]",
-              "    environment_variables TRANSPORT: \"streamable-http\"",
-              "    keep_alive true",
-              "    log_path var/\"log/fimake.log\"",
-              "    error_log_path var/\"log/fimake.log\"",
-              "  end",
-              "",
-              "  def caveats",
-              "    <<~EOS",
-              "      Next steps (one-time):",
-              "        fimake install-plugin        # register the Figma plugin (macOS)",
-              "        brew services start fimake   # run the shared server in the background",
-              "      Then add http://localhost:10101/mcp to your MCP client.",
-              "      Run `fimake doctor` if anything looks off.",
-              "    EOS",
-              "  end",
-              "",
-              "",
-          ]
-          blocks = "\n".join(blocks_lines)
-          s = re.sub(r"  service do\n.*?\n  end\n\n", "", s, flags=re.S)
-          s = re.sub(r"  def caveats\n.*?\n  end\n\n", "", s, flags=re.S)
-          s = s.replace("  test do", blocks + "  test do", 1)
+          s = re.sub(r'(fimake\.1"\n\s*sha256 ")[0-9a-f]{64}', rf"\g<1>{man}", s)
           open(p, "w").write(s)
           EOF
           git diff --stat
           git add Formula/fimake.rb
           git -c "user.name=fimake-bot" -c "user.email=fimake-bot@users.noreply.github.com" \
-            commit -m "fimake ${TAG}" && git push || echo "nothing to bump"
+            commit -m "chore(formula): bump to ${TAG}" && git push || echo "nothing to bump"

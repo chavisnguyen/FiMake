@@ -12,10 +12,10 @@ The official Figma MCP server is read-only. **Fimake lets AI agents work directl
 You need: Figma Desktop + an MCP client. No Node, no repo clone.
 
 ```bash
-brew tap chavisnguyen/fimake
+brew tap chavisnguyen/fimake https://github.com/chavisnguyen/FiMake
 brew install fimake
 fimake install-plugin        # downloads + registers the Figma plugin (macOS)
-brew services start fimake   # one shared server in the background
+fimake service start         # or: brew services start fimake
 ```
 
 Open Figma → *Plugins > Development > Fimake* and **keep the window open** (it shows **Connected**).
